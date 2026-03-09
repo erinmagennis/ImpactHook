@@ -2,7 +2,7 @@
 
 A Uniswap v4 hook that turns any swap pool into a milestone-gated funding mechanism for real-world impact projects.
 
-Traders swap normally. The hook routes a small fee (1-5%) from swap output to registered projects. As projects hit verified milestones, the fee tier adjusts — creating performance-based funding powered by trading activity.
+Traders swap normally. The hook routes a small fee (1-5%) from swap output to registered projects. As projects hit verified milestones, the fee tier adjusts - creating performance-based funding powered by trading activity.
 
 **LPs earn full yield. Swappers choose impact. Projects get funded based on milestones.**
 
@@ -12,7 +12,7 @@ Traditional impact funding is opaque and slow. Grant recipients wait months for 
 
 ImpactHook makes funding **continuous, transparent, and performance-based**:
 - Every fee is an on-chain transaction anyone can verify
-- Milestone verification gates funding progression — no results, no fees
+- Milestone verification gates funding progression - no results, no fees
 - Two independent funding channels (DeFi swap fees + institutional escrow) share the same source of truth
 - Cross-chain verification means milestones can be confirmed from any supported chain
 
@@ -57,10 +57,10 @@ Each pool has a `Project` config with:
 
 | Contract | Description |
 |----------|-------------|
-| `ImpactHook.sol` | Core Uniswap v4 hook — fee routing, milestone tracking, withdrawal, cross-chain callback handler |
-| `MilestoneArbiter.sol` | Alkahest IArbiter — gates escrow release on milestone verification |
-| `MilestoneReactor.sol` | Reactive Network RSC — subscribes to origin chain events, emits cross-chain callbacks |
-| `MilestoneOracle.sol` | Origin chain event emitter — milestone submissions trigger the cross-chain flow |
+| `ImpactHook.sol` | Core Uniswap v4 hook - fee routing, milestone tracking, withdrawal, cross-chain callback handler |
+| `MilestoneArbiter.sol` | Alkahest IArbiter - gates escrow release on milestone verification |
+| `MilestoneReactor.sol` | Reactive Network RSC - subscribes to origin chain events, emits cross-chain callbacks |
+| `MilestoneOracle.sol` | Origin chain event emitter - milestone submissions trigger the cross-chain flow |
 
 ### Two Funding Channels, One Source of Truth
 
@@ -98,19 +98,19 @@ Authorization: the Reactive Network overwrites the first callback argument with 
 
 The hook charges a fee **on top of** the standard LP fee, taken from the swapper's output:
 
-- LP yield is **unaffected** — no reason not to LP in impact pools
+- LP yield is **unaffected** - no reason not to LP in impact pools
 - Fee rate is determined by the current verified milestone's `projectFeeBps`
 - Maximum fee capped at 500 bps (5%)
 - Before any milestones are verified, the fee is 0
-- Permissionless project registration — anyone can create an impact pool
+- Permissionless project registration - anyone can create an impact pool
 
 Example progression:
 | Milestone | Status | Fee |
 |-----------|--------|-----|
 | 0: "Project registered" | Verified | 0% |
 | 1: "Phase 1 complete" | Verified | 2% |
-| 2: "Phase 2 complete" | Not yet | — |
-| 3: "Self-sustaining" | Not yet | — |
+| 2: "Phase 2 complete" | Not yet | - |
+| 3: "Self-sustaining" | Not yet | - |
 
 ## Usage
 
