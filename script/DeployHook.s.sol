@@ -14,6 +14,9 @@ contract DeployHookScript is Script {
     // Unichain Sepolia PoolManager
     address constant POOL_MANAGER = 0x1F98400000000000000000000000000000000004;
 
+    // EAS on Unichain Sepolia (OP Stack predeploy)
+    address constant EAS = 0x4200000000000000000000000000000000000021;
+
     // Deterministic CREATE2 deployer used by Forge's `new Contract{salt: ...}`
     address constant CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
@@ -25,8 +28,8 @@ contract DeployHookScript is Script {
 
         // Mine a salt that produces a hook address with the correct flags
         // Forge routes `new Contract{salt: ...}` through the deterministic Create2Deployer
-        // Constructor args include PoolManager and owner (deployer EOA)
-        bytes memory constructorArgs = abi.encode(POOL_MANAGER, msg.sender);
+        // Constructor args include PoolManager, owner (deployer EOA), and EAS
+        bytes memory constructorArgs = abi.encode(POOL_MANAGER, msg.sender, EAS);
         (address hookAddress, bytes32 salt) =
             HookMiner.find(CREATE2_DEPLOYER, flags, type(ImpactHook).creationCode, constructorArgs);
 
@@ -38,7 +41,7 @@ contract DeployHookScript is Script {
         vm.startBroadcast();
 
         // Deploy hook via CREATE2 with deployer as owner
-        ImpactHook hook = new ImpactHook{salt: salt}(IPoolManager(POOL_MANAGER), msg.sender);
+        ImpactHook hook = new ImpactHook{salt: salt}(IPoolManager(POOL_MANAGER), msg.sender, EAS);
         require(address(hook) == hookAddress, "Hook address mismatch");
 
         // Deploy MilestoneArbiter

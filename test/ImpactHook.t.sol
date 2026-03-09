@@ -14,6 +14,7 @@ import {TickMath} from "v4-core/src/libraries/TickMath.sol";
 import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
 
 import {ImpactHook} from "../src/ImpactHook.sol";
+import {IEAS} from "../src/interfaces/IEAS.sol";
 import {MilestoneArbiter, IArbiter, Attestation} from "../src/MilestoneArbiter.sol";
 import {MilestoneOracle} from "../src/MilestoneOracle.sol";
 import {MilestoneReactor} from "../src/MilestoneReactor.sol";
@@ -32,6 +33,7 @@ contract ImpactHookTest is Test, Deployers {
     address verifier = makeAddr("verifier");
     address alice = makeAddr("alice");
     address callbackProxy = makeAddr("callbackProxy");
+    address easAddress = makeAddr("eas");
 
     // Milestone configs for standard test setup
     string[] descriptions;
@@ -48,7 +50,7 @@ contract ImpactHookTest is Test, Deployers {
         address hookAddress = address(flags);
 
         // Deploy hook at the flagged address
-        deployCodeTo("ImpactHook.sol", abi.encode(manager, address(this)), hookAddress);
+        deployCodeTo("ImpactHook.sol", abi.encode(manager, address(this), easAddress), hookAddress);
         hook = ImpactHook(hookAddress);
 
         // Set callback proxy for Reactive Network tests
@@ -854,6 +856,130 @@ contract ImpactHookTest is Test, Deployers {
         // Now swap - should collect 200 bps fee
         _swap(true, -1 ether);
         assertGt(hook.accumulatedFees(poolId, currency1), 0);
+    }
+
+    // ────────── EAS Verification Tests ──────────
+
+    bytes32 constant TEST_SCHEMA_UID = keccak256("impacthook-milestone-schema");
+    bytes32 constant TEST_ATTESTATION_UID = keccak256("test-attestation-1");
+
+    function _mockEASAttestation(
+        bytes32 uid,
+        bytes32 schema,
+        address attester,
+        uint64 revocationTime,
+        bytes memory data
+    ) internal {
+        IEAS.Attestation memory att = IEAS.Attestation({
+            uid: uid,
+            schema: schema,
+            time: uint64(block.timestamp),
+            expirationTime: 0,
+            revocationTime: revocationTime,
+            refUID: bytes32(0),
+            recipient: address(0),
+            attester: attester,
+            revocable: true,
+            data: data
+        });
+
+        vm.mockCall(
+            easAddress,
+            abi.encodeWithSelector(IEAS.getAttestation.selector, uid),
+            abi.encode(att)
+        );
+    }
+
+    function test_verifyMilestoneEAS() public {
+        // Set schema
+        hook.setMilestoneSchema(TEST_SCHEMA_UID);
+
+        // Build attestation data: (bytes32 poolId, uint256 milestoneIndex, string evidence)
+        bytes memory attData = abi.encode(PoolId.unwrap(poolId), uint256(0), "Delivered 1000 water filters");
+
+        // Mock valid attestation from the verifier
+        _mockEASAttestation(TEST_ATTESTATION_UID, TEST_SCHEMA_UID, verifier, 0, attData);
+
+        // Anyone can trigger EAS verification
+        vm.prank(alice);
+        hook.verifyMilestoneEAS(poolKey, TEST_ATTESTATION_UID);
+
+        assertTrue(hook.isMilestoneVerified(poolId, 0));
+    }
+
+    function test_verifyMilestoneEAS_feesActivate() public {
+        hook.setMilestoneSchema(TEST_SCHEMA_UID);
+
+        // Verify milestone 0 (0 bps) via EAS
+        bytes memory attData0 = abi.encode(PoolId.unwrap(poolId), uint256(0), "proof0");
+        _mockEASAttestation(keccak256("att-0"), TEST_SCHEMA_UID, verifier, 0, attData0);
+        hook.verifyMilestoneEAS(poolKey, keccak256("att-0"));
+
+        // Verify milestone 1 (200 bps) via EAS
+        bytes memory attData1 = abi.encode(PoolId.unwrap(poolId), uint256(1), "proof1");
+        _mockEASAttestation(keccak256("att-1"), TEST_SCHEMA_UID, verifier, 0, attData1);
+        hook.verifyMilestoneEAS(poolKey, keccak256("att-1"));
+
+        assertEq(hook.getCurrentFeeBps(poolId), 200);
+
+        // Swap should collect fees now
+        _swap(true, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency1), 0);
+    }
+
+    function test_revert_verifyMilestoneEAS_wrongSchema() public {
+        hook.setMilestoneSchema(TEST_SCHEMA_UID);
+
+        bytes memory attData = abi.encode(PoolId.unwrap(poolId), uint256(0), "proof");
+        _mockEASAttestation(TEST_ATTESTATION_UID, keccak256("wrong-schema"), verifier, 0, attData);
+
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidSchema.selector);
+        hook.verifyMilestoneEAS(poolKey, TEST_ATTESTATION_UID);
+    }
+
+    function test_revert_verifyMilestoneEAS_wrongAttester() public {
+        hook.setMilestoneSchema(TEST_SCHEMA_UID);
+
+        bytes memory attData = abi.encode(PoolId.unwrap(poolId), uint256(0), "proof");
+        _mockEASAttestation(TEST_ATTESTATION_UID, TEST_SCHEMA_UID, alice, 0, attData);
+
+        vm.expectRevert(ImpactHook.ImpactHook__NotVerifier.selector);
+        hook.verifyMilestoneEAS(poolKey, TEST_ATTESTATION_UID);
+    }
+
+    function test_revert_verifyMilestoneEAS_revoked() public {
+        hook.setMilestoneSchema(TEST_SCHEMA_UID);
+
+        bytes memory attData = abi.encode(PoolId.unwrap(poolId), uint256(0), "proof");
+        _mockEASAttestation(TEST_ATTESTATION_UID, TEST_SCHEMA_UID, verifier, uint64(block.timestamp), attData);
+
+        vm.expectRevert(ImpactHook.ImpactHook__AttestationRevoked.selector);
+        hook.verifyMilestoneEAS(poolKey, TEST_ATTESTATION_UID);
+    }
+
+    function test_revert_verifyMilestoneEAS_wrongPoolId() public {
+        hook.setMilestoneSchema(TEST_SCHEMA_UID);
+
+        bytes memory attData = abi.encode(bytes32(uint256(999)), uint256(0), "proof");
+        _mockEASAttestation(TEST_ATTESTATION_UID, TEST_SCHEMA_UID, verifier, 0, attData);
+
+        vm.expectRevert(ImpactHook.ImpactHook__PoolIdMismatch.selector);
+        hook.verifyMilestoneEAS(poolKey, TEST_ATTESTATION_UID);
+    }
+
+    function test_revert_verifyMilestoneEAS_alreadyVerified() public {
+        hook.setMilestoneSchema(TEST_SCHEMA_UID);
+
+        bytes memory attData = abi.encode(PoolId.unwrap(poolId), uint256(0), "proof");
+        _mockEASAttestation(TEST_ATTESTATION_UID, TEST_SCHEMA_UID, verifier, 0, attData);
+
+        hook.verifyMilestoneEAS(poolKey, TEST_ATTESTATION_UID);
+
+        // After verifying milestone 0, currentMilestone advances to 1.
+        // Trying milestone 0 again hits InvalidMilestoneIndex (0 != currentMilestone which is 1)
+        _mockEASAttestation(keccak256("att-2"), TEST_SCHEMA_UID, verifier, 0, attData);
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidMilestoneIndex.selector);
+        hook.verifyMilestoneEAS(poolKey, keccak256("att-2"));
     }
 
     // ────────── Helpers ──────────

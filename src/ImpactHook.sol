@@ -9,6 +9,7 @@ import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {Currency, CurrencyLibrary} from "v4-core/src/types/Currency.sol";
 import {BeforeSwapDelta} from "v4-core/src/types/BeforeSwapDelta.sol";
+import {IEAS} from "./interfaces/IEAS.sol";
 
 /// @title ImpactHook
 /// @author ImpactHook Team
@@ -40,6 +41,9 @@ contract ImpactHook is IHooks {
     error ImpactHook__ZeroAddress();
     error ImpactHook__OwnershipTransferPending();
     error ImpactHook__NoTransferPending();
+    error ImpactHook__InvalidSchema();
+    error ImpactHook__AttestationRevoked();
+    error ImpactHook__PoolIdMismatch();
 
     // ──────────────────── Events ────────────────────
 
@@ -64,6 +68,7 @@ contract ImpactHook is IHooks {
 
     uint16 public constant MAX_FEE_BPS = 500; // 5% cap on project fees
     IPoolManager public immutable POOL_MANAGER;
+    IEAS public immutable EAS;
 
     // ──────────────────── Types ────────────────────
 
@@ -90,6 +95,8 @@ contract ImpactHook is IHooks {
     address public callbackProxy;
     /// @notice Whether fee collection is paused
     bool public paused;
+    /// @notice EAS schema UID for milestone attestations
+    bytes32 public milestoneSchemaUID;
     /// @notice Reentrancy lock
     bool private _locked;
 
@@ -123,10 +130,13 @@ contract ImpactHook is IHooks {
 
     /// @param _poolManager The Uniswap v4 PoolManager
     /// @param _owner The initial contract owner (use deployer EOA for CREATE2 deployments)
-    constructor(IPoolManager _poolManager, address _owner) {
+    /// @param _eas The EAS contract address on this chain
+    constructor(IPoolManager _poolManager, address _owner, address _eas) {
         if (_owner == address(0)) revert ImpactHook__ZeroAddress();
+        if (_eas == address(0)) revert ImpactHook__ZeroAddress();
         POOL_MANAGER = _poolManager;
         owner = _owner;
+        EAS = IEAS(_eas);
         emit OwnershipTransferred(address(0), _owner);
         Hooks.validateHookPermissions(IHooks(address(this)), getHookPermissions());
     }
@@ -335,6 +345,45 @@ contract ImpactHook is IHooks {
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
     }
 
+    /// @notice Verify a milestone via an EAS attestation. Permissionless - anyone can call
+    /// this as long as a valid attestation exists from the pool's authorized verifier.
+    /// @param key The pool key
+    /// @param attestationUID The EAS attestation UID to verify against
+    function verifyMilestoneEAS(PoolKey calldata key, bytes32 attestationUID) external {
+        PoolId poolId = key.toId();
+        Project storage project = projects[poolId];
+
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+
+        // Read attestation from EAS
+        IEAS.Attestation memory att = EAS.getAttestation(attestationUID);
+
+        // Validate attestation
+        if (att.schema != milestoneSchemaUID) revert ImpactHook__InvalidSchema();
+        if (att.attester != project.verifier) revert ImpactHook__NotVerifier();
+        if (att.revocationTime != 0) revert ImpactHook__AttestationRevoked();
+
+        // Decode attestation data: (bytes32 poolId, uint256 milestoneIndex, string evidence)
+        (bytes32 attestedPoolId, uint256 milestoneIndex,) =
+            abi.decode(att.data, (bytes32, uint256, string));
+
+        // Validate pool and milestone match
+        if (attestedPoolId != PoolId.unwrap(poolId)) revert ImpactHook__PoolIdMismatch();
+        if (milestoneIndex != project.currentMilestone) revert ImpactHook__InvalidMilestoneIndex();
+        if (milestoneIndex >= milestones[poolId].length) revert ImpactHook__InvalidMilestoneIndex();
+
+        Milestone storage milestone = milestones[poolId][milestoneIndex];
+        if (milestone.verified) revert ImpactHook__MilestoneAlreadyVerified();
+
+        milestone.verified = true;
+
+        if (milestoneIndex + 1 < milestones[poolId].length) {
+            project.currentMilestone = uint96(milestoneIndex + 1);
+        }
+
+        emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
+    }
+
     // ──────────────────── Fee Withdrawal ────────────────────
 
     /// @notice Withdraw accumulated fees for a pool. Only callable by the project recipient.
@@ -364,6 +413,12 @@ contract ImpactHook is IHooks {
     function setCallbackProxy(address _callbackProxy) external onlyOwner {
         emit CallbackProxyUpdated(callbackProxy, _callbackProxy);
         callbackProxy = _callbackProxy;
+    }
+
+    /// @notice Set the EAS milestone schema UID. Only callable by owner.
+    /// @param _schemaUID The EAS schema UID for milestone attestations
+    function setMilestoneSchema(bytes32 _schemaUID) external onlyOwner {
+        milestoneSchemaUID = _schemaUID;
     }
 
     /// @notice Pause or unpause fee collection. Only callable by owner.
