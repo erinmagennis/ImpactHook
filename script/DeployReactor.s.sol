@@ -13,7 +13,7 @@ import {MilestoneReactor} from "../src/MilestoneReactor.sol";
 ///   ORACLE_ADDRESS=0x... \
 ///   CALLBACK_ADDRESS=0x... \
 ///   forge script script/DeployReactor.s.sol:DeployReactorScript \
-///     --rpc-url https://kopli-rpc.rkt.ink \
+///     --rpc-url https://lasna-rpc.rnk.dev \
 ///     --private-key $PRIVATE_KEY \
 ///     --broadcast
 contract DeployReactorScript is Script {
@@ -30,7 +30,7 @@ contract DeployReactorScript is Script {
 
         vm.startBroadcast();
 
-        MilestoneReactor reactor = new MilestoneReactor(
+        MilestoneReactor reactor = new MilestoneReactor{value: 0.1 ether}(
             originChainId,
             destinationChainId,
             oracleAddress,

@@ -14,28 +14,31 @@ contract DeployHookScript is Script {
     // Unichain Sepolia PoolManager
     address constant POOL_MANAGER = 0x1F98400000000000000000000000000000000004;
 
+    // Deterministic CREATE2 deployer used by Forge's `new Contract{salt: ...}`
+    address constant CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
+
     function run() public {
         // Required hook permission flags
         uint160 flags = uint160(
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG
         );
 
-        // The deployer is the broadcast sender (msg.sender during broadcast)
-        address deployer = msg.sender;
-
         // Mine a salt that produces a hook address with the correct flags
-        bytes memory constructorArgs = abi.encode(POOL_MANAGER);
+        // Forge routes `new Contract{salt: ...}` through the deterministic Create2Deployer
+        // Constructor args include PoolManager and owner (deployer EOA)
+        bytes memory constructorArgs = abi.encode(POOL_MANAGER, msg.sender);
         (address hookAddress, bytes32 salt) =
-            HookMiner.find(deployer, flags, type(ImpactHook).creationCode, constructorArgs);
+            HookMiner.find(CREATE2_DEPLOYER, flags, type(ImpactHook).creationCode, constructorArgs);
 
-        console.log("Deployer:", deployer);
+        console.log("Deployer:", msg.sender);
+        console.log("CREATE2 via:", CREATE2_DEPLOYER);
         console.log("Deploying ImpactHook to:", hookAddress);
         console.log("Salt:", uint256(salt));
 
         vm.startBroadcast();
 
-        // Deploy hook via CREATE2 (deployer is msg.sender)
-        ImpactHook hook = new ImpactHook{salt: salt}(IPoolManager(POOL_MANAGER));
+        // Deploy hook via CREATE2 with deployer as owner
+        ImpactHook hook = new ImpactHook{salt: salt}(IPoolManager(POOL_MANAGER), msg.sender);
         require(address(hook) == hookAddress, "Hook address mismatch");
 
         // Deploy MilestoneArbiter

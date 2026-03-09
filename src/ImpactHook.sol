@@ -11,40 +11,59 @@ import {Currency, CurrencyLibrary} from "v4-core/src/types/Currency.sol";
 import {BeforeSwapDelta} from "v4-core/src/types/BeforeSwapDelta.sol";
 
 /// @title ImpactHook
+/// @author ImpactHook Team
 /// @notice A Uniswap v4 hook that routes a portion of swap output to milestone-gated
 /// impact projects. As projects hit verified milestones, the fee tier adjusts.
 /// Single deployed hook serves multiple pools, each with its own project config.
+/// @custom:security-contact security@impacthook.xyz
 contract ImpactHook is IHooks {
     using PoolIdLibrary for PoolKey;
     using CurrencyLibrary for Currency;
 
     // ──────────────────── Errors ────────────────────
 
-    error NotPoolManager();
-    error ProjectAlreadyRegistered();
-    error ProjectNotRegistered();
-    error NotVerifier();
-    error MilestoneAlreadyVerified();
-    error InvalidMilestoneIndex();
-    error NoFeesToWithdraw();
-    error FeeBpsTooHigh();
-    error NoMilestones();
-    error NotRecipient();
-    error NotCallbackProxy();
+    error ImpactHook__NotPoolManager();
+    error ImpactHook__ProjectAlreadyRegistered();
+    error ImpactHook__ProjectNotRegistered();
+    error ImpactHook__NotVerifier();
+    error ImpactHook__MilestoneAlreadyVerified();
+    error ImpactHook__InvalidMilestoneIndex();
+    error ImpactHook__NoFeesToWithdraw();
+    error ImpactHook__FeeBpsTooHigh();
+    error ImpactHook__NoMilestones();
+    error ImpactHook__NotRecipient();
+    error ImpactHook__NotCallbackProxy();
+    error ImpactHook__NotOwner();
+    error ImpactHook__Paused();
+    error ImpactHook__FeeAmountOverflow();
+    error ImpactHook__NotProjectRecipient();
+    error ImpactHook__ZeroAddress();
+    error ImpactHook__OwnershipTransferPending();
+    error ImpactHook__NoTransferPending();
 
     // ──────────────────── Events ────────────────────
 
+    /// @notice Emitted when a new impact project is registered for a pool
     event ProjectRegistered(PoolId indexed poolId, address recipient, address verifier, uint256 milestoneCount);
+    /// @notice Emitted when a milestone is verified and the fee tier updates
     event MilestoneVerified(PoolId indexed poolId, uint256 milestoneIndex, uint16 newFeeBps);
+    /// @notice Emitted when swap fees are accumulated for a project
     event FeesAccumulated(PoolId indexed poolId, Currency indexed currency, uint256 amount);
+    /// @notice Emitted when a project recipient withdraws accumulated fees
     event FeesWithdrawn(PoolId indexed poolId, Currency indexed currency, address recipient, uint256 amount);
-    event CallbackProxyUpdated(address oldProxy, address newProxy);
+    /// @notice Emitted when the Reactive Network callback proxy is updated
+    event CallbackProxyUpdated(address indexed oldProxy, address indexed newProxy);
+    /// @notice Emitted when ownership transfer is initiated
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    /// @notice Emitted when ownership transfer is completed
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    /// @notice Emitted when the hook is paused or unpaused
+    event PausedStateChanged(bool paused);
 
     // ──────────────────── Constants ────────────────────
 
     uint16 public constant MAX_FEE_BPS = 500; // 5% cap on project fees
-    IPoolManager public immutable poolManager;
-    address public callbackProxy; // Reactive Network Callback Proxy for this chain
+    IPoolManager public immutable POOL_MANAGER;
 
     // ──────────────────── Types ────────────────────
 
@@ -55,13 +74,24 @@ contract ImpactHook is IHooks {
     }
 
     struct Project {
-        address recipient;
-        address verifier;
-        uint256 currentMilestone; // Index of current active milestone (0 = first)
-        bool registered;
+        address recipient;      // slot 0: 20 bytes
+        bool registered;        // slot 0: 1 byte (packed with recipient)
+        address verifier;       // slot 1: 20 bytes
+        uint96 currentMilestone; // slot 1: 12 bytes (packed with verifier, max 2^96 milestones)
     }
 
     // ──────────────────── Storage ────────────────────
+
+    /// @notice Contract owner (deployer initially, transferable via 2-step)
+    address public owner;
+    /// @notice Pending owner for 2-step ownership transfer
+    address public pendingOwner;
+    /// @notice Reactive Network Callback Proxy for this chain
+    address public callbackProxy;
+    /// @notice Whether fee collection is paused
+    bool public paused;
+    /// @notice Reentrancy lock
+    bool private _locked;
 
     // Project config per pool
     mapping(PoolId => Project) public projects;
@@ -73,22 +103,38 @@ contract ImpactHook is IHooks {
     // ──────────────────── Modifiers ────────────────────
 
     modifier onlyPoolManager() {
-        if (msg.sender != address(poolManager)) revert NotPoolManager();
+        if (msg.sender != address(POOL_MANAGER)) revert ImpactHook__NotPoolManager();
         _;
+    }
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert ImpactHook__NotOwner();
+        _;
+    }
+
+    modifier nonReentrant() {
+        if (_locked) revert ImpactHook__Paused();
+        _locked = true;
+        _;
+        _locked = false;
     }
 
     // ──────────────────── Constructor ────────────────────
 
-    address public owner;
-
-    constructor(IPoolManager _poolManager) {
-        poolManager = _poolManager;
-        owner = msg.sender;
+    /// @param _poolManager The Uniswap v4 PoolManager
+    /// @param _owner The initial contract owner (use deployer EOA for CREATE2 deployments)
+    constructor(IPoolManager _poolManager, address _owner) {
+        if (_owner == address(0)) revert ImpactHook__ZeroAddress();
+        POOL_MANAGER = _poolManager;
+        owner = _owner;
+        emit OwnershipTransferred(address(0), _owner);
         Hooks.validateHookPermissions(IHooks(address(this)), getHookPermissions());
     }
 
     // ──────────────────── Hook Permissions ────────────────────
 
+    /// @notice Returns the hook permission flags
+    /// @return Permissions struct with beforeInitialize, afterSwap, and afterSwapReturnDelta enabled
     function getHookPermissions() public pure returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
             beforeInitialize: true,
@@ -110,7 +156,8 @@ contract ImpactHook is IHooks {
 
     // ──────────────────── Project Registration ────────────────────
 
-    /// @notice Register a project for a pool. Must be called before pool initialization.
+    /// @notice Register a project for a pool. Only callable by the hook owner.
+    /// Must be called before pool initialization.
     /// @param key The pool key
     /// @param recipient Address that receives accumulated fees
     /// @param verifier Address authorized to verify milestones
@@ -122,26 +169,28 @@ contract ImpactHook is IHooks {
         address verifier,
         string[] calldata descriptions,
         uint16[] calldata feeBpsValues
-    ) external {
-        if (descriptions.length == 0) revert NoMilestones();
-        if (descriptions.length != feeBpsValues.length) revert NoMilestones();
+    ) external onlyOwner {
+        if (recipient == address(0)) revert ImpactHook__ZeroAddress();
+        if (verifier == address(0)) revert ImpactHook__ZeroAddress();
+        if (descriptions.length == 0) revert ImpactHook__NoMilestones();
+        if (descriptions.length != feeBpsValues.length) revert ImpactHook__NoMilestones();
 
         PoolId poolId = key.toId();
-        if (projects[poolId].registered) revert ProjectAlreadyRegistered();
+        if (projects[poolId].registered) revert ImpactHook__ProjectAlreadyRegistered();
 
         // Validate fee caps
-        for (uint256 i = 0; i < feeBpsValues.length; i++) {
-            if (feeBpsValues[i] > MAX_FEE_BPS) revert FeeBpsTooHigh();
+        for (uint256 i = 0; i < feeBpsValues.length; ++i) {
+            if (feeBpsValues[i] > MAX_FEE_BPS) revert ImpactHook__FeeBpsTooHigh();
         }
 
         projects[poolId] = Project({
             recipient: recipient,
+            registered: true,
             verifier: verifier,
-            currentMilestone: 0,
-            registered: true
+            currentMilestone: 0
         });
 
-        for (uint256 i = 0; i < descriptions.length; i++) {
+        for (uint256 i = 0; i < descriptions.length; ++i) {
             milestones[poolId].push(Milestone({
                 description: descriptions[i],
                 projectFeeBps: feeBpsValues[i],
@@ -163,7 +212,7 @@ contract ImpactHook is IHooks {
         returns (bytes4)
     {
         PoolId poolId = key.toId();
-        if (!projects[poolId].registered) revert ProjectNotRegistered();
+        if (!projects[poolId].registered) revert ImpactHook__ProjectNotRegistered();
         return this.beforeInitialize.selector;
     }
 
@@ -176,6 +225,11 @@ contract ImpactHook is IHooks {
         BalanceDelta delta,
         bytes calldata
     ) external override onlyPoolManager returns (bytes4, int128) {
+        // If paused, skip fee collection
+        if (paused) {
+            return (this.afterSwap.selector, 0);
+        }
+
         PoolId poolId = key.toId();
 
         // Get current fee rate
@@ -210,15 +264,18 @@ contract ImpactHook is IHooks {
             return (this.afterSwap.selector, 0);
         }
 
+        // Bounds check: feeAmount must fit in int128 for the return delta
+        if (feeAmount > uint128(type(int128).max)) revert ImpactHook__FeeAmountOverflow();
+
         // Take the fee from the pool manager into this contract
-        poolManager.take(feeCurrency, address(this), feeAmount);
+        POOL_MANAGER.take(feeCurrency, address(this), feeAmount);
 
         // Track accumulated fees
         accumulatedFees[poolId][feeCurrency] += feeAmount;
 
         emit FeesAccumulated(poolId, feeCurrency, feeAmount);
 
-        // Return the fee amount as hookDelta — this reduces the swapper's output
+        // Return the fee amount as hookDelta - this reduces the swapper's output
         return (this.afterSwap.selector, int128(int256(feeAmount)));
     }
 
@@ -232,19 +289,19 @@ contract ImpactHook is IHooks {
         PoolId poolId = key.toId();
         Project storage project = projects[poolId];
 
-        if (!project.registered) revert ProjectNotRegistered();
-        if (msg.sender != project.verifier) revert NotVerifier();
-        if (milestoneIndex != project.currentMilestone) revert InvalidMilestoneIndex();
-        if (milestoneIndex >= milestones[poolId].length) revert InvalidMilestoneIndex();
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+        if (msg.sender != project.verifier) revert ImpactHook__NotVerifier();
+        if (milestoneIndex != project.currentMilestone) revert ImpactHook__InvalidMilestoneIndex();
+        if (milestoneIndex >= milestones[poolId].length) revert ImpactHook__InvalidMilestoneIndex();
 
         Milestone storage milestone = milestones[poolId][milestoneIndex];
-        if (milestone.verified) revert MilestoneAlreadyVerified();
+        if (milestone.verified) revert ImpactHook__MilestoneAlreadyVerified();
 
         milestone.verified = true;
 
         // Advance to next milestone (if there is one)
         if (milestoneIndex + 1 < milestones[poolId].length) {
-            project.currentMilestone = milestoneIndex + 1;
+            project.currentMilestone = uint96(milestoneIndex + 1);
         }
 
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
@@ -257,45 +314,39 @@ contract ImpactHook is IHooks {
     /// @param poolId The pool ID
     /// @param milestoneIndex The milestone to verify
     function verifyMilestoneReactive(address rvmId, PoolId poolId, uint256 milestoneIndex) external {
-        if (msg.sender != callbackProxy) revert NotCallbackProxy();
+        if (msg.sender != callbackProxy) revert ImpactHook__NotCallbackProxy();
 
         Project storage project = projects[poolId];
 
-        if (!project.registered) revert ProjectNotRegistered();
-        if (rvmId != project.verifier) revert NotVerifier();
-        if (milestoneIndex != project.currentMilestone) revert InvalidMilestoneIndex();
-        if (milestoneIndex >= milestones[poolId].length) revert InvalidMilestoneIndex();
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+        if (rvmId != project.verifier) revert ImpactHook__NotVerifier();
+        if (milestoneIndex != project.currentMilestone) revert ImpactHook__InvalidMilestoneIndex();
+        if (milestoneIndex >= milestones[poolId].length) revert ImpactHook__InvalidMilestoneIndex();
 
         Milestone storage milestone = milestones[poolId][milestoneIndex];
-        if (milestone.verified) revert MilestoneAlreadyVerified();
+        if (milestone.verified) revert ImpactHook__MilestoneAlreadyVerified();
 
         milestone.verified = true;
 
         if (milestoneIndex + 1 < milestones[poolId].length) {
-            project.currentMilestone = milestoneIndex + 1;
+            project.currentMilestone = uint96(milestoneIndex + 1);
         }
 
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
     }
 
-    /// @notice Set the Reactive Network Callback Proxy address. Only callable by owner.
-    function setCallbackProxy(address _callbackProxy) external {
-        if (msg.sender != owner) revert NotVerifier(); // reuse error for brevity
-        emit CallbackProxyUpdated(callbackProxy, _callbackProxy);
-        callbackProxy = _callbackProxy;
-    }
-
     // ──────────────────── Fee Withdrawal ────────────────────
 
-    /// @notice Withdraw accumulated fees for a pool. Sends to the registered recipient.
+    /// @notice Withdraw accumulated fees for a pool. Only callable by the project recipient.
     /// @param poolId The pool ID
     /// @param currency The currency to withdraw
-    function withdraw(PoolId poolId, Currency currency) external {
+    function withdraw(PoolId poolId, Currency currency) external nonReentrant {
         Project storage project = projects[poolId];
-        if (!project.registered) revert ProjectNotRegistered();
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+        if (msg.sender != project.recipient) revert ImpactHook__NotProjectRecipient();
 
         uint256 amount = accumulatedFees[poolId][currency];
-        if (amount == 0) revert NoFeesToWithdraw();
+        if (amount == 0) revert ImpactHook__NoFeesToWithdraw();
 
         // Zero out before transfer (checks-effects-interactions)
         accumulatedFees[poolId][currency] = 0;
@@ -306,25 +357,72 @@ contract ImpactHook is IHooks {
         emit FeesWithdrawn(poolId, currency, project.recipient, amount);
     }
 
+    // ──────────────────── Admin Functions ────────────────────
+
+    /// @notice Set the Reactive Network Callback Proxy address. Only callable by owner.
+    /// @param _callbackProxy The new callback proxy address
+    function setCallbackProxy(address _callbackProxy) external onlyOwner {
+        emit CallbackProxyUpdated(callbackProxy, _callbackProxy);
+        callbackProxy = _callbackProxy;
+    }
+
+    /// @notice Pause or unpause fee collection. Only callable by owner.
+    /// When paused, afterSwap returns 0 fee. Existing accumulated fees can still be withdrawn.
+    /// @param _paused Whether to pause
+    function setPaused(bool _paused) external onlyOwner {
+        paused = _paused;
+        emit PausedStateChanged(_paused);
+    }
+
+    /// @notice Initiate ownership transfer (2-step). Only callable by current owner.
+    /// @param newOwner The address to transfer ownership to
+    function transferOwnership(address newOwner) external onlyOwner {
+        if (newOwner == address(0)) revert ImpactHook__ZeroAddress();
+        pendingOwner = newOwner;
+        emit OwnershipTransferStarted(owner, newOwner);
+    }
+
+    /// @notice Accept ownership transfer. Only callable by the pending owner.
+    function acceptOwnership() external {
+        if (msg.sender != pendingOwner) revert ImpactHook__NoTransferPending();
+        emit OwnershipTransferred(owner, msg.sender);
+        owner = msg.sender;
+        pendingOwner = address(0);
+    }
+
     // ──────────────────── View Functions ────────────────────
 
     /// @notice Check if a specific milestone is verified
+    /// @param poolId The pool ID
+    /// @param milestoneIndex The milestone index to check
+    /// @return Whether the milestone is verified
     function isMilestoneVerified(PoolId poolId, uint256 milestoneIndex) external view returns (bool) {
         if (milestoneIndex >= milestones[poolId].length) return false;
         return milestones[poolId][milestoneIndex].verified;
     }
 
     /// @notice Get the current fee rate for a pool
+    /// @param poolId The pool ID
+    /// @return The current fee in basis points
     function getCurrentFeeBps(PoolId poolId) external view returns (uint16) {
         return _getCurrentFeeBps(poolId);
     }
 
     /// @notice Get milestone count for a pool
+    /// @param poolId The pool ID
+    /// @return The number of milestones
     function getMilestoneCount(PoolId poolId) external view returns (uint256) {
         return milestones[poolId].length;
     }
 
     /// @notice Get project info for frontend display
+    /// @param poolId The pool ID
+    /// @return recipient The project recipient address
+    /// @return verifier The milestone verifier address
+    /// @return currentMilestone The current milestone index
+    /// @return milestoneCount Total number of milestones
+    /// @return currentFeeBps Current fee rate in basis points
+    /// @return registered Whether a project is registered for this pool
     function getProjectInfo(PoolId poolId)
         external
         view
@@ -349,18 +447,24 @@ contract ImpactHook is IHooks {
     }
 
     /// @notice Update the recipient address. Only callable by current recipient.
+    /// @param key The pool key
+    /// @param newRecipient The new recipient address
     function updateRecipient(PoolKey calldata key, address newRecipient) external {
+        if (newRecipient == address(0)) revert ImpactHook__ZeroAddress();
         PoolId poolId = key.toId();
         Project storage project = projects[poolId];
-        if (msg.sender != project.recipient) revert NotRecipient();
+        if (msg.sender != project.recipient) revert ImpactHook__NotRecipient();
         project.recipient = newRecipient;
     }
 
     /// @notice Update the verifier address. Only callable by current verifier.
+    /// @param key The pool key
+    /// @param newVerifier The new verifier address
     function updateVerifier(PoolKey calldata key, address newVerifier) external {
+        if (newVerifier == address(0)) revert ImpactHook__ZeroAddress();
         PoolId poolId = key.toId();
         Project storage project = projects[poolId];
-        if (msg.sender != project.verifier) revert NotVerifier();
+        if (msg.sender != project.verifier) revert ImpactHook__NotVerifier();
         project.verifier = newVerifier;
     }
 
@@ -390,7 +494,7 @@ contract ImpactHook is IHooks {
             return ms[current - 1].projectFeeBps;
         }
 
-        // No verified milestones — no fee
+        // No verified milestones - no fee
         return 0;
     }
 

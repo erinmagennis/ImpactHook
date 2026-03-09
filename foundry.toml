@@ -9,6 +9,7 @@ remappings = [
     "v4-periphery/=lib/v4-periphery/",
     "forge-std/=lib/forge-std/src/",
     "@openzeppelin/=lib/v4-core/lib/openzeppelin-contracts/",
+    "reactive-lib/=lib/reactive-lib/",
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

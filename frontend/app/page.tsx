@@ -77,7 +77,7 @@ function Hero() {
                 style={{ color: 'var(--accent-cyan)', border: '1px solid rgba(34, 211, 238, 0.15)', background: 'rgba(34, 211, 238, 0.04)' }}>
             Uniswap v4 Hook
             <span className="w-1 h-1 rounded-full" style={{ background: 'var(--accent-cyan)' }} />
-            Unichain
+            Asset-Class Specific Liquidity
           </span>
         </div>
 
@@ -96,8 +96,8 @@ function Hero() {
 
         <p className="animate-fade-up delay-400 text-[clamp(0.8rem,1.6vw,0.95rem)] leading-relaxed max-w-xl mx-auto mb-14"
            style={{ color: 'var(--text-dim)' }}>
-          No donations. No extra steps. Just swap. A small fee from your trade output goes directly
-          to verified impact projects. Funding only flows when milestones are proven on-chain.
+          A new class of liquidity pool where swap fees fund verified real-world impact.
+          No donations. No extra steps. Just swap. Funding only flows when milestones are proven on-chain.
         </p>
 
         {/* Stats row */}
@@ -264,36 +264,38 @@ function WhyItMatters() {
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader label="The Problem" title="Why this exists" />
+        <SectionHeader label="The Problem" title="Why this exists" subtitle="Asset-class specific liquidity for real-world impact" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
           <div className="animate-fade-up delay-200">
             <h3 className="font-display text-[15px] mb-4" style={{ color: 'var(--text-bright)' }}>
-              Traditional funding is broken
+              Liquidity has no purpose beyond yield
             </h3>
             <div className="flex flex-col gap-4">
               <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Billions flow into impact projects every year. Most of it passes through layers of
-                intermediaries. Donors can&apos;t verify outcomes. Recipients wait months for disbursement.
-                Nobody knows if the money actually did what it was supposed to.
+                $2.5 trillion in daily crypto trading volume generates zero social impact.
+                Every pool looks the same: token pair, fee tier, TVL. There is no way to differentiate
+                liquidity by what it does in the real world.
               </p>
               <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Meanwhile, $2.5 trillion in daily crypto trading volume generates zero social impact.
-                What if even a fraction of that trading activity could fund real things in the real world?
+                Meanwhile, billions in impact funding passes through layers of intermediaries.
+                Donors can&apos;t verify outcomes. Recipients wait months. Nobody knows if the money
+                did what it was supposed to. These two problems have the same solution.
               </p>
             </div>
           </div>
           <div className="animate-fade-up delay-300">
             <h3 className="font-display text-[15px] mb-4" style={{ color: 'var(--text-bright)' }}>
-              ImpactHook changes the equation
+              A new class of liquidity pool
             </h3>
             <div className="flex flex-col gap-3">
               {[
+                { label: "Impact-differentiated", text: "Pools are defined not just by token pair and fee tier, but by the real-world outcome they fund" },
                 { label: "Continuous", text: "Funding flows with every swap, not once-a-year grants" },
-                { label: "Transparent", text: "Every fee, every milestone, every withdrawal is on-chain and auditable" },
-                { label: "Performance-based", text: "No results, no funding. Milestones must be verified before fees release" },
-                { label: "Permissionless", text: "Anyone can create an impact pool for any cause. No gatekeepers" },
-                { label: "Effortless", text: "Traders just pick a pool. No donations, no forms, no extra steps" },
+                { label: "Milestone-gated", text: "No results, no funding. Verification happens on-chain before fees release" },
+                { label: "Cross-chain verified", text: "Milestones confirmed from any chain via Reactive Network, not just the chain the pool lives on" },
+                { label: "Permissionless", text: "Anyone can create an impact pool for any cause. No gatekeepers, no grant committees" },
+                { label: "Effortless for traders", text: "Just pick a pool that matches what you care about. Same tokens, same swap, different impact" },
               ].map((item) => (
                 <div key={item.label} className="flex gap-3 items-start">
                   <span className="text-[11px] font-data mt-0.5 flex-shrink-0" style={{ color: 'var(--accent-cyan)' }}>+</span>
@@ -795,11 +797,12 @@ function Footer() {
 
 /* == SHARED =============================================== */
 
-function SectionHeader({ label, title }: { label: string; title: string }) {
+function SectionHeader({ label, title, subtitle }: { label: string; title: string; subtitle?: string }) {
   return (
     <div className="animate-fade-up">
       <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: 'var(--accent-cyan)' }}>{label}</span>
       <h2 className="font-display text-[clamp(1.5rem,4vw,2.5rem)] mt-2" style={{ color: 'var(--text-bright)' }}>{title}</h2>
+      {subtitle && <p className="text-[14px] mt-2" style={{ color: 'var(--text-mid)' }}>{subtitle}</p>}
     </div>
   );
 }

@@ -1,20 +1,23 @@
 # ImpactHook
 
-A Uniswap v4 hook that turns any swap pool into a milestone-gated funding mechanism for real-world impact projects.
+**Asset-class specific liquidity for real-world impact.**
 
-Traders swap normally. The hook routes a small fee (1-5%) from swap output to registered projects. As projects hit verified milestones, the fee tier adjusts - creating performance-based funding powered by trading activity.
+ImpactHook is a Uniswap v4 hook that creates a new category of liquidity pool where swap fees are programmatically routed to verified impact projects. Pools are differentiated not just by token pair or fee tier, but by the real-world outcome they fund - clean water, climate research, school meals, open-source infrastructure.
 
-**LPs earn full yield. Swappers choose impact. Projects get funded based on milestones.**
+This is asset-class specific liquidity: pools with distinct characteristics shaped by milestone-gated funding, cross-chain verification, and performance-based fee progression. Traders self-select into impact-aligned venues. LPs provide liquidity knowing their pools serve a purpose beyond yield. The result is a new DeFi primitive that turns trading volume into measurable social impact.
+
+**LPs earn full yield. Traders choose their impact. Projects get funded when milestones are proven on-chain.**
 
 ## Why This Matters
 
-Traditional impact funding is opaque and slow. Grant recipients wait months for disbursement. Donors can't verify outcomes. Intermediaries take cuts.
+$2.5 trillion in daily crypto trading volume generates zero social impact. Meanwhile, traditional impact funding is opaque and slow - grant recipients wait months for disbursement, donors can't verify outcomes, and intermediaries take cuts.
 
-ImpactHook makes funding **continuous, transparent, and performance-based**:
-- Every fee is an on-chain transaction anyone can verify
-- Milestone verification gates funding progression - no results, no fees
-- Two independent funding channels (DeFi swap fees + institutional escrow) share the same source of truth
-- Cross-chain verification means milestones can be confirmed from any supported chain
+ImpactHook connects these two worlds:
+- **Continuous funding**: Every swap generates fees, not once-a-year grants
+- **Milestone-gated**: No results, no funding. Verification happens on-chain before fees release
+- **Dual-channel**: DeFi swap fees and institutional escrow share the same source of truth
+- **Cross-chain**: Milestones can be verified from any supported chain via Reactive Network
+- **Permissionless**: Anyone can create an impact pool for any cause. No gatekeepers
 
 ## How It Works
 
@@ -89,8 +92,8 @@ Authorization: the Reactive Network overwrites the first callback argument with 
 
 | Partner | Integration | Location |
 |---------|-------------|----------|
-| **Uniswap Foundation** | Novel v4 hook with dynamic milestone-gated fee routing via `afterSwapReturnDelta` | `src/ImpactHook.sol` |
-| **Unichain** | Targets Unichain Sepolia (OP Stack L2). EAS available as predeploy. | All contracts |
+| **Uniswap Foundation** | Novel v4 hook creating asset-class specific liquidity via milestone-gated fee routing (`afterSwapReturnDelta`) | `src/ImpactHook.sol` |
+| **Unichain** | Deployed on Unichain Sepolia (OP Stack L2). EAS attestations for milestone verification. | All contracts |
 | **Reactive Network** | Cross-chain milestone verification: `MilestoneOracle` → `MilestoneReactor` RSC → `verifyMilestoneReactive()` | `src/MilestoneOracle.sol`, `src/MilestoneReactor.sol`, `src/ImpactHook.sol` |
 | **Arkhai (Alkahest)** | Milestone-gated escrow via `IArbiter` integration | `src/MilestoneArbiter.sol` |
 
@@ -144,6 +147,7 @@ The deployment script mines a CREATE2 salt to produce a hook address with the co
 | Contract | Address |
 |----------|---------|
 | PoolManager | `0x1F98400000000000000000000000000000000004` |
+| Callback Proxy | `0x9299472A6399Fd1027ebF067571Eb3e3D7837FC4` |
 | EAS | `0x4200000000000000000000000000000000000021` |
 | SchemaRegistry | `0x4200000000000000000000000000000000000020` |
 

@@ -17,6 +17,7 @@ import {ImpactHook} from "../src/ImpactHook.sol";
 import {MilestoneArbiter, IArbiter, Attestation} from "../src/MilestoneArbiter.sol";
 import {MilestoneOracle} from "../src/MilestoneOracle.sol";
 import {MilestoneReactor} from "../src/MilestoneReactor.sol";
+import {IReactive} from "reactive-lib/src/interfaces/IReactive.sol";
 
 contract ImpactHookTest is Test, Deployers {
     using PoolIdLibrary for PoolKey;
@@ -47,7 +48,7 @@ contract ImpactHookTest is Test, Deployers {
         address hookAddress = address(flags);
 
         // Deploy hook at the flagged address
-        deployCodeTo("ImpactHook.sol", abi.encode(manager), hookAddress);
+        deployCodeTo("ImpactHook.sol", abi.encode(manager, address(this)), hookAddress);
         hook = ImpactHook(hookAddress);
 
         // Set callback proxy for Reactive Network tests
@@ -57,7 +58,7 @@ contract ImpactHookTest is Test, Deployers {
         // Milestone 0: 0 bps (project must prove itself)
         // Milestone 1: 200 bps (2%)
         // Milestone 2: 300 bps (3%)
-        // Milestone 3: 100 bps (1% — winding down)
+        // Milestone 3: 100 bps (1% - winding down)
         descriptions.push("Project registered");
         descriptions.push("Phase 1 complete");
         descriptions.push("Phase 2 complete");
@@ -108,7 +109,7 @@ contract ImpactHookTest is Test, Deployers {
     }
 
     function test_revert_doubleRegister() public {
-        vm.expectRevert(ImpactHook.ProjectAlreadyRegistered.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__ProjectAlreadyRegistered.selector);
         hook.registerProject(poolKey, recipient, verifier, descriptions, feeBpsValues);
     }
 
@@ -140,7 +141,7 @@ contract ImpactHookTest is Test, Deployers {
         uint16[] memory fees = new uint16[](1);
         fees[0] = 501; // Over MAX_FEE_BPS (500)
 
-        vm.expectRevert(ImpactHook.FeeBpsTooHigh.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__FeeBpsTooHigh.selector);
         hook.registerProject(newKey, recipient, verifier, desc, fees);
     }
 
@@ -156,8 +157,45 @@ contract ImpactHookTest is Test, Deployers {
         string[] memory desc = new string[](0);
         uint16[] memory fees = new uint16[](0);
 
-        vm.expectRevert(ImpactHook.NoMilestones.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__NoMilestones.selector);
         hook.registerProject(newKey, recipient, verifier, desc, fees);
+    }
+
+    function test_revert_registerProject_notOwner() public {
+        PoolKey memory newKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+
+        string[] memory desc = new string[](1);
+        desc[0] = "test";
+        uint16[] memory fees = new uint16[](1);
+        fees[0] = 100;
+
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
+        hook.registerProject(newKey, recipient, verifier, desc, fees);
+    }
+
+    function test_revert_registerProject_zeroRecipient() public {
+        PoolKey memory newKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+
+        string[] memory desc = new string[](1);
+        desc[0] = "test";
+        uint16[] memory fees = new uint16[](1);
+        fees[0] = 100;
+
+        vm.expectRevert(ImpactHook.ImpactHook__ZeroAddress.selector);
+        hook.registerProject(newKey, address(0), verifier, desc, fees);
     }
 
     // ────────── Swap + Fee Tests ──────────
@@ -237,13 +275,43 @@ contract ImpactHookTest is Test, Deployers {
         hook.verifyMilestone(poolKey, 1);
         vm.stopPrank();
 
-        // Swap zeroForOne — fees in currency1
+        // Swap zeroForOne - fees in currency1
         _swap(true, -1 ether);
         assertGt(hook.accumulatedFees(poolId, currency1), 0);
 
-        // Swap oneForZero — fees in currency0
+        // Swap oneForZero - fees in currency0
         _swap(false, -1 ether);
         assertGt(hook.accumulatedFees(poolId, currency0), 0);
+    }
+
+    // ────────── Pause Tests ──────────
+
+    function test_pauseStopsFeeCollection() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        // Pause the hook
+        hook.setPaused(true);
+        assertTrue(hook.paused());
+
+        // Swap should succeed but collect no fees
+        _swap(true, -1 ether);
+        assertEq(hook.accumulatedFees(poolId, currency1), 0, "No fees when paused");
+
+        // Unpause
+        hook.setPaused(false);
+
+        // Now fees should accumulate
+        _swap(true, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency1), 0, "Fees after unpause");
+    }
+
+    function test_revert_pause_notOwner() public {
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
+        hook.setPaused(true);
     }
 
     // ────────── Multiple Pools Test ──────────
@@ -316,7 +384,7 @@ contract ImpactHookTest is Test, Deployers {
         assertGt(fees1, 0, "Pool 1 should have fees");
         assertGt(fees2pool, 0, "Pool 2 should have fees");
 
-        // Pool 1 at 200 bps, Pool 2 at 100 bps — pool 1 fees should be higher
+        // Pool 1 at 200 bps, Pool 2 at 100 bps - pool 1 fees should be higher
         assertGt(fees1, fees2pool, "Pool 1 (200 bps) should have more fees than Pool 2 (100 bps)");
 
         // Verify different recipients
@@ -325,7 +393,8 @@ contract ImpactHookTest is Test, Deployers {
         assertEq(r1, recipient);
         assertEq(r2, recipient2);
 
-        // Withdraw from pool 2 — should go to recipient2
+        // Withdraw from pool 2 - only recipient can withdraw now
+        vm.prank(recipient2);
         hook.withdraw(poolId2, currency1);
         assertEq(currency1.balanceOf(recipient2), fees2pool);
         assertEq(hook.accumulatedFees(poolId2, currency1), 0);
@@ -351,13 +420,13 @@ contract ImpactHookTest is Test, Deployers {
 
     function test_revert_unauthorizedVerifier() public {
         vm.prank(alice);
-        vm.expectRevert(ImpactHook.NotVerifier.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__NotVerifier.selector);
         hook.verifyMilestone(poolKey, 0);
     }
 
     function test_revert_outOfOrderMilestone() public {
         vm.prank(verifier);
-        vm.expectRevert(ImpactHook.InvalidMilestoneIndex.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidMilestoneIndex.selector);
         hook.verifyMilestone(poolKey, 1);
     }
 
@@ -367,7 +436,7 @@ contract ImpactHookTest is Test, Deployers {
 
         // currentMilestone has advanced to 1, so index 0 is invalid
         vm.prank(verifier);
-        vm.expectRevert(ImpactHook.InvalidMilestoneIndex.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidMilestoneIndex.selector);
         hook.verifyMilestone(poolKey, 0);
     }
 
@@ -386,6 +455,7 @@ contract ImpactHookTest is Test, Deployers {
 
         uint256 recipientBefore = currency1.balanceOf(recipient);
 
+        vm.prank(recipient);
         hook.withdraw(poolId, currency1);
 
         uint256 recipientAfter = currency1.balanceOf(recipient);
@@ -394,7 +464,21 @@ contract ImpactHookTest is Test, Deployers {
     }
 
     function test_revert_withdrawNoFees() public {
-        vm.expectRevert(ImpactHook.NoFeesToWithdraw.selector);
+        vm.prank(recipient);
+        vm.expectRevert(ImpactHook.ImpactHook__NoFeesToWithdraw.selector);
+        hook.withdraw(poolId, currency1);
+    }
+
+    function test_revert_withdraw_notRecipient() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        _swap(true, -1 ether);
+
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotProjectRecipient.selector);
         hook.withdraw(poolId, currency1);
     }
 
@@ -421,8 +505,14 @@ contract ImpactHookTest is Test, Deployers {
 
     function test_revert_updateRecipient_unauthorized() public {
         vm.prank(alice);
-        vm.expectRevert(ImpactHook.NotRecipient.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__NotRecipient.selector);
         hook.updateRecipient(poolKey, alice);
+    }
+
+    function test_revert_updateRecipient_zeroAddress() public {
+        vm.prank(recipient);
+        vm.expectRevert(ImpactHook.ImpactHook__ZeroAddress.selector);
+        hook.updateRecipient(poolKey, address(0));
     }
 
     function test_updateVerifier() public {
@@ -434,6 +524,12 @@ contract ImpactHookTest is Test, Deployers {
         assertEq(v, newVerifier);
     }
 
+    function test_revert_updateVerifier_zeroAddress() public {
+        vm.prank(verifier);
+        vm.expectRevert(ImpactHook.ImpactHook__ZeroAddress.selector);
+        hook.updateVerifier(poolKey, address(0));
+    }
+
     function test_setCallbackProxy() public {
         address newProxy = makeAddr("newProxy");
         hook.setCallbackProxy(newProxy);
@@ -442,8 +538,44 @@ contract ImpactHookTest is Test, Deployers {
 
     function test_revert_setCallbackProxy_unauthorized() public {
         vm.prank(alice);
-        vm.expectRevert();
+        vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
         hook.setCallbackProxy(alice);
+    }
+
+    // ────────── Ownership Tests (2-step) ──────────
+
+    function test_transferOwnership_twoStep() public {
+        address newOwner = makeAddr("newOwner");
+
+        // Step 1: Current owner initiates transfer
+        hook.transferOwnership(newOwner);
+        assertEq(hook.pendingOwner(), newOwner);
+        assertEq(hook.owner(), address(this)); // Still the old owner
+
+        // Step 2: New owner accepts
+        vm.prank(newOwner);
+        hook.acceptOwnership();
+        assertEq(hook.owner(), newOwner);
+        assertEq(hook.pendingOwner(), address(0));
+    }
+
+    function test_revert_transferOwnership_notOwner() public {
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
+        hook.transferOwnership(alice);
+    }
+
+    function test_revert_transferOwnership_zeroAddress() public {
+        vm.expectRevert(ImpactHook.ImpactHook__ZeroAddress.selector);
+        hook.transferOwnership(address(0));
+    }
+
+    function test_revert_acceptOwnership_notPending() public {
+        hook.transferOwnership(makeAddr("newOwner"));
+
+        vm.prank(alice); // Not the pending owner
+        vm.expectRevert(ImpactHook.ImpactHook__NoTransferPending.selector);
+        hook.acceptOwnership();
     }
 
     // ────────── Reactive Network Callback Tests ──────────
@@ -457,15 +589,15 @@ contract ImpactHookTest is Test, Deployers {
     }
 
     function test_revert_verifyMilestoneReactive_wrongCaller() public {
-        // Not from callback proxy — should revert
+        // Not from callback proxy - should revert
         vm.prank(alice);
-        vm.expectRevert(ImpactHook.NotCallbackProxy.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__NotCallbackProxy.selector);
         hook.verifyMilestoneReactive(verifier, poolId, 0);
     }
 
     function test_revert_verifyMilestoneReactive_wrongRvmId() public {
         vm.prank(callbackProxy);
-        vm.expectRevert(ImpactHook.NotVerifier.selector);
+        vm.expectRevert(ImpactHook.ImpactHook__NotVerifier.selector);
         hook.verifyMilestoneReactive(alice, poolId, 0);
     }
 
@@ -616,28 +748,8 @@ contract ImpactHookTest is Test, Deployers {
     }
 
     function test_reactor_react_emitsCallback() public {
-        // Deploy reactor (not on Reactive Network, so subscription won't fire)
-        // We'll mock the isReactiveNetwork check by deploying with code at REACTIVE_SYSTEM
-        address REACTIVE_SYSTEM = 0x0000000000000000000000000000000000fffFfF;
-
-        // Place dummy code at system address to simulate Reactive Network
-        vm.etch(REACTIVE_SYSTEM, hex"01");
-
-        // Mock the subscribe call to succeed
-        vm.mockCall(
-            REACTIVE_SYSTEM,
-            abi.encodeWithSignature(
-                "subscribe(uint256,address,uint256,uint256,uint256,uint256)",
-                uint256(11155111),
-                address(0xBEEF),
-                uint256(keccak256("MilestoneSubmitted(bytes32,uint256,bytes)")),
-                uint256(0),
-                uint256(0),
-                uint256(0)
-            ),
-            ""
-        );
-
+        // In test environment, system contract is absent so vm=true (ReactVM mode)
+        // react() has vmOnly modifier, so it works when vm=true
         MilestoneReactor reactor = new MilestoneReactor(
             11155111,
             1301,
@@ -646,7 +758,7 @@ contract ImpactHookTest is Test, Deployers {
         );
 
         // Build a LogRecord simulating a MilestoneSubmitted event
-        MilestoneReactor.LogRecord memory log = MilestoneReactor.LogRecord({
+        IReactive.LogRecord memory log = IReactive.LogRecord({
             chain_id: 11155111,
             _contract: address(0xBEEF),
             topic_0: uint256(keccak256("MilestoneSubmitted(bytes32,uint256,bytes)")),
@@ -664,13 +776,33 @@ contract ImpactHookTest is Test, Deployers {
         // Expect the Callback event to be emitted
         // We check topic1 (chain_id) and topic2 (contract)
         vm.expectEmit(true, true, false, false);
-        emit MilestoneReactor.Callback(1301, address(hook), 200_000, "");
+        emit IReactive.Callback(1301, address(hook), 200_000, "");
 
         reactor.react(log);
     }
 
-    function test_revert_reactor_react_notReactiveNetwork() public {
-        // Deploy without Reactive Network system contract
+    function test_revert_reactor_react_notReactiveVM() public {
+        // Place code at system address to simulate Reactive Network (not ReactVM)
+        // When system contract exists, vm=false, and vmOnly modifier blocks react()
+        address REACTIVE_SYSTEM = 0x0000000000000000000000000000000000fffFfF;
+        vm.etch(REACTIVE_SYSTEM, hex"01");
+
+        // Mock the subscribe call to succeed during deployment
+        uint256 REACTIVE_IGNORE = 0xa65f96fc951c35ead38878e0f0b7a3c744a6f5ccc1476b313353ce31712313ad;
+        vm.mockCall(
+            REACTIVE_SYSTEM,
+            abi.encodeWithSignature(
+                "subscribe(uint256,address,uint256,uint256,uint256,uint256)",
+                uint256(11155111),
+                address(0xBEEF),
+                uint256(keccak256("MilestoneSubmitted(bytes32,uint256,bytes)")),
+                REACTIVE_IGNORE,
+                REACTIVE_IGNORE,
+                REACTIVE_IGNORE
+            ),
+            ""
+        );
+
         MilestoneReactor reactor = new MilestoneReactor(
             11155111,
             1301,
@@ -678,12 +810,12 @@ contract ImpactHookTest is Test, Deployers {
             address(hook)
         );
 
-        MilestoneReactor.LogRecord memory log;
-        vm.expectRevert(MilestoneReactor.NotReactiveNetwork.selector);
+        IReactive.LogRecord memory log;
+        vm.expectRevert("VM only");
         reactor.react(log);
     }
 
-    // ────────── End-to-End: Oracle → Reactor → Hook ──────────
+    // ────────── End-to-End: Oracle -> Reactor -> Hook ──────────
 
     function test_e2e_crossChainMilestoneVerification() public {
         // Simulate the full cross-chain flow locally:
@@ -719,7 +851,7 @@ contract ImpactHookTest is Test, Deployers {
         assertTrue(hook.isMilestoneVerified(poolId, 1));
         assertEq(hook.getCurrentFeeBps(poolId), 200);
 
-        // Now swap — should collect 200 bps fee
+        // Now swap - should collect 200 bps fee
         _swap(true, -1 ether);
         assertGt(hook.accumulatedFees(poolId, currency1), 0);
     }
