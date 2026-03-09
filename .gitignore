@@ -1,0 +1,16 @@
+# Private docs & notes
+private/
+
+# Foundry build artifacts
+out/
+cache/
+
+# Environment & secrets
+.env
+.env.*
+
+# OS files
+.DS_Store
+
+# Node (if frontend added later)
+node_modules/
