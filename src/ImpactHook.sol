@@ -30,6 +30,7 @@ contract ImpactHook is IHooks {
     error FeeBpsTooHigh();
     error NoMilestones();
     error NotRecipient();
+    error NotCallbackProxy();
 
     // ──────────────────── Events ────────────────────
 
@@ -37,11 +38,13 @@ contract ImpactHook is IHooks {
     event MilestoneVerified(PoolId indexed poolId, uint256 milestoneIndex, uint16 newFeeBps);
     event FeesAccumulated(PoolId indexed poolId, Currency indexed currency, uint256 amount);
     event FeesWithdrawn(PoolId indexed poolId, Currency indexed currency, address recipient, uint256 amount);
+    event CallbackProxyUpdated(address oldProxy, address newProxy);
 
     // ──────────────────── Constants ────────────────────
 
     uint16 public constant MAX_FEE_BPS = 500; // 5% cap on project fees
     IPoolManager public immutable poolManager;
+    address public callbackProxy; // Reactive Network Callback Proxy for this chain
 
     // ──────────────────── Types ────────────────────
 
@@ -76,8 +79,11 @@ contract ImpactHook is IHooks {
 
     // ──────────────────── Constructor ────────────────────
 
+    address public owner;
+
     constructor(IPoolManager _poolManager) {
         poolManager = _poolManager;
+        owner = msg.sender;
         Hooks.validateHookPermissions(IHooks(address(this)), getHookPermissions());
     }
 
@@ -246,10 +252,13 @@ contract ImpactHook is IHooks {
 
     /// @notice Verify a milestone via Reactive Network callback.
     /// First param is the ReactVM ID (auto-injected by Reactive Network).
+    /// Only callable by the chain's Callback Proxy contract.
     /// @param rvmId The ReactVM ID (verified against the authorized verifier)
     /// @param poolId The pool ID
     /// @param milestoneIndex The milestone to verify
     function verifyMilestoneReactive(address rvmId, PoolId poolId, uint256 milestoneIndex) external {
+        if (msg.sender != callbackProxy) revert NotCallbackProxy();
+
         Project storage project = projects[poolId];
 
         if (!project.registered) revert ProjectNotRegistered();
@@ -267,6 +276,13 @@ contract ImpactHook is IHooks {
         }
 
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
+    }
+
+    /// @notice Set the Reactive Network Callback Proxy address. Only callable by owner.
+    function setCallbackProxy(address _callbackProxy) external {
+        if (msg.sender != owner) revert NotVerifier(); // reuse error for brevity
+        emit CallbackProxyUpdated(callbackProxy, _callbackProxy);
+        callbackProxy = _callbackProxy;
     }
 
     // ──────────────────── Fee Withdrawal ────────────────────

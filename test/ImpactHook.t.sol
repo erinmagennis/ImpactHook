@@ -9,12 +9,12 @@ import {Hooks} from "v4-core/src/libraries/Hooks.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {Currency, CurrencyLibrary} from "v4-core/src/types/Currency.sol";
-import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {PoolSwapTest} from "v4-core/src/test/PoolSwapTest.sol";
 import {TickMath} from "v4-core/src/libraries/TickMath.sol";
 import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
 
 import {ImpactHook} from "../src/ImpactHook.sol";
+import {MilestoneArbiter, IArbiter, Attestation} from "../src/MilestoneArbiter.sol";
 
 contract ImpactHookTest is Test, Deployers {
     using PoolIdLibrary for PoolKey;
@@ -28,6 +28,7 @@ contract ImpactHookTest is Test, Deployers {
     address recipient = makeAddr("recipient");
     address verifier = makeAddr("verifier");
     address alice = makeAddr("alice");
+    address callbackProxy = makeAddr("callbackProxy");
 
     // Milestone configs for standard test setup
     string[] descriptions;
@@ -46,6 +47,9 @@ contract ImpactHookTest is Test, Deployers {
         // Deploy hook at the flagged address
         deployCodeTo("ImpactHook.sol", abi.encode(manager), hookAddress);
         hook = ImpactHook(hookAddress);
+
+        // Set callback proxy for Reactive Network tests
+        hook.setCallbackProxy(callbackProxy);
 
         // Set up milestone configs:
         // Milestone 0: 0 bps (project must prove itself)
@@ -102,13 +106,11 @@ contract ImpactHookTest is Test, Deployers {
     }
 
     function test_revert_doubleRegister() public {
-        // Try to register again for the same pool
         vm.expectRevert(ImpactHook.ProjectAlreadyRegistered.selector);
         hook.registerProject(poolKey, recipient, verifier, descriptions, feeBpsValues);
     }
 
     function test_revert_initWithoutRegistration() public {
-        // Create a new pool key with no project registered
         PoolKey memory newKey = PoolKey({
             currency0: currency0,
             currency1: currency1,
@@ -117,7 +119,7 @@ contract ImpactHookTest is Test, Deployers {
             hooks: IHooks(address(hook))
         });
 
-        // v4 wraps hook reverts, so just check it reverts (not the specific selector)
+        // v4 wraps hook reverts
         vm.expectRevert();
         manager.initialize(newKey, SQRT_PRICE_1_1);
     }
@@ -159,35 +161,26 @@ contract ImpactHookTest is Test, Deployers {
     // ────────── Swap + Fee Tests ──────────
 
     function test_zeroFeeBeforeFirstMilestone() public {
-        // No milestones verified → fee should be 0
         uint16 currentFee = hook.getCurrentFeeBps(poolId);
         assertEq(currentFee, 0);
 
-        // Swap should go through with no fee taken
-        uint256 recipientBalanceBefore = currency1.balanceOf(address(hook));
-
+        uint256 hookBalanceBefore = currency1.balanceOf(address(hook));
         _swap(true, -1 ether);
+        uint256 hookBalanceAfter = currency1.balanceOf(address(hook));
 
-        uint256 recipientBalanceAfter = currency1.balanceOf(address(hook));
-        assertEq(recipientBalanceAfter, recipientBalanceBefore); // No fees accumulated
+        assertEq(hookBalanceAfter, hookBalanceBefore);
         assertEq(hook.accumulatedFees(poolId, currency1), 0);
     }
 
     function test_feeAfterMilestoneVerification() public {
-        // Verify milestone 0 (0 bps — still no fee)
-        vm.prank(verifier);
+        // Verify milestone 0 (0 bps) and 1 (200 bps)
+        vm.startPrank(verifier);
         hook.verifyMilestone(poolKey, 0);
-
-        // Still 0 bps
-        assertEq(hook.getCurrentFeeBps(poolId), 0);
-
-        // Verify milestone 1 (200 bps = 2%)
-        vm.prank(verifier);
         hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
 
         assertEq(hook.getCurrentFeeBps(poolId), 200);
 
-        // Swap and verify fee is taken
         _swap(true, -1 ether);
 
         uint256 fees = hook.accumulatedFees(poolId, currency1);
@@ -214,8 +207,129 @@ contract ImpactHookTest is Test, Deployers {
         _swap(true, -1 ether);
         uint256 fees2 = hook.accumulatedFees(poolId, currency1) - fees1;
 
-        // Second swap should have higher fees (300 bps vs 200 bps)
         assertGt(fees2, fees1, "Higher milestone should yield higher fees");
+    }
+
+    function test_feeOneForZero() public {
+        // Verify milestones to enable fees
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        // Swap in the opposite direction (oneForZero)
+        _swap(false, -1 ether);
+
+        // Fees should accumulate in currency0 (the output for oneForZero)
+        uint256 fees0 = hook.accumulatedFees(poolId, currency0);
+        assertGt(fees0, 0, "Should accumulate fees in currency0 for oneForZero swap");
+
+        // currency1 fees should be 0 (not the output for this direction)
+        uint256 fees1 = hook.accumulatedFees(poolId, currency1);
+        assertEq(fees1, 0, "Should not accumulate fees in currency1 for oneForZero swap");
+    }
+
+    function test_feeBothDirections() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        // Swap zeroForOne — fees in currency1
+        _swap(true, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency1), 0);
+
+        // Swap oneForZero — fees in currency0
+        _swap(false, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency0), 0);
+    }
+
+    // ────────── Multiple Pools Test ──────────
+
+    function test_multipleProjects() public {
+        // Create a second pool with a different project
+        address recipient2 = makeAddr("recipient2");
+        address verifier2 = makeAddr("verifier2");
+
+        PoolKey memory poolKey2 = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 10000,
+            tickSpacing: 200,
+            hooks: IHooks(address(hook))
+        });
+
+        string[] memory desc2 = new string[](2);
+        desc2[0] = "Start";
+        desc2[1] = "Done";
+        uint16[] memory fees2 = new uint16[](2);
+        fees2[0] = 100; // 1% from the start
+        fees2[1] = 400; // 4% after milestone 1
+
+        hook.registerProject(poolKey2, recipient2, verifier2, desc2, fees2);
+        manager.initialize(poolKey2, SQRT_PRICE_1_1);
+
+        modifyLiquidityRouter.modifyLiquidity(
+            poolKey2,
+            IPoolManager.ModifyLiquidityParams({
+                tickLower: -200,
+                tickUpper: 200,
+                liquidityDelta: 100 ether,
+                salt: bytes32(0)
+            }),
+            ""
+        );
+
+        PoolId poolId2 = poolKey2.toId();
+
+        // Verify milestone 0 on pool2 (100 bps immediately)
+        vm.prank(verifier2);
+        hook.verifyMilestone(poolKey2, 0);
+
+        // Verify milestones on pool1
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        // Swap on pool 1
+        _swap(true, -1 ether);
+
+        // Swap on pool 2
+        swapRouter.swap(
+            poolKey2,
+            IPoolManager.SwapParams({
+                zeroForOne: true,
+                amountSpecified: -1 ether,
+                sqrtPriceLimitX96: TickMath.MIN_SQRT_PRICE + 1
+            }),
+            PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
+            ""
+        );
+
+        // Verify independent fee tracking
+        uint256 fees1 = hook.accumulatedFees(poolId, currency1);
+        uint256 fees2pool = hook.accumulatedFees(poolId2, currency1);
+
+        assertGt(fees1, 0, "Pool 1 should have fees");
+        assertGt(fees2pool, 0, "Pool 2 should have fees");
+
+        // Pool 1 at 200 bps, Pool 2 at 100 bps — pool 1 fees should be higher
+        assertGt(fees1, fees2pool, "Pool 1 (200 bps) should have more fees than Pool 2 (100 bps)");
+
+        // Verify different recipients
+        (address r1,,,,,) = hook.getProjectInfo(poolId);
+        (address r2,,,,,) = hook.getProjectInfo(poolId2);
+        assertEq(r1, recipient);
+        assertEq(r2, recipient2);
+
+        // Withdraw from pool 2 — should go to recipient2
+        hook.withdraw(poolId2, currency1);
+        assertEq(currency1.balanceOf(recipient2), fees2pool);
+        assertEq(hook.accumulatedFees(poolId2, currency1), 0);
+
+        // Pool 1 fees unaffected
+        assertEq(hook.accumulatedFees(poolId, currency1), fees1);
     }
 
     // ────────── Milestone Verification Tests ──────────
@@ -240,7 +354,6 @@ contract ImpactHookTest is Test, Deployers {
     }
 
     function test_revert_outOfOrderMilestone() public {
-        // Try to verify milestone 1 before milestone 0
         vm.prank(verifier);
         vm.expectRevert(ImpactHook.InvalidMilestoneIndex.selector);
         hook.verifyMilestone(poolKey, 1);
@@ -250,7 +363,7 @@ contract ImpactHookTest is Test, Deployers {
         vm.prank(verifier);
         hook.verifyMilestone(poolKey, 0);
 
-        // Try to verify milestone 0 again — currentMilestone has advanced to 1
+        // currentMilestone has advanced to 1, so index 0 is invalid
         vm.prank(verifier);
         vm.expectRevert(ImpactHook.InvalidMilestoneIndex.selector);
         hook.verifyMilestone(poolKey, 0);
@@ -259,13 +372,11 @@ contract ImpactHookTest is Test, Deployers {
     // ────────── Withdrawal Tests ──────────
 
     function test_withdrawFees() public {
-        // Verify milestones to enable fees
         vm.startPrank(verifier);
         hook.verifyMilestone(poolKey, 0);
         hook.verifyMilestone(poolKey, 1);
         vm.stopPrank();
 
-        // Swap to generate fees
         _swap(true, -1 ether);
 
         uint256 fees = hook.accumulatedFees(poolId, currency1);
@@ -273,7 +384,6 @@ contract ImpactHookTest is Test, Deployers {
 
         uint256 recipientBefore = currency1.balanceOf(recipient);
 
-        // Withdraw
         hook.withdraw(poolId, currency1);
 
         uint256 recipientAfter = currency1.balanceOf(recipient);
@@ -322,29 +432,90 @@ contract ImpactHookTest is Test, Deployers {
         assertEq(v, newVerifier);
     }
 
-    // ────────── Reactive Network Callback Test ──────────
+    function test_setCallbackProxy() public {
+        address newProxy = makeAddr("newProxy");
+        hook.setCallbackProxy(newProxy);
+        assertEq(hook.callbackProxy(), newProxy);
+    }
+
+    function test_revert_setCallbackProxy_unauthorized() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        hook.setCallbackProxy(alice);
+    }
+
+    // ────────── Reactive Network Callback Tests ──────────
 
     function test_verifyMilestoneReactive() public {
-        // Simulate a Reactive Network callback where rvmId == verifier
-        vm.prank(address(0xCAFE)); // any caller (callback proxy)
+        // Must come from the callback proxy
+        vm.prank(callbackProxy);
         hook.verifyMilestoneReactive(verifier, poolId, 0);
 
         assertTrue(hook.isMilestoneVerified(poolId, 0));
     }
 
+    function test_revert_verifyMilestoneReactive_wrongCaller() public {
+        // Not from callback proxy — should revert
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.NotCallbackProxy.selector);
+        hook.verifyMilestoneReactive(verifier, poolId, 0);
+    }
+
     function test_revert_verifyMilestoneReactive_wrongRvmId() public {
-        vm.prank(address(0xCAFE));
+        vm.prank(callbackProxy);
         vm.expectRevert(ImpactHook.NotVerifier.selector);
         hook.verifyMilestoneReactive(alice, poolId, 0);
+    }
+
+    // ────────── MilestoneArbiter Tests ──────────
+
+    function test_arbiter_returnsTrueWhenVerified() public {
+        MilestoneArbiter arbiter = new MilestoneArbiter(address(hook));
+
+        // Verify milestone 0
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+
+        // Encode demand: poolId, milestone 0
+        bytes memory demand = abi.encode(MilestoneArbiter.DemandData({
+            poolId: poolId,
+            requiredMilestone: 0
+        }));
+
+        Attestation memory emptyAttestation;
+        assertTrue(arbiter.checkObligation(emptyAttestation, demand, bytes32(0)));
+    }
+
+    function test_arbiter_returnsFalseWhenNotVerified() public {
+        MilestoneArbiter arbiter = new MilestoneArbiter(address(hook));
+
+        // Don't verify any milestones
+        bytes memory demand = abi.encode(MilestoneArbiter.DemandData({
+            poolId: poolId,
+            requiredMilestone: 0
+        }));
+
+        Attestation memory emptyAttestation;
+        assertFalse(arbiter.checkObligation(emptyAttestation, demand, bytes32(0)));
+    }
+
+    function test_arbiter_returnsFalseForInvalidMilestone() public {
+        MilestoneArbiter arbiter = new MilestoneArbiter(address(hook));
+
+        bytes memory demand = abi.encode(MilestoneArbiter.DemandData({
+            poolId: poolId,
+            requiredMilestone: 99 // doesn't exist
+        }));
+
+        Attestation memory emptyAttestation;
+        assertFalse(arbiter.checkObligation(emptyAttestation, demand, bytes32(0)));
     }
 
     // ────────── Fuzz Tests ──────────
 
     function testFuzz_feeCalculation(uint16 feeBps) public {
-        // Bound to valid range
         feeBps = uint16(bound(feeBps, 1, 500));
 
-        // Create a new pool with a single milestone at the fuzzed fee rate
         PoolKey memory newKey = PoolKey({
             currency0: currency0,
             currency1: currency1,
@@ -374,11 +545,9 @@ contract ImpactHookTest is Test, Deployers {
 
         PoolId newPoolId = newKey.toId();
 
-        // Verify the milestone to activate fees
         vm.prank(verifier);
         hook.verifyMilestone(newKey, 0);
 
-        // Swap
         swapRouter.swap(
             newKey,
             IPoolManager.SwapParams({
