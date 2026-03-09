@@ -110,6 +110,11 @@ function Hero() {
 
         {/* CTA */}
         <div className="animate-fade-up delay-600 flex flex-wrap gap-4 justify-center">
+          <a href="/dashboard"
+             className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide transition-all hover:scale-[1.02]"
+             style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))', border: '1px solid rgba(99,102,241,0.4)', color: '#fff' }}>
+            Launch App
+          </a>
           <a href="#impact"
              className="inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide transition-all hover:scale-[1.02]"
              style={{ background: 'rgba(34, 211, 238, 0.08)', border: '1px solid rgba(34, 211, 238, 0.25)', color: 'var(--accent-cyan)' }}>

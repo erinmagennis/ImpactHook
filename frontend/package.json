@@ -19,8 +19,12 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.10",
+    "@tanstack/react-query": "^5.90.21",
     "next": "^16.1.6",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "viem": "^2.47.0",
+    "wagmi": "^3.5.0"
   }
 }
