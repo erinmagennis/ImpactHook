@@ -15,6 +15,8 @@ import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
 
 import {ImpactHook} from "../src/ImpactHook.sol";
 import {MilestoneArbiter, IArbiter, Attestation} from "../src/MilestoneArbiter.sol";
+import {MilestoneOracle} from "../src/MilestoneOracle.sol";
+import {MilestoneReactor} from "../src/MilestoneReactor.sol";
 
 contract ImpactHookTest is Test, Deployers {
     using PoolIdLibrary for PoolKey;
@@ -561,6 +563,165 @@ contract ImpactHookTest is Test, Deployers {
 
         uint256 accFees = hook.accumulatedFees(newPoolId, currency1);
         assertGt(accFees, 0, "Should accumulate fees for any valid bps");
+    }
+
+    // ────────── MilestoneOracle Tests ──────────
+
+    function test_oracle_submitMilestone() public {
+        MilestoneOracle oracle = new MilestoneOracle();
+        oracle.setAuthorizedSubmitter(poolId, alice);
+
+        vm.prank(alice);
+        vm.expectEmit(true, true, false, true);
+        emit MilestoneOracle.MilestoneSubmitted(poolId, 0, "proof-hash");
+        oracle.submitMilestone(poolId, 0, "proof-hash");
+    }
+
+    function test_oracle_ownerCanSubmit() public {
+        MilestoneOracle oracle = new MilestoneOracle();
+        // Owner can submit without being an authorized submitter
+        oracle.submitMilestone(poolId, 0, "");
+    }
+
+    function test_revert_oracle_unauthorized() public {
+        MilestoneOracle oracle = new MilestoneOracle();
+
+        vm.prank(alice);
+        vm.expectRevert(MilestoneOracle.NotAuthorized.selector);
+        oracle.submitMilestone(poolId, 0, "");
+    }
+
+    function test_revert_oracle_setSubmitter_unauthorized() public {
+        MilestoneOracle oracle = new MilestoneOracle();
+
+        vm.prank(alice);
+        vm.expectRevert(MilestoneOracle.NotAuthorized.selector);
+        oracle.setAuthorizedSubmitter(poolId, alice);
+    }
+
+    // ────────── MilestoneReactor Tests ──────────
+
+    function test_reactor_deployment() public {
+        MilestoneReactor reactor = new MilestoneReactor(
+            11155111,  // origin: Sepolia
+            1301,      // destination: Unichain Sepolia
+            address(0xBEEF), // oracle address
+            address(hook)    // callback address
+        );
+
+        assertEq(reactor.originChainId(), 11155111);
+        assertEq(reactor.destinationChainId(), 1301);
+        assertEq(reactor.oracleAddress(), address(0xBEEF));
+        assertEq(reactor.callbackAddress(), address(hook));
+    }
+
+    function test_reactor_react_emitsCallback() public {
+        // Deploy reactor (not on Reactive Network, so subscription won't fire)
+        // We'll mock the isReactiveNetwork check by deploying with code at REACTIVE_SYSTEM
+        address REACTIVE_SYSTEM = 0x0000000000000000000000000000000000fffFfF;
+
+        // Place dummy code at system address to simulate Reactive Network
+        vm.etch(REACTIVE_SYSTEM, hex"01");
+
+        // Mock the subscribe call to succeed
+        vm.mockCall(
+            REACTIVE_SYSTEM,
+            abi.encodeWithSignature(
+                "subscribe(uint256,address,uint256,uint256,uint256,uint256)",
+                uint256(11155111),
+                address(0xBEEF),
+                uint256(keccak256("MilestoneSubmitted(bytes32,uint256,bytes)")),
+                uint256(0),
+                uint256(0),
+                uint256(0)
+            ),
+            ""
+        );
+
+        MilestoneReactor reactor = new MilestoneReactor(
+            11155111,
+            1301,
+            address(0xBEEF),
+            address(hook)
+        );
+
+        // Build a LogRecord simulating a MilestoneSubmitted event
+        MilestoneReactor.LogRecord memory log = MilestoneReactor.LogRecord({
+            chain_id: 11155111,
+            _contract: address(0xBEEF),
+            topic_0: uint256(keccak256("MilestoneSubmitted(bytes32,uint256,bytes)")),
+            topic_1: uint256(PoolId.unwrap(poolId)), // poolId
+            topic_2: 0,     // milestoneIndex
+            topic_3: 0,
+            data: "",
+            block_number: 100,
+            op_code: 0,
+            block_hash: 0,
+            tx_hash: 0,
+            log_index: 0
+        });
+
+        // Expect the Callback event to be emitted
+        // We check topic1 (chain_id) and topic2 (contract)
+        vm.expectEmit(true, true, false, false);
+        emit MilestoneReactor.Callback(1301, address(hook), 200_000, "");
+
+        reactor.react(log);
+    }
+
+    function test_revert_reactor_react_notReactiveNetwork() public {
+        // Deploy without Reactive Network system contract
+        MilestoneReactor reactor = new MilestoneReactor(
+            11155111,
+            1301,
+            address(0xBEEF),
+            address(hook)
+        );
+
+        MilestoneReactor.LogRecord memory log;
+        vm.expectRevert(MilestoneReactor.NotReactiveNetwork.selector);
+        reactor.react(log);
+    }
+
+    // ────────── End-to-End: Oracle → Reactor → Hook ──────────
+
+    function test_e2e_crossChainMilestoneVerification() public {
+        // Simulate the full cross-chain flow locally:
+        // 1. MilestoneOracle emits MilestoneSubmitted
+        // 2. MilestoneReactor processes it and produces callback payload
+        // 3. ImpactHook.verifyMilestoneReactive is called with the payload
+
+        // Step 1: Oracle emits event
+        MilestoneOracle oracle = new MilestoneOracle();
+        oracle.setAuthorizedSubmitter(poolId, alice);
+        vm.prank(alice);
+        oracle.submitMilestone(poolId, 0, "proof");
+
+        // Step 2: Simulate what MilestoneReactor would produce
+        // The callback payload encodes verifyMilestoneReactive(rvmId, poolId, milestoneIndex)
+        // In production, the first arg (rvmId) is overwritten by Reactive Network
+        // We simulate it by setting rvmId = verifier (the authorized verifier for this pool)
+
+        // Step 3: CallbackProxy calls verifyMilestoneReactive on behalf of Reactive Network
+        vm.prank(callbackProxy);
+        hook.verifyMilestoneReactive(verifier, poolId, 0);
+
+        // Verify milestone 0 is now verified
+        assertTrue(hook.isMilestoneVerified(poolId, 0));
+
+        // Verify fee is still 0 for milestone 0 (as configured)
+        assertEq(hook.getCurrentFeeBps(poolId), 0);
+
+        // Continue: verify milestone 1 via reactive callback
+        vm.prank(callbackProxy);
+        hook.verifyMilestoneReactive(verifier, poolId, 1);
+
+        assertTrue(hook.isMilestoneVerified(poolId, 1));
+        assertEq(hook.getCurrentFeeBps(poolId), 200);
+
+        // Now swap — should collect 200 bps fee
+        _swap(true, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency1), 0);
     }
 
     // ────────── Helpers ──────────

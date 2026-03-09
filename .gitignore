@@ -7,10 +7,17 @@ cache/
 
 # Environment & secrets
 .env
-.env.*
+.env.local
+.env.*.local
 
 # OS files
 .DS_Store
 
-# Node (if frontend added later)
+# Node / Frontend
 node_modules/
+frontend/.next/
+
+# Unrelated files
+PROGRESS.md
+docs/
+overview.md

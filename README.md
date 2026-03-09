@@ -6,6 +6,16 @@ Traders swap normally. The hook routes a small fee (1-5%) from swap output to re
 
 **LPs earn full yield. Swappers choose impact. Projects get funded based on milestones.**
 
+## Why This Matters
+
+Traditional impact funding is opaque and slow. Grant recipients wait months for disbursement. Donors can't verify outcomes. Intermediaries take cuts.
+
+ImpactHook makes funding **continuous, transparent, and performance-based**:
+- Every fee is an on-chain transaction anyone can verify
+- Milestone verification gates funding progression — no results, no fees
+- Two independent funding channels (DeFi swap fees + institutional escrow) share the same source of truth
+- Cross-chain verification means milestones can be confirmed from any supported chain
+
 ## How It Works
 
 ```
@@ -25,12 +35,32 @@ Each pool has a `Project` config with:
 
 ## Architecture
 
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        ImpactHook.sol                            │
+│  afterSwap() fee routing · milestone tracking · withdrawal       │
+│  verifyMilestoneReactive() cross-chain callback handler          │
+└──────┬────────────────────────┬──────────────────────┬───────────┘
+       │                        │                      │
+       ▼                        ▼                      ▼
+┌──────────────┐  ┌─────────────────────┐  ┌────────────────────┐
+│ MilestoneArbiter│  │  MilestoneReactor   │  │  MilestoneOracle   │
+│ (Alkahest escrow)│  │  (Reactive Network) │  │  (Origin chain)    │
+│ IArbiter gate   │  │  RSC: subscribes to │  │  Emits Milestone-  │
+│ on milestones   │  │  origin events,     │  │  Submitted events  │
+└──────────────┘  │  emits Callbacks     │  │  for cross-chain   │
+                  └─────────────────────┘  │  verification       │
+                                           └────────────────────┘
+```
+
 ### Contracts
 
 | Contract | Description |
 |----------|-------------|
-| `ImpactHook.sol` | Core Uniswap v4 hook — fee routing, milestone tracking, withdrawal |
+| `ImpactHook.sol` | Core Uniswap v4 hook — fee routing, milestone tracking, withdrawal, cross-chain callback handler |
 | `MilestoneArbiter.sol` | Alkahest IArbiter — gates escrow release on milestone verification |
+| `MilestoneReactor.sol` | Reactive Network RSC — subscribes to origin chain events, emits cross-chain callbacks |
+| `MilestoneOracle.sol` | Origin chain event emitter — milestone submissions trigger the cross-chain flow |
 
 ### Two Funding Channels, One Source of Truth
 
@@ -42,15 +72,26 @@ Both channels are gated by the same on-chain milestone state.
 
 ### Cross-Chain Milestone Verification
 
-The hook supports [Reactive Network](https://reactive.network) callbacks for cross-chain milestone verification. An RSC on Reactive Network can subscribe to `MilestoneSubmitted` events on any origin chain and trigger `verifyMilestoneReactive()` on the hook.
+```
+Origin Chain              Reactive Network           Destination Chain
+(any supported)           (ReactVM)                  (Unichain)
+
+MilestoneOracle    ──→    MilestoneReactor    ──→    ImpactHook
+  emits event              subscribes &               verifyMilestoneReactive()
+  MilestoneSubmitted       emits Callback             updates milestone state
+```
+
+The hook supports [Reactive Network](https://reactive.network) callbacks for cross-chain milestone verification. `MilestoneReactor` (deployed on Reactive Network) subscribes to `MilestoneSubmitted` events from `MilestoneOracle` on any origin chain and triggers `verifyMilestoneReactive()` on the hook via the chain's Callback Proxy.
+
+Authorization: the Reactive Network overwrites the first callback argument with the ReactVM ID. The hook checks `msg.sender == callbackProxy` and `rvmId == project.verifier`.
 
 ## Partner Integrations
 
 | Partner | Integration | Location |
 |---------|-------------|----------|
 | **Uniswap Foundation** | Novel v4 hook with dynamic milestone-gated fee routing via `afterSwapReturnDelta` | `src/ImpactHook.sol` |
-| **Unichain** | Deployed on Unichain (OP Stack L2). EAS available as predeploy for attestations. | All contracts |
-| **Reactive Network** | Cross-chain milestone verification via RSC → `verifyMilestoneReactive()` callback | `src/ImpactHook.sol:verifyMilestoneReactive()` |
+| **Unichain** | Targets Unichain Sepolia (OP Stack L2). EAS available as predeploy. | All contracts |
+| **Reactive Network** | Cross-chain milestone verification: `MilestoneOracle` → `MilestoneReactor` RSC → `verifyMilestoneReactive()` | `src/MilestoneOracle.sol`, `src/MilestoneReactor.sol`, `src/ImpactHook.sol` |
 | **Arkhai (Alkahest)** | Milestone-gated escrow via `IArbiter` integration | `src/MilestoneArbiter.sol` |
 
 ## Fee Model
@@ -61,6 +102,7 @@ The hook charges a fee **on top of** the standard LP fee, taken from the swapper
 - Fee rate is determined by the current verified milestone's `projectFeeBps`
 - Maximum fee capped at 500 bps (5%)
 - Before any milestones are verified, the fee is 0
+- Permissionless project registration — anyone can create an impact pool
 
 Example progression:
 | Milestone | Status | Fee |
@@ -84,9 +126,9 @@ forge build
 forge test
 ```
 
-22 tests covering: project registration, swap fee accumulation, milestone verification, fee progression, withdrawal, access control, Reactive Network callbacks, and fuzz testing.
+39 tests covering: project registration, swap fee accumulation (both directions), milestone verification, fee progression, withdrawal, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), end-to-end cross-chain flow, and fuzz testing.
 
-### Deploy
+### Deploy (Unichain Sepolia)
 
 ```shell
 forge script script/DeployHook.s.sol:DeployHookScript \

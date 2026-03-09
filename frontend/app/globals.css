@@ -1,0 +1,300 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('https://cdn.jsdelivr.net/gh/rougier/departure-mono@master/fonts/DepartureMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg-void: #050508;
+  --bg-surface: #0c0d12;
+  --bg-elevated: #12141c;
+  --bg-card: #181a24;
+  --accent-cyan: #22d3ee;
+  --accent-emerald: #34d399;
+  --accent-violet: #a78bfa;
+  --accent-amber: #fbbf24;
+  --text-bright: #f0f4f8;
+  --text-mid: #8892a4;
+  --text-dim: #4a5268;
+  --border-subtle: rgba(136, 146, 164, 0.08);
+  --border-active: rgba(34, 211, 238, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-void);
+  color: var(--text-bright);
+  font-family: 'Departure Mono', 'SF Mono', 'Fira Code', monospace;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* --- Noise overlay for texture --- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
+}
+
+/* --- Gradient mesh background --- */
+.bg-mesh {
+  position: relative;
+}
+.bg-mesh::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 10%, rgba(34, 211, 238, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 500px at 80% 20%, rgba(167, 139, 250, 0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 50% 80%, rgba(52, 211, 153, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- Typography --- */
+.font-display {
+  font-family: 'Departure Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+.font-data {
+  font-family: 'Departure Mono', 'SF Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Gradient utilities --- */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #22d3ee, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-violet {
+  background: linear-gradient(135deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-full {
+  background: linear-gradient(135deg, #22d3ee, #a78bfa, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* --- Card system --- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 0 40px rgba(34, 211, 238, 0.03);
+}
+
+.card-glow {
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.08),
+    0 4px 40px rgba(34, 211, 238, 0.04),
+    0 8px 80px rgba(167, 139, 250, 0.02);
+}
+
+/* --- Milestone timeline --- */
+.timeline-line {
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-emerald) 50%, var(--border-subtle) 50%);
+}
+
+.milestone-node {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.milestone-verified {
+  background: rgba(34, 211, 238, 0.12);
+  border: 1.5px solid var(--accent-cyan);
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.15);
+}
+
+.milestone-pending {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-subtle);
+}
+
+.milestone-active {
+  background: rgba(167, 139, 250, 0.1);
+  border: 1.5px solid var(--accent-violet);
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.12);
+}
+
+/* --- Flow arrows --- */
+.flow-connector {
+  position: relative;
+}
+.flow-connector::after {
+  content: ">";
+  position: absolute;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.flow-connector:last-child::after {
+  display: none;
+}
+
+/* --- Status indicators --- */
+.status-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* --- Animations --- */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes progress-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes type-in {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+
+.animate-progress-bar {
+  animation: progress-fill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.6s;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* --- Dividers --- */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
+}
+
+/* --- Scanline effect on hero --- */
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.008) 2px,
+    rgba(255, 255, 255, 0.008) 4px
+  );
+  pointer-events: none;
+}
+
+/* --- Selection color --- */
+::selection {
+  background: rgba(34, 211, 238, 0.2);
+  color: var(--text-bright);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-dim);
+  border-radius: 2px;
+}
