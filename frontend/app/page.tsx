@@ -134,9 +134,9 @@ function Hero() {
 
         {/* Title */}
         <h1 className="animate-fade-up delay-200 text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.95] font-display tracking-tight mb-6">
-          <span className="text-gradient-full">Every swap</span>
+          <span style={{ color: 'var(--text-bright)' }}>Swap for</span>
           <br />
-          <span style={{ color: 'var(--text-bright)' }}>funds what matters</span>
+          <span className="text-gradient-full">impact</span>
         </h1>
 
         {/* Subtitle */}
@@ -150,7 +150,7 @@ function Hero() {
         {/* Stats row with tagline */}
         <div className="animate-fade-up delay-400 mb-4">
           <span className="text-[12px] tracking-[0.1em] uppercase" style={{ color: 'var(--accent-cyan)' }}>
-            Choose once. Fund forever.
+            Impact on autopilot
           </span>
         </div>
         <div className="animate-fade-up delay-500 flex flex-wrap justify-center gap-8 md:gap-16 mb-16">
