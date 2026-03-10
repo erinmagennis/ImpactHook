@@ -9,6 +9,8 @@ const navItems = [
   { href: "/milestones", label: "Milestones" },
   { href: "/withdraw", label: "Withdraw" },
   { href: "/portfolio", label: "Portfolio" },
+  { href: "/impact", label: "Impact" },
+  { href: "/technical", label: "Technical" },
 ];
 
 export function Navigation() {

@@ -46,7 +46,7 @@ function ScrollNav() {
         style={{
           padding: "8px 16px",
           fontSize: 13,
-          borderRadius: 8,
+          borderRadius: 2,
           textDecoration: "none",
           display: "inline-flex",
           alignItems: "center",
@@ -224,7 +224,7 @@ function Hero() {
         <div className="animate-fade-up delay-600 flex flex-col items-center gap-5">
           <a href="/dashboard"
              className="cta-primary inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold tracking-wide transition-all hover:scale-[1.02]">
-            Launch App
+            Create Impact
           </a>
           <a href="#impact"
              className="inline-flex items-center gap-2 text-[13px] tracking-wide transition-all hover:opacity-80"
@@ -263,9 +263,7 @@ function ImpactShowcase() {
             What your swaps can fund
           </h2>
           <p className="text-[15px] leading-relaxed max-w-2xl mx-auto" style={{ color: 'var(--text-mid)' }}>
-            Any project can create a pool. Traders pick the cause they care about.
-            Same tokens, same price, same liquidity - the only difference is where a small
-            percentage of your swap goes. And it only goes when milestones are verified.
+            Same tokens, same liquidity. The only difference is where a small percentage of your swap goes.
           </p>
         </div>
 
@@ -337,7 +335,8 @@ function HowItWorks() {
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader label="How It Works" title="Three steps. Zero friction." />
+        <SectionHeader label="How It Works" title="Three steps. Zero friction."
+          subtitle="$2.5 trillion in daily crypto volume generates zero social impact. ImpactHook changes that." />
 
         {/* Trader flow */}
         <div className="mt-16 mb-8">
@@ -351,19 +350,8 @@ function HowItWorks() {
             <StepCard num="02" title="Swap normally" color="var(--accent-cyan)"
               desc="Same tokens, same Uniswap interface. A small fee (currently 2%) goes to the project. LPs earn full yield." />
             <StepCard num="03" title="It runs in the background" color="var(--accent-cyan)"
-              desc="Funding happens automatically with every swap. No follow-up needed. As long as the project keeps hitting milestones, your trades keep fueling it. If progress stops, funding stops. Check your impact portfolio any time." />
+              desc="Funding flows automatically. If the project keeps hitting milestones, your trades keep fueling it. If progress stops, funding stops." />
           </div>
-        </div>
-
-        {/* Key message */}
-        <div className="p-6 text-center animate-fade-up delay-500"
-             style={{ background: 'rgba(34, 211, 238, 0.03)', border: '1px solid rgba(34, 211, 238, 0.08)', borderRadius: '2px' }}>
-          <p className="text-[15px] leading-relaxed max-w-2xl mx-auto" style={{ color: 'var(--text-mid)' }}>
-            You want to support projects that matter. But you don&apos;t have time to research every
-            organization, track where your money goes, or follow up months later to see if it worked.
-            ImpactHook handles all of that. The protocol only releases funds when milestones are
-            verified on-chain. You see the outcomes without doing the work.
-          </p>
         </div>
 
         {/* Project flow */}
@@ -372,15 +360,13 @@ function HowItWorks() {
             <span style={{ color: 'var(--accent-violet)' }}><GlobeIcon /></span>
             <span className="text-[12px] tracking-[0.15em] uppercase" style={{ color: 'var(--accent-violet)' }}>For Impact Projects</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <StepCard num="01" title="Register" color="var(--accent-violet)"
-              desc="Define your milestones and fee tiers. Up to 5% per swap, capped for safety." small />
-            <StepCard num="02" title="Set verifier" color="var(--accent-violet)"
-              desc="A Safe multisig, a DAO, an oracle, or a cross-chain RSC. Your verifier can be any address. Your recipient can be a multisig too." small />
-            <StepCard num="03" title="Hit milestones" color="var(--accent-violet)"
-              desc="Do the work. Verifier confirms on-chain. Fee tier adjusts and funding grows." small />
-            <StepCard num="04" title="Withdraw" color="var(--accent-violet)"
-              desc="Accumulated fees go directly to you. No middlemen. No delays. Fully transparent." small />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StepCard num="01" title="Register your project" color="var(--accent-violet)"
+              desc="Define milestones, fee tiers (up to 5%), and set your verifier - a multisig, DAO, oracle, or cross-chain RSC." />
+            <StepCard num="02" title="Hit milestones" color="var(--accent-violet)"
+              desc="Do the work. Verifier confirms on-chain. Fee tier adjusts and funding grows." />
+            <StepCard num="03" title="Withdraw" color="var(--accent-violet)"
+              desc="Accumulated fees go directly to you. No middlemen. No delays." />
           </div>
         </div>
       </div>
@@ -409,7 +395,7 @@ function ImpactPortfolio() {
         <SectionHeader
           label="For Funders"
           title="Your impact portfolio"
-          subtitle="Every swap you make through an impact pool is tracked. See what you've funded, what milestones have been hit, and the real-world outcomes your trades enabled."
+          subtitle="Every swap through an impact pool is tracked. See what you funded and what it achieved."
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mt-16">
@@ -435,11 +421,8 @@ function ImpactPortfolio() {
             </div>
 
             <div className="card p-5">
-              <div className="text-[11px] tracking-[0.12em] uppercase mb-3" style={{ color: 'var(--text-dim)' }}>How it works</div>
               <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
                 Your portfolio builds automatically from your swaps. No opt-in required.
-                Every trade through an impact pool is recorded. You can see exactly which projects
-                you funded, how much, and what those projects achieved.
               </p>
             </div>
           </div>
@@ -483,22 +466,22 @@ function Transparency() {
   const items = [
     {
       label: "Every fee on-chain",
-      desc: "Every swap fee is recorded as a FeesAccumulated event. Anyone can verify the exact amount collected for any project at any time.",
+      desc: "Swap fees are recorded as events. Anyone can verify the exact amount collected for any project.",
       icon: "{}",
     },
     {
       label: "Milestones are permanent",
-      desc: "Milestone verifications are immutable on-chain events. Once verified, the record can never be altered or deleted. EAS attestations add an additional layer of proof.",
+      desc: "Verifications are immutable on-chain. EAS attestations add an additional layer of proof.",
       icon: "[]",
     },
     {
       label: "Withdrawals are public",
-      desc: "Every withdrawal is a FeesWithdrawn event with the recipient address and exact amount. No money moves without a visible on-chain record.",
+      desc: "Every withdrawal includes the recipient address and exact amount. No money moves without a record.",
       icon: "->",
     },
     {
       label: "Open source, auditable",
-      desc: "All contracts are verified on-chain and the source code is public on GitHub. Anyone can read the logic, run the tests, or fork the project.",
+      desc: "Contracts verified on-chain, source code public on GitHub. Read the logic, run the tests, or fork it.",
       icon: "<>",
     },
   ];
@@ -508,8 +491,8 @@ function Transparency() {
       <div className="max-w-5xl mx-auto">
         <SectionHeader
           label="Accountability"
-          title="Full transparency, by default"
-          subtitle="Every dollar is traceable. Every milestone is permanent. Every withdrawal is public. Not because we chose to be transparent - because the protocol makes it impossible not to be."
+          title="Transparent by design"
+          subtitle="Every fee, milestone, and withdrawal is recorded on-chain and publicly verifiable."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-16">
@@ -531,10 +514,8 @@ function Transparency() {
             <span className="text-[13px]" style={{ color: 'var(--text-bright)' }}>Direct donations</span>
           </div>
           <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-mid)' }}>
-            Beyond swap fees, anyone can donate directly to a project&apos;s fund. Institutions,
-            DAOs, and individuals contribute alongside continuous DeFi funding. Same milestone-gated
-            rules apply - no money moves until milestones are verified. Two funding paths, one
-            source of truth.
+            Anyone can donate directly to a project. Same milestone-gated rules apply.
+            Two funding paths, one source of truth.
           </p>
         </div>
       </div>
@@ -542,183 +523,206 @@ function Transparency() {
   );
 }
 
-/* == WHY IT MATTERS ======================================= */
+/* == DISCOVER PROJECTS ==================================== */
 
-function WhyItMatters() {
+const UNICEF_FOCUS_AREAS = [
+  "All",
+  "Health",
+  "Education",
+  "WASH",
+  "Climate",
+  "Nutrition",
+  "Child Protection",
+  "Social Inclusion",
+  "DeSci",
+  "Infrastructure",
+];
+
+const DISCOVERABLE_PROJECTS = [
+  {
+    name: "Clean Water - Kenya",
+    tags: ["Health", "WASH"],
+    status: "active" as const,
+    funded: "0.82 ETH",
+    milestones: "2/4",
+    fee: "200 bps",
+    accent: "cyan",
+  },
+  {
+    name: "Climate Data API",
+    tags: ["Climate", "DeSci"],
+    status: "active" as const,
+    funded: "0.31 ETH",
+    milestones: "1/4",
+    fee: "100 bps",
+    accent: "emerald",
+  },
+  {
+    name: "School Meals - Oaxaca",
+    tags: ["Education", "Nutrition"],
+    status: "active" as const,
+    funded: "0.14 ETH",
+    milestones: "1/4",
+    fee: "150 bps",
+    accent: "violet",
+  },
+  {
+    name: "Solar Microgrids - Haiti",
+    tags: ["Infrastructure", "Climate"],
+    status: "upcoming" as const,
+    funded: "0 ETH",
+    milestones: "0/3",
+    fee: "100 bps",
+    accent: "amber",
+  },
+  {
+    name: "Vaccine Cold Chain - DRC",
+    tags: ["Health", "Child Protection"],
+    status: "active" as const,
+    funded: "0.09 ETH",
+    milestones: "1/3",
+    fee: "200 bps",
+    accent: "cyan",
+  },
+  {
+    name: "Open Textbooks - Global",
+    tags: ["Education", "Social Inclusion"],
+    status: "upcoming" as const,
+    funded: "0 ETH",
+    milestones: "0/5",
+    fee: "50 bps",
+    accent: "violet",
+  },
+];
+
+function DiscoverProjects() {
+  const [activeTag, setActiveTag] = useState("All");
+
+  const filtered = activeTag === "All"
+    ? DISCOVERABLE_PROJECTS
+    : DISCOVERABLE_PROJECTS.filter(p => p.tags.includes(activeTag));
+
+  const accentMap: Record<string, string> = {
+    cyan: 'var(--accent-cyan)',
+    emerald: 'var(--accent-emerald)',
+    violet: 'var(--accent-violet)',
+    amber: 'var(--accent-amber)',
+  };
+
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader label="The Problem" title="Why this exists" subtitle="Asset-class specific liquidity for real-world impact" />
+        <SectionHeader
+          label="Discover"
+          title="Find projects to fund"
+          subtitle="Filter by UNICEF focus area, cause, or category. Every project is permissionless and milestone-gated."
+        />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-          <div className="animate-fade-up delay-200">
-            <h3 className="font-display text-[15px] mb-4" style={{ color: 'var(--text-bright)' }}>
-              Liquidity has no purpose beyond yield
-            </h3>
-            <div className="flex flex-col gap-4">
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                $2.5 trillion in daily crypto trading volume generates zero social impact.
-                Every pool looks the same: token pair, fee tier, TVL. There is no way to differentiate
-                liquidity by what it does in the real world.
-              </p>
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Meanwhile, billions in impact funding passes through layers of intermediaries.
-                Donors can&apos;t verify outcomes. Recipients wait months. Nobody knows if the money
-                did what it was supposed to. These two problems have the same solution.
-              </p>
-            </div>
-          </div>
-          <div className="animate-fade-up delay-300">
-            <h3 className="font-display text-[15px] mb-4" style={{ color: 'var(--text-bright)' }}>
-              A new class of liquidity pool
-            </h3>
-            <div className="flex flex-col gap-3">
-              {[
-                { label: "Impact-differentiated", text: "Pools defined by the real-world outcome they fund, not just token pair and fee tier" },
-                { label: "Continuous", text: "Funding flows with every swap, not once-a-year grants" },
-                { label: "Milestone-gated", text: "No results, no funding. Verification happens on-chain before fees release" },
-                { label: "Cross-chain verified", text: "Milestones confirmed from any chain via Reactive Network" },
-                { label: "Permissionless", text: "Anyone can create an impact pool for any cause. No gatekeepers, no grant committees" },
-                { label: "Zero-friction for traders", text: "Same tokens, same swap, different impact. Just pick a pool" },
-              ].map((item) => (
-                <div key={item.label} className="flex gap-3 items-start">
-                  <span className="text-[11px] font-data mt-0.5 flex-shrink-0" style={{ color: 'var(--accent-cyan)' }}>+</span>
+        {/* Tag filter */}
+        <div className="mt-10 flex flex-wrap gap-2 animate-fade-up delay-200">
+          {UNICEF_FOCUS_AREAS.map(tag => {
+            const isActive = activeTag === tag;
+            return (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(tag)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: 2,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  letterSpacing: '0.04em',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  fontFamily: 'inherit',
+                  color: isActive ? '#fff' : 'var(--text-dim)',
+                  background: isActive
+                    ? 'rgba(34, 211, 238, 0.12)'
+                    : 'transparent',
+                  border: isActive
+                    ? '1px solid rgba(34, 211, 238, 0.3)'
+                    : '1px solid var(--border-subtle)',
+                }}
+              >
+                {tag}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Project grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+          {filtered.map((project, i) => {
+            const color = accentMap[project.accent];
+            return (
+              <div
+                key={project.name}
+                className="card p-5 animate-fade-up flex flex-col"
+                style={{ animationDelay: `${100 + i * 80}ms` }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-display text-[14px]" style={{ color: 'var(--text-bright)' }}>
+                    {project.name}
+                  </span>
+                  <span
+                    className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5"
+                    style={{
+                      color: project.status === 'active' ? 'var(--accent-emerald)' : 'var(--text-dim)',
+                      border: `1px solid ${project.status === 'active' ? 'rgba(52, 211, 153, 0.2)' : 'var(--border-subtle)'}`,
+                      background: project.status === 'active' ? 'rgba(52, 211, 153, 0.05)' : 'transparent',
+                    }}
+                  >
+                    {project.status}
+                  </span>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {project.tags.map(tag => (
+                    <span
+                      key={tag}
+                      className="text-[10px] tracking-wider px-2 py-0.5"
+                      style={{
+                        color: color,
+                        border: `1px solid ${color}33`,
+                        background: `${color}0d`,
+                        borderRadius: 2,
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center gap-5 mt-auto pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                   <div>
-                    <span className="text-[13px]" style={{ color: 'var(--text-bright)' }}>{item.label}. </span>
-                    <span className="text-[13px]" style={{ color: 'var(--text-dim)' }}>{item.text}</span>
+                    <div className="font-data text-[13px]" style={{ color: 'var(--text-bright)' }}>{project.funded}</div>
+                    <div className="text-[9px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>Funded</div>
+                  </div>
+                  <div>
+                    <div className="font-data text-[13px]" style={{ color: 'var(--text-mid)' }}>{project.milestones}</div>
+                    <div className="text-[9px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>Milestones</div>
+                  </div>
+                  <div>
+                    <div className="font-data text-[13px]" style={{ color }}>{project.fee}</div>
+                    <div className="text-[9px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>Impact fee</div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
-    </section>
-  );
-}
 
-/* == FOR PROJECTS (condensed) ============================= */
-
-function ForProjects() {
-  return (
-    <section className="relative py-24 px-6">
-      <div className="max-w-5xl mx-auto">
-        <SectionHeader label="For Projects" title="Prove your progress, get funded" />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-          <div className="animate-fade-up delay-200">
-            <p className="text-[14px] leading-relaxed mb-6" style={{ color: 'var(--text-mid)' }}>
-              If you&apos;re building something that matters, ImpactHook gives you a new way to get funded.
-              Create a pool, define your milestones, and let the trading community fund your work.
-              No pitch decks. No grant committees. Just verified results.
+        {filtered.length === 0 && (
+          <div className="card p-10 mt-8 text-center animate-fade-up">
+            <p className="text-[13px]" style={{ color: 'var(--text-dim)' }}>
+              No projects in this category yet. Anyone can register an impact pool.
             </p>
-
-            {/* Mock project dashboard */}
-            <div className="card p-5">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Project View</span>
-                <span className="text-[10px] px-2 py-0.5" style={{ color: 'var(--accent-emerald)', border: '1px solid rgba(52, 211, 153, 0.2)', background: 'rgba(52, 211, 153, 0.05)' }}>
-                  Funding Active
-                </span>
-              </div>
-              <div className="font-display text-sm mb-4" style={{ color: 'var(--text-bright)' }}>Clean Water in Rural Kenya</div>
-
-              {/* Milestone proof cards */}
-              <div className="flex flex-col gap-3">
-                <MilestoneProof index={0} name="Equipment sourced" status="verified" proof="Tx: 0xa4f2...8b1c" date="Feb 14, 2026" feeBps={0} />
-                <MilestoneProof index={1} name="Installation complete" status="verified" proof="Tx: 0x7e91...3d4a" date="Mar 2, 2026" feeBps={200} />
-                <MilestoneProof index={2} name="First 1,000 liters filtered" status="pending" proof="Awaiting verification" date="" feeBps={300} />
-                <MilestoneProof index={3} name="Community-maintained" status="locked" proof="" date="" feeBps={100} />
-              </div>
-            </div>
           </div>
-
-          {/* Funding summary + dual channels */}
-          <div className="animate-fade-up delay-300 flex flex-col gap-4">
-            <div className="card p-5">
-              <div className="text-[11px] tracking-[0.12em] uppercase mb-3" style={{ color: 'var(--text-dim)' }}>Funding summary</div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <div className="font-data text-[15px]" style={{ color: 'var(--text-bright)' }}>1.247</div>
-                  <div className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-dim)' }}>ETH earned</div>
-                </div>
-                <div>
-                  <div className="font-data text-[15px]" style={{ color: 'var(--text-bright)' }}>0.831</div>
-                  <div className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-dim)' }}>ETH withdrawn</div>
-                </div>
-                <div>
-                  <div className="font-data text-[15px]" style={{ color: 'var(--accent-cyan)' }}>0.416</div>
-                  <div className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-dim)' }}>ETH available</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Two funding channels */}
-            <div className="card p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-lg" style={{ color: 'var(--accent-cyan)' }}>~</span>
-                <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Channel 1: Swap Fees</span>
-              </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                DeFi-native continuous funding. The hook charges a fee on swap output.
-                LPs earn full yield. Fees come from swappers who choose impact pools.
-              </p>
-            </div>
-            <div className="card p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-lg" style={{ color: 'var(--accent-violet)' }}>#</span>
-                <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Channel 2: Grant Escrow</span>
-              </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Institutional milestone-gated funding via Alkahest (Zellic-audited).
-                Both channels share one source of truth for milestone state.
-              </p>
-            </div>
-
-            <div className="p-4" style={{ background: 'rgba(167, 139, 250, 0.04)', border: '1px solid rgba(167, 139, 250, 0.1)', borderRadius: '2px' }}>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-mid)' }}>
-                Two funding paths, same on-chain accountability. Whether funds come from
-                DeFi trading or institutional grants, milestones must be verified before a single dollar moves.
-              </p>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </section>
-  );
-}
-
-function MilestoneProof({ index, name, status, proof, date, feeBps }: {
-  index: number; name: string; status: 'verified' | 'pending' | 'locked';
-  proof: string; date: string; feeBps: number;
-}) {
-  const colors = {
-    verified: { bg: 'rgba(34, 211, 238, 0.06)', border: 'rgba(34, 211, 238, 0.15)', text: 'var(--accent-cyan)' },
-    pending: { bg: 'rgba(167, 139, 250, 0.06)', border: 'rgba(167, 139, 250, 0.15)', text: 'var(--accent-violet)' },
-    locked: { bg: 'var(--bg-elevated)', border: 'var(--border-subtle)', text: 'var(--text-dim)' },
-  };
-  const c = colors[status];
-
-  return (
-    <div className="p-3 rounded-sm" style={{ background: c.bg, border: `1px solid ${c.border}` }}>
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          {status === 'verified' && <span style={{ color: c.text }}><CheckIcon /></span>}
-          {status === 'pending' && <span className="w-3 h-3 flex items-center justify-center"><span className="w-2 h-2 rounded-full" style={{ background: c.text, animation: 'pulse-glow 2s ease-in-out infinite' }} /></span>}
-          {status === 'locked' && <span className="w-3 h-3 flex items-center justify-center"><span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--text-dim)' }} /></span>}
-          <span className="text-[12px]" style={{ color: status === 'locked' ? 'var(--text-dim)' : 'var(--text-bright)' }}>{name}</span>
-        </div>
-        <span className="font-data text-[10px]" style={{ color: c.text }}>
-          {feeBps} bps
-        </span>
-      </div>
-      {(proof || date) && (
-        <div className="flex items-center gap-3 ml-5">
-          {proof && <span className="text-[10px]" style={{ color: 'var(--text-dim)' }}>{proof}</span>}
-          {date && <span className="text-[10px]" style={{ color: 'var(--text-dim)' }}>{date}</span>}
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -731,7 +735,7 @@ function DashboardSection() {
   return (
     <section id="dashboard" className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader label="Live Data" title="Pool dashboard" />
+        <SectionHeader label="Live Data" title="Pool dashboard" subtitle="Real-time hook state and milestone progress from Unichain Sepolia." />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-16">
           {/* Pool info */}
@@ -847,13 +851,13 @@ function DataCell({ label, value, accent }: { label: string; value: string; acce
   );
 }
 
-/* == ARCHITECTURE ========================================= */
+/* == ARCHITECTURE + TESTING ================================ */
 
 function Architecture() {
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader label="Under the Hood" title="Architecture" />
+        <SectionHeader label="Under the Hood" title="Architecture" subtitle="Four contracts across three chains, one shared milestone state." />
 
         {/* Contract map */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-16">
@@ -906,6 +910,17 @@ accumulatedFees[poolId][feeCurrency] += feeAmount;
 return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
           </pre>
         </div>
+
+        {/* Test coverage - merged */}
+        <div className="card p-6 mt-4">
+          <div className="flex items-center gap-4">
+            <div className="font-data text-3xl" style={{ color: 'var(--accent-emerald)' }}>102</div>
+            <div>
+              <div className="text-[13px]" style={{ color: 'var(--text-bright)' }}>tests passing</div>
+              <div className="text-[11px]" style={{ color: 'var(--text-dim)' }}>0 failed, 0 skipped</div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -937,50 +952,45 @@ function ContractCard({ name, role, description, chain, accent }: {
   );
 }
 
-/* == TESTING ============================================== */
+/* == LEARN MORE =========================================== */
 
-function Testing() {
+function LearnMore() {
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader label="Quality" title="Test coverage" />
+        <SectionHeader label="Go Deeper" title="For institutions and builders" subtitle="Detailed pages for UNICEF reviewers and Hookathon judges." />
 
-        <div className="card p-6 mt-16">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="font-data text-3xl" style={{ color: 'var(--accent-emerald)' }}>63</div>
-            <div>
-              <div className="text-[13px]" style={{ color: 'var(--text-bright)' }}>tests passing</div>
-              <div className="text-[11px]" style={{ color: 'var(--text-dim)' }}>0 failed, 0 skipped</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-12">
+          <a href="/impact" className="card card-glow p-8 group transition-all" style={{ textDecoration: 'none' }}>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-data text-[18px]" style={{ color: 'var(--accent-emerald)' }}>01</span>
+              <span className="font-display text-[16px]" style={{ color: 'var(--text-bright)' }}>Impact & Accountability</span>
             </div>
-          </div>
+            <p className="text-[13px] leading-relaxed mb-4" style={{ color: 'var(--text-mid)' }}>
+              Why this exists, how accountability works, dual funding channels,
+              UNICEF focus area alignment, and the full transparency model.
+            </p>
+            <span className="text-[12px] tracking-wide" style={{ color: 'var(--accent-emerald)' }}>
+              Read more &#8594;
+            </span>
+          </a>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <TestGroup name="Core Hook" count={16} items={["Registration", "Fee routing (both dirs)", "Milestone progression", "Withdrawal"]} />
-            <TestGroup name="Access Control" count={10} items={["Verifier auth", "Recipient auth", "Callback proxy", "Owner checks"]} />
-            <TestGroup name="Integrations" count={19} items={["MilestoneArbiter (3)", "Reactive callbacks (3)", "Oracle events (4)", "EAS verification (8)", "E2E cross-chain"]} />
-            <TestGroup name="Donations & Edge" count={18} items={["Direct donations (6)", "Fuzz (257 runs)", "Multiple pools", "Zero fees", "Out of bounds"]} />
-          </div>
+          <a href="/technical" className="card card-glow p-8 group transition-all" style={{ textDecoration: 'none' }}>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-data text-[18px]" style={{ color: 'var(--accent-cyan)' }}>02</span>
+              <span className="font-display text-[16px]" style={{ color: 'var(--text-bright)' }}>Technical Deep Dive</span>
+            </div>
+            <p className="text-[13px] leading-relaxed mb-4" style={{ color: 'var(--text-mid)' }}>
+              Architecture, cross-chain verification flow, code snippets,
+              102 tests, deployed contracts, and EAS integration.
+            </p>
+            <span className="text-[12px] tracking-wide" style={{ color: 'var(--accent-cyan)' }}>
+              Read more &#8594;
+            </span>
+          </a>
         </div>
       </div>
     </section>
-  );
-}
-
-function TestGroup({ name, count, items }: { name: string; count: number; items: string[] }) {
-  return (
-    <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: '2px' }}>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="font-data text-[15px]" style={{ color: 'var(--accent-emerald)' }}>{count}</span>
-        <span className="text-[11px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>{name}</span>
-      </div>
-      <ul className="flex flex-col gap-1">
-        {items.map(item => (
-          <li key={item} className="text-[11px] flex items-center gap-2" style={{ color: 'var(--text-dim)' }}>
-            <span style={{ color: 'var(--accent-emerald)' }}>+</span> {item}
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -997,7 +1007,7 @@ function Partners() {
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader label="Ecosystem" title="Built with" />
+        <SectionHeader label="Ecosystem" title="Built with" subtitle="Partner protocols and infrastructure powering ImpactHook." />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
           {partners.map((p, i) => (
@@ -1061,21 +1071,19 @@ export default function Home() {
       <div className="divider" />
       <ImpactShowcase />
       <div className="divider" />
+      <DiscoverProjects />
+      <div className="divider" />
       <HowItWorks />
       <div className="divider" />
       <ImpactPortfolio />
       <div className="divider" />
       <Transparency />
       <div className="divider" />
-      <WhyItMatters />
-      <div className="divider" />
-      <ForProjects />
-      <div className="divider" />
       <DashboardSection />
       <div className="divider" />
       <Architecture />
       <div className="divider" />
-      <Testing />
+      <LearnMore />
       <div className="divider" />
       <Partners />
       <Footer />
