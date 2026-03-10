@@ -129,7 +129,7 @@ forge build
 forge test
 ```
 
-39 tests covering: project registration, swap fee accumulation (both directions), milestone verification, fee progression, withdrawal, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), end-to-end cross-chain flow, and fuzz testing.
+63 tests covering: project registration, swap fee accumulation (both directions), milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
 
 ### Deploy (Unichain Sepolia)
 
@@ -141,6 +141,17 @@ forge script script/DeployHook.s.sol:DeployHookScript \
 ```
 
 The deployment script mines a CREATE2 salt to produce a hook address with the correct permission flags (`beforeInitialize`, `afterSwap`, `afterSwapReturnDelta`).
+
+## Deployed Contracts
+
+| Contract | Chain | Address |
+|----------|-------|---------|
+| ImpactHook | Unichain Sepolia | `0x6b3C6687e712c8f4AbA76362f73Ea2ef088b2044` |
+| MilestoneArbiter | Unichain Sepolia | `0xfF42b8650B7C1957a60Dc1dc6133d30fBE20Bf63` |
+| MilestoneOracle | Ethereum Sepolia | `0x9845d22Fbb33f30E241824aCB1813c041291A4Ca` |
+| MilestoneReactor | Reactive Lasna | `0x4CB877dee81E9e68533FFaf8495Ce9bCdc9518a4` |
+
+EAS Schema UID: `0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bfb52`
 
 ## Key Addresses (Unichain Sepolia)
 

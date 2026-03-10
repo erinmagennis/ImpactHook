@@ -104,60 +104,60 @@ function MilestoneCard({
 
   return (
     <div
+      className={`card ${verified ? '' : ''}`}
       style={{
         padding: 20,
-        borderRadius: 12,
         background: verified
-          ? "rgba(34,197,94,0.04)"
-          : "rgba(255,255,255,0.02)",
-        border: `1px solid ${verified ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.06)"}`,
+          ? 'rgba(52,211,153,0.04)'
+          : 'var(--bg-card)',
+        borderColor: verified ? 'rgba(52,211,153,0.15)' : undefined,
       }}
     >
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
           marginBottom: 12,
         }}
       >
         <div>
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
+              display: 'flex',
+              alignItems: 'center',
               gap: 8,
               marginBottom: 4,
             }}
           >
             <div
+              className={verified ? 'milestone-verified' : 'milestone-pending'}
               style={{
                 width: 24,
                 height: 24,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                borderRadius: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 fontSize: 12,
                 fontWeight: 700,
-                background: verified
-                  ? "linear-gradient(135deg, #22c55e, #16a34a)"
-                  : "rgba(255,255,255,0.08)",
-                color: verified ? "#fff" : "rgba(255,255,255,0.4)",
+                color: verified ? 'var(--accent-cyan)' : 'var(--text-dim)',
               }}
             >
-              {verified ? "\u2713" : index}
+              {verified ? '\u2713' : index}
             </div>
             <span
-              style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}
+              className="font-display"
+              style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-bright)' }}
             >
               {description || `Milestone ${index}`}
             </span>
           </div>
           <span
+            className="font-data"
             style={{
               fontSize: 13,
-              color: "rgba(255,255,255,0.4)",
+              color: 'var(--text-dim)',
             }}
           >
             Fee tier: {feeBps} bps
@@ -165,17 +165,20 @@ function MilestoneCard({
         </div>
         <div
           style={{
-            padding: "3px 10px",
-            borderRadius: 12,
-            fontSize: 12,
+            padding: '3px 10px',
+            borderRadius: 2,
+            fontSize: 11,
             fontWeight: 600,
-            color: verified ? "#22c55e" : "rgba(255,255,255,0.3)",
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+            color: verified ? 'var(--accent-emerald)' : 'var(--text-dim)',
             background: verified
-              ? "rgba(34,197,94,0.1)"
-              : "rgba(255,255,255,0.04)",
+              ? 'rgba(52,211,153,0.08)'
+              : 'var(--bg-elevated)',
+            border: `1px solid ${verified ? 'rgba(52,211,153,0.15)' : 'var(--border-subtle)'}`,
           }}
         >
-          {verified ? "Verified" : "Pending"}
+          {verified ? 'Verified' : 'Pending'}
         </div>
       </div>
 
@@ -185,12 +188,12 @@ function MilestoneCard({
           style={{
             marginTop: 16,
             paddingTop: 16,
-            borderTop: "1px solid rgba(255,255,255,0.06)",
+            borderTop: '1px solid var(--border-subtle)',
           }}
         >
           <div
             style={{
-              display: "flex",
+              display: 'flex',
               gap: 8,
               marginBottom: 12,
             }}
@@ -198,41 +201,90 @@ function MilestoneCard({
             <button
               onClick={handleDirectVerify}
               disabled={directLoading}
-              style={buttonStyle}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 2,
+                border: '1px solid rgba(34,211,238,0.2)',
+                background: 'rgba(34,211,238,0.08)',
+                color: 'var(--accent-cyan)',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                opacity: directLoading ? 0.4 : 1,
+              }}
             >
-              {directLoading ? "Verifying..." : "Direct Verify"}
+              {directLoading ? 'Verifying...' : 'Direct Verify'}
             </button>
           </div>
 
           {/* EAS attestation */}
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
             <input
               type="text"
               placeholder="Evidence (IPFS CID or description)"
               value={evidence}
               onChange={(e) => setEvidence(e.target.value)}
-              style={inputStyle}
+              style={{
+                flex: 1,
+                padding: '10px 12px',
+                borderRadius: 2,
+                border: '1px solid var(--border-subtle)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text-bright)',
+                fontSize: 13,
+                outline: 'none',
+              }}
             />
             <button
               onClick={handleEASAttest}
               disabled={attestLoading || !evidence}
               style={{
-                ...buttonStyle,
-                background:
-                  evidence
-                    ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
-                    : "rgba(255,255,255,0.05)",
+                padding: '8px 16px',
+                borderRadius: 2,
+                border: `1px solid ${evidence ? 'rgba(167,139,250,0.2)' : 'rgba(34,211,238,0.2)'}`,
+                background: evidence
+                  ? 'rgba(167,139,250,0.08)'
+                  : 'rgba(34,211,238,0.08)',
+                color: evidence ? 'var(--accent-violet)' : 'var(--accent-cyan)',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                opacity: (attestLoading || !evidence) ? 0.4 : 1,
               }}
             >
-              {attestLoading ? "Attesting..." : "EAS Attest"}
+              {attestLoading ? 'Attesting...' : 'EAS Attest'}
             </button>
           </div>
 
           {directSuccess && (
-            <div style={successStyle}>Milestone verified via direct call</div>
+            <div
+              style={{
+                marginTop: 8,
+                padding: '6px 12px',
+                borderRadius: 2,
+                background: 'rgba(52,211,153,0.06)',
+                border: '1px solid rgba(52,211,153,0.15)',
+                color: 'var(--accent-emerald)',
+                fontSize: 12,
+              }}
+            >
+              Milestone verified via direct call
+            </div>
           )}
           {attestSuccess && (
-            <div style={successStyle}>
+            <div
+              style={{
+                marginTop: 8,
+                padding: '6px 12px',
+                borderRadius: 2,
+                background: 'rgba(52,211,153,0.06)',
+                border: '1px solid rgba(52,211,153,0.15)',
+                color: 'var(--accent-emerald)',
+                fontSize: 12,
+              }}
+            >
               EAS attestation created. Call verifyMilestoneEAS() to complete.
             </div>
           )}
@@ -263,34 +315,37 @@ export default function MilestonesPage() {
     isConnected && address?.toLowerCase() === verifier?.toLowerCase();
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08080c" }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-void)' }}>
       <Navigation />
-      <main style={{ maxWidth: 700, margin: "0 auto", padding: "40px 24px" }}>
-        <div style={{ marginBottom: 32 }}>
+      <main style={{ maxWidth: 700, margin: '0 auto', padding: '40px 24px' }}>
+        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
           <h1
+            className="font-display"
             style={{
               fontSize: 28,
               fontWeight: 700,
-              color: "#fff",
+              color: 'var(--text-bright)',
               marginBottom: 8,
-              letterSpacing: "-0.02em",
+              letterSpacing: '-0.02em',
             }}
           >
             Milestones
           </h1>
-          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.4)" }}>
+          <p style={{ fontSize: 14, color: 'var(--text-mid)' }}>
             View and verify project milestones via direct call or EAS attestation
           </p>
         </div>
 
         {/* Pool ID input */}
-        <div style={{ marginBottom: 24 }}>
+        <div className="animate-fade-up delay-100" style={{ marginBottom: 24 }}>
           <label
             style={{
-              fontSize: 13,
-              color: "rgba(255,255,255,0.4)",
-              display: "block",
+              fontSize: 11,
+              color: 'var(--text-dim)',
+              display: 'block',
               marginBottom: 6,
+              textTransform: 'uppercase',
+              letterSpacing: '0.12em',
             }}
           >
             Pool ID
@@ -300,36 +355,44 @@ export default function MilestonesPage() {
             placeholder="0x..."
             value={poolIdInput}
             onChange={(e) => setPoolIdInput(e.target.value)}
-            style={{ ...inputStyle, width: "100%" }}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              borderRadius: 2,
+              border: '1px solid var(--border-subtle)',
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-bright)',
+              fontSize: 13,
+              outline: 'none',
+            }}
           />
         </div>
 
         {!registered ? (
           <div
+            className="card animate-fade-up delay-200"
             style={{
               padding: 40,
-              borderRadius: 12,
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.06)",
-              textAlign: "center",
-              color: "rgba(255,255,255,0.4)",
+              textAlign: 'center',
+              color: 'var(--text-dim)',
+              fontSize: 13,
             }}
           >
             {poolIdInput
-              ? "No project registered for this pool"
-              : "Enter a Pool ID to view milestones"}
+              ? 'No project registered for this pool'
+              : 'Enter a Pool ID to view milestones'}
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="animate-fade-up delay-200" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {isVerifier && (
               <div
                 style={{
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  background: "rgba(99,102,241,0.1)",
-                  border: "1px solid rgba(99,102,241,0.2)",
+                  padding: '8px 14px',
+                  borderRadius: 2,
+                  background: 'rgba(167,139,250,0.06)',
+                  border: '1px solid rgba(167,139,250,0.15)',
                   fontSize: 13,
-                  color: "#a5b4fc",
+                  color: 'var(--accent-violet)',
                   marginBottom: 4,
                 }}
               >
@@ -350,35 +413,3 @@ export default function MilestonesPage() {
     </div>
   );
 }
-
-const buttonStyle: React.CSSProperties = {
-  padding: "8px 16px",
-  borderRadius: 8,
-  border: "1px solid rgba(255,255,255,0.1)",
-  background: "rgba(255,255,255,0.06)",
-  color: "#fff",
-  fontSize: 13,
-  fontWeight: 500,
-  cursor: "pointer",
-  whiteSpace: "nowrap",
-};
-
-const inputStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "8px 12px",
-  borderRadius: 8,
-  border: "1px solid rgba(255,255,255,0.1)",
-  background: "rgba(255,255,255,0.04)",
-  color: "#fff",
-  fontSize: 13,
-  outline: "none",
-};
-
-const successStyle: React.CSSProperties = {
-  marginTop: 8,
-  padding: "6px 12px",
-  borderRadius: 6,
-  background: "rgba(34,197,94,0.1)",
-  color: "#22c55e",
-  fontSize: 12,
-};

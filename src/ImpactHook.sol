@@ -44,6 +44,8 @@ contract ImpactHook is IHooks {
     error ImpactHook__InvalidSchema();
     error ImpactHook__AttestationRevoked();
     error ImpactHook__PoolIdMismatch();
+    error ImpactHook__ZeroDonation();
+    error ImpactHook__DonationTransferFailed();
 
     // ──────────────────── Events ────────────────────
 
@@ -63,6 +65,8 @@ contract ImpactHook is IHooks {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     /// @notice Emitted when the hook is paused or unpaused
     event PausedStateChanged(bool paused);
+    /// @notice Emitted when someone donates directly to a project
+    event Donated(PoolId indexed poolId, Currency indexed currency, address indexed donor, uint256 amount);
 
     // ──────────────────── Constants ────────────────────
 
@@ -404,6 +408,43 @@ contract ImpactHook is IHooks {
         currency.transfer(project.recipient, amount);
 
         emit FeesWithdrawn(poolId, currency, project.recipient, amount);
+    }
+
+    // ──────────────────── Direct Donations ────────────────────
+
+    /// @notice Donate directly to a project's accumulated fees. Same milestone-gated
+    /// withdrawal rules apply. For ERC20: approve this contract first, then call with amount.
+    /// For native ETH: send ETH with the call (currency = address(0)).
+    /// @param poolId The pool ID to donate to
+    /// @param currency The currency to donate (use address(0) for native ETH)
+    /// @param amount The amount to donate (ignored for native ETH, uses msg.value instead)
+    function donate(PoolId poolId, Currency currency, uint256 amount) external payable nonReentrant {
+        Project storage project = projects[poolId];
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+
+        uint256 donationAmount;
+
+        if (currency.isAddressZero()) {
+            // Native ETH donation
+            donationAmount = msg.value;
+        } else {
+            // ERC20 donation - pull tokens from sender
+            donationAmount = amount;
+            // Use low-level call for transferFrom to handle non-standard ERC20s
+            (bool success, bytes memory data) = Currency.unwrap(currency).call(
+                abi.encodeWithSelector(0x23b872dd, msg.sender, address(this), donationAmount)
+            );
+            if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
+                revert ImpactHook__DonationTransferFailed();
+            }
+        }
+
+        if (donationAmount == 0) revert ImpactHook__ZeroDonation();
+
+        accumulatedFees[poolId][currency] += donationAmount;
+
+        emit Donated(poolId, currency, msg.sender, donationAmount);
+        emit FeesAccumulated(poolId, currency, donationAmount);
     }
 
     // ──────────────────── Admin Functions ────────────────────

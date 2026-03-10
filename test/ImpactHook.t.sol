@@ -982,6 +982,105 @@ contract ImpactHookTest is Test, Deployers {
         hook.verifyMilestoneEAS(poolKey, keccak256("att-2"));
     }
 
+    // ────────── Donate Tests ──────────
+
+    function test_donateERC20() public {
+        // Approve hook to pull currency1 tokens from alice
+        address token1 = Currency.unwrap(currency1);
+        vm.startPrank(alice);
+        deal(token1, alice, 10 ether);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), 5 ether));
+        require(ok, "approve failed");
+
+        // Donate
+        hook.donate(poolId, currency1, 1 ether);
+        vm.stopPrank();
+
+        // Check accumulated fees increased
+        uint256 fees = hook.accumulatedFees(poolId, currency1);
+        assertEq(fees, 1 ether);
+    }
+
+    function test_donateEmitsEvents() public {
+        address token1 = Currency.unwrap(currency1);
+        vm.startPrank(alice);
+        deal(token1, alice, 10 ether);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), 5 ether));
+        require(ok, "approve failed");
+
+        vm.expectEmit(true, true, true, true);
+        emit ImpactHook.Donated(poolId, currency1, alice, 1 ether);
+        vm.expectEmit(true, true, false, true);
+        emit ImpactHook.FeesAccumulated(poolId, currency1, 1 ether);
+        hook.donate(poolId, currency1, 1 ether);
+        vm.stopPrank();
+    }
+
+    function test_donateRevertsNotRegistered() public {
+        // Create an unregistered pool ID
+        PoolKey memory fakeKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+        PoolId fakePoolId = fakeKey.toId();
+
+        vm.expectRevert(ImpactHook.ImpactHook__ProjectNotRegistered.selector);
+        hook.donate(fakePoolId, currency1, 1 ether);
+    }
+
+    function test_donateRevertsZeroAmount() public {
+        vm.expectRevert(ImpactHook.ImpactHook__ZeroDonation.selector);
+        hook.donate(poolId, currency1, 0);
+    }
+
+    function test_donateAccumulatesWithSwapFees() public {
+        // First verify milestone 0 and 1 so fees are active
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        // Swap to accumulate some fees
+        _swap(true, -1 ether);
+        uint256 feesAfterSwap = hook.accumulatedFees(poolId, currency1);
+        assertTrue(feesAfterSwap > 0, "Should have swap fees");
+
+        // Now donate on top
+        address token1 = Currency.unwrap(currency1);
+        vm.startPrank(alice);
+        deal(token1, alice, 10 ether);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), 5 ether));
+        require(ok, "approve failed");
+
+        hook.donate(poolId, currency1, 2 ether);
+        vm.stopPrank();
+
+        // Total should be swap fees + donation
+        uint256 totalFees = hook.accumulatedFees(poolId, currency1);
+        assertEq(totalFees, feesAfterSwap + 2 ether);
+    }
+
+    function test_donateWithdrawableByRecipient() public {
+        // Donate
+        address token1 = Currency.unwrap(currency1);
+        vm.startPrank(alice);
+        deal(token1, alice, 10 ether);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), 5 ether));
+        require(ok, "approve failed");
+        hook.donate(poolId, currency1, 1 ether);
+        vm.stopPrank();
+
+        // Recipient withdraws
+        uint256 balBefore = CurrencyLibrary.balanceOf(currency1, recipient);
+        vm.prank(recipient);
+        hook.withdraw(poolId, currency1);
+        uint256 balAfter = CurrencyLibrary.balanceOf(currency1, recipient);
+        assertEq(balAfter - balBefore, 1 ether);
+    }
+
     // ────────── Helpers ──────────
 
     function _swap(bool zeroForOne, int256 amountSpecified) internal {

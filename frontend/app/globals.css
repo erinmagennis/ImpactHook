@@ -18,8 +18,8 @@
   --accent-violet: #a78bfa;
   --accent-amber: #fbbf24;
   --text-bright: #f0f4f8;
-  --text-mid: #8892a4;
-  --text-dim: #4a5268;
+  --text-mid: #9ca3b8;
+  --text-dim: #6b7394;
   --border-subtle: rgba(136, 146, 164, 0.08);
   --border-active: rgba(34, 211, 238, 0.2);
 }
@@ -100,6 +100,33 @@ body::before {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Hero title gradient - keeps original gradient feel */
+.text-hero-gradient {
+  background: linear-gradient(135deg, #22d3ee, #a78bfa, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* CTA primary button */
+.cta-primary {
+  background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(139,92,246,0.35));
+  border: 1px solid rgba(139,92,246,0.5);
+  color: #fff;
+  position: relative;
+}
+.cta-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.cta-primary:hover::before {
+  opacity: 1;
 }
 
 /* --- Impact gradient section --- */

@@ -8,6 +8,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/milestones", label: "Milestones" },
   { href: "/withdraw", label: "Withdraw" },
+  { href: "/portfolio", label: "Portfolio" },
 ];
 
 export function Navigation() {
@@ -21,7 +22,7 @@ export function Navigation() {
         zIndex: 50,
         borderBottom: "1px solid rgba(255,255,255,0.06)",
         backdropFilter: "blur(20px)",
-        backgroundColor: "rgba(8,8,12,0.85)",
+        backgroundColor: "rgba(5,5,8,0.88)",
       }}
     >
       <div
@@ -38,6 +39,7 @@ export function Navigation() {
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
           <Link
             href="/"
+            className="font-display"
             style={{
               fontSize: 18,
               fontWeight: 700,
@@ -57,13 +59,15 @@ export function Navigation() {
                   href={item.href}
                   style={{
                     padding: "6px 14px",
-                    borderRadius: 8,
-                    fontSize: 14,
+                    borderRadius: 2,
+                    fontSize: 13,
                     fontWeight: 500,
+                    letterSpacing: "0.02em",
                     color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
                     backgroundColor: isActive
                       ? "rgba(99,102,241,0.15)"
                       : "transparent",
+                    border: isActive ? "1px solid rgba(99,102,241,0.2)" : "1px solid transparent",
                     textDecoration: "none",
                     transition: "all 0.15s",
                   }}
