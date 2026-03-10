@@ -238,7 +238,7 @@ export default function WithdrawPage() {
             </div>
             <div className="card" style={{ padding: 24 }}>
               <div style={{ fontSize: 12, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
-                Example: Clean Water - Kenya
+                Example: Clean Water - Chiapas Schools
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
                 <div style={{ padding: 16, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>

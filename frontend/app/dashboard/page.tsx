@@ -87,7 +87,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
               marginBottom: 6,
             }}
           >
-            {showDemo ? "Clean Water - Kenya" : "Active Pool"}
+            {showDemo ? "Clean Water - Chiapas Schools" : "Active Pool"}
           </div>
           <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>
             {showDemo ? "0xa3f7c2...1b9e04d8" : `${poolId.slice(0, 10)}...${poolId.slice(-8)}`}

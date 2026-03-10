@@ -62,17 +62,18 @@ export default function ImpactPage() {
             Liquidity with purpose
           </h1>
           <p className="text-[15px] leading-relaxed max-w-2xl" style={{ color: 'var(--text-mid)' }}>
-            $2.5 trillion in daily crypto trading volume generates zero social impact.
-            Every pool looks the same: token pair, fee tier, TVL. There is no way to
-            differentiate liquidity by what it does in the real world.
+            45.8% of children in Mexico live in poverty. In Chiapas, 44% of children under 5
+            are stunted. $2.5 trillion in daily crypto trading volume generates zero social
+            impact. ImpactHook connects the two.
           </p>
         </div>
 
         {/* The problem */}
         <div className="card p-6 animate-fade-up delay-100" style={{ marginBottom: 24, borderLeft: '2px solid var(--accent-cyan)' }}>
           <p className="text-[14px] leading-relaxed" style={{ color: 'var(--text-mid)' }}>
-            You want to support projects that matter. But you don&apos;t have time to research every
-            organization, track where your money goes, or follow up months later to see if it worked.
+            You want to fund projects that help children. But you don&apos;t have time to research every
+            organization, track where your money goes, or follow up months later to see if children
+            actually received clean water, meals, or school supplies.
             ImpactHook handles all of that. The protocol only releases funds when milestones are
             verified on-chain. You see the outcomes without doing the work.
           </p>
@@ -85,11 +86,11 @@ export default function ImpactPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              { label: "Impact-differentiated", text: "Pools defined by the real-world outcome they fund, not just token pair and fee tier" },
-              { label: "Continuous", text: "Funding flows with every swap, not once-a-year grants" },
-              { label: "Milestone-gated", text: "No results, no funding. Verification happens on-chain before fees release" },
+              { label: "Impact-differentiated", text: "Pools defined by what they fund - clean water for children, school meals, rural solar - not just token pair and fee tier" },
+              { label: "Continuous", text: "Funding flows with every swap, not once-a-year grants. Children get sustained support" },
+              { label: "Milestone-gated", text: "No results, no funding. Water systems must be installed before the next tranche releases" },
               { label: "Cross-chain verified", text: "Milestones confirmed from any chain via Reactive Network" },
-              { label: "Permissionless", text: "Anyone can create an impact pool for any cause. No gatekeepers" },
+              { label: "Permissionless", text: "Any organization serving children can create an impact pool. No gatekeepers" },
               { label: "Zero-friction", text: "Same tokens, same swap, different impact. Just pick a pool" },
             ].map((item) => (
               <div key={item.label} className="card p-4 flex gap-3 items-start">
@@ -178,13 +179,13 @@ export default function ImpactPage() {
                   Funding Active
                 </span>
               </div>
-              <div className="font-display text-sm mb-4" style={{ color: 'var(--text-bright)' }}>Clean Water in Rural Kenya</div>
+              <div className="font-display text-sm mb-4" style={{ color: 'var(--text-bright)' }}>Clean Water - Chiapas Schools</div>
 
               <div className="flex flex-col gap-3">
-                <MilestoneProof index={0} name="Equipment sourced" status="verified" proof="Tx: 0xa4f2...8b1c" date="Feb 14, 2026" feeBps={0} />
-                <MilestoneProof index={1} name="Installation complete" status="verified" proof="Tx: 0x7e91...3d4a" date="Mar 2, 2026" feeBps={200} />
-                <MilestoneProof index={2} name="First 1,000 liters filtered" status="pending" proof="Awaiting verification" date="" feeBps={300} />
-                <MilestoneProof index={3} name="Community-maintained" status="locked" proof="" date="" feeBps={100} />
+                <MilestoneProof index={0} name="Baseline water testing" status="verified" proof="Tx: 0xa4f2...8b1c" date="Feb 14, 2026" feeBps={0} />
+                <MilestoneProof index={1} name="Systems installed in 20 schools" status="verified" proof="Tx: 0x7e91...3d4a" date="Mar 2, 2026" feeBps={200} />
+                <MilestoneProof index={2} name="3-month water quality verified" status="pending" proof="Awaiting verification" date="" feeBps={300} />
+                <MilestoneProof index={3} name="Community management trained" status="locked" proof="" date="" feeBps={100} />
               </div>
             </div>
 
@@ -290,23 +291,23 @@ export default function ImpactPage() {
             {[
               {
                 area: "Health & WASH",
-                example: "Clean water filtration, vaccine cold chains",
-                how: "Milestone-gated funding ensures equipment is delivered and operational before more funding flows.",
+                example: "e.g. school water purification in Chiapas or Guanajuato",
+                how: "Organizations installing water systems for children could use milestone-gated funding - each verified installation unlocks the next tranche.",
               },
               {
-                area: "Education",
-                example: "School meals, open textbooks",
-                how: "Track meals served, students reached, materials published - all verified on-chain.",
+                area: "Nutrition",
+                example: "e.g. child nutrition programs in Oaxaca or Guerrero",
+                how: "Programs delivering food to children under 5 have natural milestone cycles that map directly to on-chain verification checkpoints.",
               },
               {
-                area: "Climate & DeSci",
-                example: "Satellite data, reforestation tracking",
-                how: "Public datasets and environmental outcomes verified through EAS attestations.",
+                area: "Education & Climate",
+                example: "e.g. solar-powered schools, digital literacy programs",
+                how: "Each solar installation or computer lab is a discrete, verifiable milestone with measurable child outcomes.",
               },
               {
-                area: "Social Inclusion",
-                example: "Microgrids, community infrastructure",
-                how: "Cross-chain verification lets projects on any chain prove milestones to funders on Unichain.",
+                area: "Global Expansion",
+                example: "Starting in Mexico, designed for any programme country",
+                how: "Cross-chain verification lets projects anywhere prove milestones to funders on Unichain. The protocol is permissionless.",
               },
             ].map((item) => (
               <div key={item.area} className="card p-5">

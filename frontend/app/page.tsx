@@ -79,55 +79,55 @@ const POOL = {
 
 const IMPACT_EXAMPLES = [
   {
-    title: "Clean Water in Rural Kenya",
-    description: "Solar-powered filtration for 3 villages. Milestones track equipment delivery, installation, and first clean water served.",
-    milestones: ["Equipment sourced", "Installation complete", "First 1,000 liters filtered", "Community-maintained"],
-    category: "Public Health",
+    title: "Clean Water - Chiapas Schools",
+    description: "Water purification systems for 20 schools in Chiapas, where 44% of children under 5 are stunted from contaminated water.",
+    milestones: ["Baseline water testing", "Systems installed in 20 schools", "3-month quality verification", "Community management trained"],
+    category: "WASH",
     accent: "cyan",
     funded: "0.82 ETH",
-    beneficiaries: "~1,200 people",
+    beneficiaries: "~2,400 children",
   },
   {
-    title: "Open Source Climate Data",
-    description: "Public dataset of real-time deforestation tracking from satellite imagery. Funding flows as data milestones hit.",
-    milestones: ["Data pipeline live", "First 10 regions covered", "API public launch", "Peer reviewed"],
-    category: "Climate / DeSci",
+    title: "Child Nutrition - Oaxaca",
+    description: "Protein-fortified food delivery for children under 5 in rural Oaxaca. Milestone-verified delivery every 3 weeks.",
+    milestones: ["500 children assessed", "3 months delivered", "Anemia rates reduced", "Caregivers certified"],
+    category: "Nutrition",
     accent: "emerald",
     funded: "0.31 ETH",
-    beneficiaries: "Open access",
+    beneficiaries: "500 children",
   },
   {
-    title: "School Meals in Oaxaca",
-    description: "Daily meals for 200 students via a local cooperative. No middlemen. Every dollar visible on-chain.",
-    milestones: ["Kitchen operational", "First 1,000 meals served", "Expanded to 2nd school", "Full year sustained"],
+    title: "Solar Schools - Rural Mexico",
+    description: "Off-grid solar for 10 rural schools. Each installation extends study hours and powers computer labs for children.",
+    milestones: ["Site assessments complete", "Solar installed in 10 schools", "Energy output verified", "6 months computer lab data"],
     category: "Education",
     accent: "violet",
     funded: "0.14 ETH",
-    beneficiaries: "200 students",
+    beneficiaries: "800 children",
   },
 ];
 
 const PORTFOLIO_ITEMS = [
   {
-    project: "Clean Water - Kenya",
+    project: "Clean Water - Chiapas Schools",
     contributed: "0.047 ETH",
     milestones: "2/4 verified",
     status: "active",
-    outcome: "812 people now have access to filtered water",
+    outcome: "2,400 children now drinking purified water at school",
   },
   {
-    project: "Climate Data API",
+    project: "Child Nutrition - Oaxaca",
     contributed: "0.023 ETH",
     milestones: "1/4 verified",
     status: "active",
-    outcome: "Pipeline processing 3 regions of satellite data",
+    outcome: "500 children assessed, food delivery underway",
   },
   {
-    project: "School Meals - Oaxaca",
+    project: "Solar Schools - Rural Mexico",
     contributed: "0.011 ETH",
     milestones: "1/4 verified",
     status: "active",
-    outcome: "Kitchen serving 200 students daily",
+    outcome: "10 school site assessments complete, installation starting",
   },
 ];
 
@@ -202,9 +202,9 @@ function Hero() {
         {/* Subtitle */}
         <p className="animate-fade-up delay-300 text-[clamp(1rem,2.2vw,1.2rem)] leading-relaxed max-w-2xl mx-auto mb-10"
            style={{ color: 'var(--text-mid)' }}>
-          Pick a pool that funds clean water, school meals, or climate research.
-          Swap the same tokens you already trade. Funding only flows when milestones
-          are proven on-chain.
+          Pick a pool that funds clean water for children in Chiapas, school meals in Oaxaca,
+          or solar power for rural classrooms. Same tokens you already trade. Funding only
+          flows when milestones are verified on-chain.
         </p>
 
         {/* Stats row with tagline */}
@@ -346,7 +346,7 @@ function HowItWorks() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StepCard num="01" title="Choose a pool" color="var(--accent-cyan)"
-              desc="You want to swap USDC for ETH. Two pools, same pair. One funds clean water in Kenya. You pick that one." />
+              desc="You want to swap USDC for ETH. Two pools, same pair. One funds clean water for children in Chiapas. You pick that one." />
             <StepCard num="02" title="Swap normally" color="var(--accent-cyan)"
               desc="Same tokens, same Uniswap interface. A small fee (currently 2%) goes to the project. LPs earn full yield." />
             <StepCard num="03" title="It runs in the background" color="var(--accent-cyan)"
@@ -540,7 +540,7 @@ const UNICEF_FOCUS_AREAS = [
 
 const DISCOVERABLE_PROJECTS = [
   {
-    name: "Clean Water - Kenya",
+    name: "Clean Water - Chiapas Schools",
     tags: ["Health", "WASH"],
     status: "active" as const,
     funded: "0.82 ETH",
@@ -549,8 +549,8 @@ const DISCOVERABLE_PROJECTS = [
     accent: "cyan",
   },
   {
-    name: "Climate Data API",
-    tags: ["Climate", "DeSci"],
+    name: "Child Nutrition - Oaxaca",
+    tags: ["Nutrition", "Health"],
     status: "active" as const,
     funded: "0.31 ETH",
     milestones: "1/4",
@@ -558,8 +558,8 @@ const DISCOVERABLE_PROJECTS = [
     accent: "emerald",
   },
   {
-    name: "School Meals - Oaxaca",
-    tags: ["Education", "Nutrition"],
+    name: "Solar Schools - Rural Mexico",
+    tags: ["Education", "Climate"],
     status: "active" as const,
     funded: "0.14 ETH",
     milestones: "1/4",
@@ -567,16 +567,7 @@ const DISCOVERABLE_PROJECTS = [
     accent: "violet",
   },
   {
-    name: "Solar Microgrids - Haiti",
-    tags: ["Infrastructure", "Climate"],
-    status: "upcoming" as const,
-    funded: "0 ETH",
-    milestones: "0/3",
-    fee: "100 bps",
-    accent: "amber",
-  },
-  {
-    name: "Vaccine Cold Chain - DRC",
+    name: "Vaccine Cold Chain - Kenya",
     tags: ["Health", "Child Protection"],
     status: "active" as const,
     funded: "0.09 ETH",
@@ -585,13 +576,49 @@ const DISCOVERABLE_PROJECTS = [
     accent: "cyan",
   },
   {
-    name: "Open Textbooks - Global",
+    name: "Digital Literacy - Chiapas",
     tags: ["Education", "Social Inclusion"],
     status: "upcoming" as const,
     funded: "0 ETH",
-    milestones: "0/5",
-    fee: "50 bps",
+    milestones: "0/4",
+    fee: "100 bps",
+    accent: "amber",
+  },
+  {
+    name: "Water Filters - Guanajuato",
+    tags: ["WASH", "Health"],
+    status: "upcoming" as const,
+    funded: "0 ETH",
+    milestones: "0/4",
+    fee: "150 bps",
+    accent: "emerald",
+  },
+  {
+    name: "School Meals - Bangladesh",
+    tags: ["Nutrition", "Education"],
+    status: "upcoming" as const,
+    funded: "0 ETH",
+    milestones: "0/4",
+    fee: "100 bps",
     accent: "violet",
+  },
+  {
+    name: "Reforestation - Colombia",
+    tags: ["Climate", "DeSci"],
+    status: "upcoming" as const,
+    funded: "0 ETH",
+    milestones: "0/5",
+    fee: "150 bps",
+    accent: "emerald",
+  },
+  {
+    name: "Maternal Health - Nepal",
+    tags: ["Health", "Social Inclusion"],
+    status: "upcoming" as const,
+    funded: "0 ETH",
+    milestones: "0/3",
+    fee: "200 bps",
+    accent: "cyan",
   },
 ];
 

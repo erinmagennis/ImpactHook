@@ -418,10 +418,10 @@ export default function MilestonesPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
-                { desc: "Project registered", fee: 0, verified: true },
-                { desc: "Phase 1 - Equipment sourced & installed", fee: 100, verified: true },
-                { desc: "Phase 2 - 1,000 liters filtered", fee: 200, verified: false },
-                { desc: "Phase 3 - Community self-sustaining", fee: 300, verified: false },
+                { desc: "Baseline water testing complete", fee: 0, verified: true },
+                { desc: "Purification systems installed in 20 schools", fee: 100, verified: true },
+                { desc: "3-month water quality verification", fee: 200, verified: false },
+                { desc: "Community management trained", fee: 300, verified: false },
               ].map((m, i) => (
                 <div
                   key={i}
