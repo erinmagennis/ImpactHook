@@ -27,31 +27,20 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   const milestoneCount = projectInfo?.[3];
   const currentFeeBps = projectInfo?.[4];
 
-  if (!registered) {
-    return (
-      <div className="card card-glow animate-fade-up delay-200" style={{ padding: 24 }}>
-        <div
-          style={{
-            color: "var(--text-dim)",
-            textAlign: "center",
-            padding: "40px 0",
-            fontSize: 13,
-          }}
-        >
-          No projects registered yet. Register a project to get started.
-        </div>
-      </div>
-    );
-  }
+  const showDemo = !registered;
 
-  const milestoneProgress = milestoneCount
-    ? Number(currentMilestone) / Number(milestoneCount)
-    : 0;
+  // Demo data for preview when no real pool exists
+  const demoRecipient = "0x1a2B...9c4D";
+  const demoVerifier = "0x7e8F...3a1B";
+  const demoCurrent = showDemo ? 2 : Number(currentMilestone);
+  const demoTotal = showDemo ? 4 : Number(milestoneCount);
+  const demoFee = showDemo ? 200 : (currentFeeBps || 0);
+  const demoProgress = demoTotal ? demoCurrent / demoTotal : 0;
 
   const milestoneNodes = [];
-  for (let i = 0; i < Number(milestoneCount); i++) {
-    const isVerified = i < Number(currentMilestone);
-    const isActive = i === Number(currentMilestone);
+  for (let i = 0; i < demoTotal; i++) {
+    const isVerified = i < demoCurrent;
+    const isActive = i === demoCurrent;
     milestoneNodes.push(
       <div
         key={i}
@@ -66,7 +55,27 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   }
 
   return (
-    <div className="card card-glow animate-fade-up delay-200" style={{ padding: 24 }}>
+    <div className="card card-glow animate-fade-up delay-200" style={{ padding: 24, position: "relative" }}>
+      {showDemo && (
+        <div
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            padding: "3px 8px",
+            borderRadius: 2,
+            fontSize: 10,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            background: "rgba(167,139,250,0.1)",
+            color: "var(--accent-violet)",
+            border: "1px solid rgba(167,139,250,0.2)",
+          }}
+        >
+          Preview
+        </div>
+      )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
           <div
@@ -78,10 +87,10 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
               marginBottom: 6,
             }}
           >
-            Active Pool
+            {showDemo ? "Clean Water - Kenya" : "Active Pool"}
           </div>
           <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>
-            {poolId.slice(0, 10)}...{poolId.slice(-8)}
+            {showDemo ? "0xa3f7c2...1b9e04d8" : `${poolId.slice(0, 10)}...${poolId.slice(-8)}`}
           </div>
         </div>
         <div
@@ -92,21 +101,21 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
             fontWeight: 600,
             letterSpacing: "0.04em",
             background:
-              currentFeeBps && currentFeeBps > 0
+              demoFee > 0
                 ? "rgba(52, 211, 153, 0.1)"
                 : "var(--bg-elevated)",
             color:
-              currentFeeBps && currentFeeBps > 0
+              demoFee > 0
                 ? "var(--accent-emerald)"
                 : "var(--text-dim)",
             border: `1px solid ${
-              currentFeeBps && currentFeeBps > 0
+              demoFee > 0
                 ? "rgba(52, 211, 153, 0.25)"
                 : "var(--border-subtle)"
             }`,
           }}
         >
-          {currentFeeBps ? `${currentFeeBps} bps` : "0 bps"}
+          {demoFee} bps
         </div>
       </div>
 
@@ -117,7 +126,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
             Milestone Progress
           </span>
           <span className="font-data" style={{ fontSize: 13, color: "var(--text-bright)" }}>
-            {currentMilestone?.toString()} / {milestoneCount?.toString()}
+            {demoCurrent} / {demoTotal}
           </span>
         </div>
         <div
@@ -132,7 +141,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
           <div
             style={{
               height: "100%",
-              width: `${milestoneProgress * 100}%`,
+              width: `${demoProgress * 100}%`,
               borderRadius: 1,
               background: "linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald))",
               transition: "width 0.5s ease",
@@ -146,9 +155,26 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
 
       {/* Info grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        <InfoItem label="Recipient" value={`${recipient?.slice(0, 6)}...${recipient?.slice(-4)}`} />
-        <InfoItem label="Verifier" value={`${verifier?.slice(0, 6)}...${verifier?.slice(-4)}`} />
+        <InfoItem label="Recipient" value={showDemo ? demoRecipient : `${recipient?.slice(0, 6)}...${recipient?.slice(-4)}`} />
+        <InfoItem label="Verifier" value={showDemo ? demoVerifier : `${verifier?.slice(0, 6)}...${verifier?.slice(-4)}`} />
       </div>
+
+      {showDemo && (
+        <div
+          style={{
+            marginTop: 16,
+            padding: "10px 14px",
+            borderRadius: 2,
+            background: "rgba(34,211,238,0.04)",
+            border: "1px solid rgba(34,211,238,0.1)",
+            fontSize: 12,
+            color: "var(--text-mid)",
+            lineHeight: 1.5,
+          }}
+        >
+          This is a preview. Register a project to see live data from the hook contract.
+        </div>
+      )}
     </div>
   );
 }

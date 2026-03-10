@@ -48,7 +48,7 @@ export function Navigation() {
               letterSpacing: "-0.02em",
             }}
           >
-            ImpactHook
+            <span className="text-hero-gradient">Impact</span>Hook
           </Link>
           <div style={{ display: "flex", gap: 4 }}>
             {navItems.map((item) => {

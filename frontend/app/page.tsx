@@ -1,3 +1,63 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+function ScrollNav() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setVisible(window.scrollY > window.innerHeight * 0.8);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <nav
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: 56,
+        zIndex: 50,
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        background: "rgba(5,5,8,0.88)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        transform: visible ? "translateY(0)" : "translateY(-100%)",
+        transition: "transform 0.3s ease",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 24px",
+      }}
+    >
+      <span
+        className="font-display"
+        style={{ fontSize: 16, color: "#fff", letterSpacing: "-0.01em" }}
+      >
+        <span className="text-hero-gradient">Impact</span>Hook
+      </span>
+      <a
+        href="/dashboard"
+        className="cta-primary"
+        style={{
+          padding: "8px 16px",
+          fontSize: 13,
+          borderRadius: 8,
+          textDecoration: "none",
+          display: "inline-flex",
+          alignItems: "center",
+        }}
+      >
+        Launch App
+      </a>
+    </nav>
+  );
+}
+
 const MILESTONES = [
   { index: 0, name: "Project registered", feeBps: 0, verified: true },
   { index: 1, name: "Phase 1 complete", feeBps: 200, verified: true },
@@ -161,20 +221,15 @@ function Hero() {
         </div>
 
         {/* CTA */}
-        <div className="animate-fade-up delay-600 flex flex-wrap gap-4 justify-center">
+        <div className="animate-fade-up delay-600 flex flex-col items-center gap-5">
           <a href="/dashboard"
-             className="cta-primary inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold tracking-wide transition-all hover:scale-[1.02]">
+             className="cta-primary inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold tracking-wide transition-all hover:scale-[1.02]">
             Launch App
           </a>
           <a href="#impact"
-             className="inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide transition-all hover:scale-[1.02]"
-             style={{ background: 'rgba(34, 211, 238, 0.08)', border: '1px solid rgba(34, 211, 238, 0.25)', color: 'var(--accent-cyan)' }}>
-            See the impact
-          </a>
-          <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer"
-             className="inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide transition-all hover:scale-[1.02]"
-             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-mid)' }}>
-            View Source <ExternalIcon />
+             className="inline-flex items-center gap-2 text-[13px] tracking-wide transition-all hover:opacity-80"
+             style={{ color: 'var(--text-mid)' }}>
+            See how it works <span style={{ color: 'var(--accent-cyan)' }}>&#8595;</span>
           </a>
         </div>
       </div>
@@ -1001,6 +1056,7 @@ function SectionHeader({ label, title, subtitle }: { label: string; title: strin
 export default function Home() {
   return (
     <main>
+      <ScrollNav />
       <Hero />
       <div className="divider" />
       <ImpactShowcase />

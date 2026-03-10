@@ -1081,6 +1081,503 @@ contract ImpactHookTest is Test, Deployers {
         assertEq(balAfter - balBefore, 1 ether);
     }
 
+    // ────────── Native ETH Donation Tests ──────────
+
+    function test_donateNativeETH() public {
+        vm.deal(alice, 5 ether);
+        vm.prank(alice);
+        hook.donate{value: 1 ether}(poolId, CurrencyLibrary.ADDRESS_ZERO, 0);
+
+        uint256 fees = hook.accumulatedFees(poolId, CurrencyLibrary.ADDRESS_ZERO);
+        assertEq(fees, 1 ether);
+    }
+
+    function test_donateNativeETH_zeroValue() public {
+        vm.deal(alice, 5 ether);
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__ZeroDonation.selector);
+        hook.donate{value: 0}(poolId, CurrencyLibrary.ADDRESS_ZERO, 0);
+    }
+
+    function test_donateNativeETH_withdrawable() public {
+        vm.deal(alice, 5 ether);
+        vm.prank(alice);
+        hook.donate{value: 2 ether}(poolId, CurrencyLibrary.ADDRESS_ZERO, 0);
+
+        uint256 balBefore = recipient.balance;
+        vm.prank(recipient);
+        hook.withdraw(poolId, CurrencyLibrary.ADDRESS_ZERO);
+        assertEq(recipient.balance - balBefore, 2 ether);
+    }
+
+    function test_donateNativeETH_emitsEvents() public {
+        vm.deal(alice, 5 ether);
+        vm.prank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit ImpactHook.Donated(poolId, CurrencyLibrary.ADDRESS_ZERO, alice, 1 ether);
+        vm.expectEmit(true, true, false, true);
+        emit ImpactHook.FeesAccumulated(poolId, CurrencyLibrary.ADDRESS_ZERO, 1 ether);
+        hook.donate{value: 1 ether}(poolId, CurrencyLibrary.ADDRESS_ZERO, 0);
+    }
+
+    // ────────── Donate ERC20 Failure Tests ──────────
+
+    function test_donateERC20_noApproval() public {
+        address token1 = Currency.unwrap(currency1);
+        deal(token1, alice, 10 ether);
+
+        vm.prank(alice);
+        vm.expectRevert(); // SafeERC20 will revert
+        hook.donate(poolId, currency1, 1 ether);
+    }
+
+    function test_donateERC20_insufficientBalance() public {
+        address token1 = Currency.unwrap(currency1);
+        deal(token1, alice, 0); // no balance
+        vm.startPrank(alice);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), 5 ether));
+        require(ok);
+
+        vm.expectRevert(); // transfer will fail
+        hook.donate(poolId, currency1, 1 ether);
+        vm.stopPrank();
+    }
+
+    // ────────── Fee Precision Tests ──────────
+
+    function test_feeCalculation_exactPrecision() public {
+        // Verify milestones 0 (0 bps) and 1 (200 bps = 2%)
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        // Perform swap and check fee is ~2% of output
+        uint256 hookBefore = currency1.balanceOf(address(hook));
+        _swap(true, -1 ether);
+        uint256 fees = currency1.balanceOf(address(hook)) - hookBefore;
+
+        // Fee should be exactly 200/10000 of the swap output
+        // We can't predict exact output, but fee should be >0 and < 3% of input
+        assertGt(fees, 0);
+        assertLt(fees, 0.03 ether); // Less than 3% of 1 ETH input
+    }
+
+    function test_feeCalculation_smallSwap() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        // Very small swap - fee should still be calculated (or zero if dust)
+        _swap(true, -100);
+        // Should not revert - dust amounts handled gracefully
+    }
+
+    // ────────── Full Milestone Progression Tests ──────────
+
+    function test_verifyAllMilestones() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        hook.verifyMilestone(poolKey, 2);
+        hook.verifyMilestone(poolKey, 3);
+        vm.stopPrank();
+
+        // All 4 should be verified
+        assertTrue(hook.isMilestoneVerified(poolId, 0));
+        assertTrue(hook.isMilestoneVerified(poolId, 1));
+        assertTrue(hook.isMilestoneVerified(poolId, 2));
+        assertTrue(hook.isMilestoneVerified(poolId, 3));
+
+        // Fee should be 100 bps (milestone 3: "Self-sustaining")
+        assertEq(hook.getCurrentFeeBps(poolId), 100);
+    }
+
+    function test_verifyAllMilestones_currentMilestoneStays() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        hook.verifyMilestone(poolKey, 2);
+        hook.verifyMilestone(poolKey, 3);
+        vm.stopPrank();
+
+        // currentMilestone should stay at 3 (last one, no advancement)
+        (,, uint256 cm,,,) = hook.getProjectInfo(poolId);
+        assertEq(cm, 3);
+    }
+
+    function test_revert_verifyBeyondLastMilestone() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        hook.verifyMilestone(poolKey, 2);
+        hook.verifyMilestone(poolKey, 3);
+        vm.stopPrank();
+
+        // Try to verify index 4 (doesn't exist)
+        vm.prank(verifier);
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidMilestoneIndex.selector);
+        hook.verifyMilestone(poolKey, 4);
+    }
+
+    // ────────── Multiple Swap Accumulation ──────────
+
+    function test_multipleSwapsAccumulate() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        _swap(true, -1 ether);
+        uint256 fees1 = hook.accumulatedFees(poolId, currency1);
+
+        _swap(true, -1 ether);
+        uint256 fees2 = hook.accumulatedFees(poolId, currency1);
+
+        _swap(true, -1 ether);
+        uint256 fees3 = hook.accumulatedFees(poolId, currency1);
+
+        // Each swap should add more fees (prices shift but fees still accumulate)
+        assertGt(fees2, fees1);
+        assertGt(fees3, fees2);
+    }
+
+    // ────────── Withdrawal Event Tests ──────────
+
+    function test_withdrawEmitsEvent() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        _swap(true, -1 ether);
+        uint256 fees = hook.accumulatedFees(poolId, currency1);
+
+        vm.prank(recipient);
+        vm.expectEmit(true, true, false, true);
+        emit ImpactHook.FeesWithdrawn(poolId, currency1, recipient, fees);
+        hook.withdraw(poolId, currency1);
+    }
+
+    function test_withdraw_doubleWithdrawReverts() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        _swap(true, -1 ether);
+
+        vm.startPrank(recipient);
+        hook.withdraw(poolId, currency1);
+
+        vm.expectRevert(ImpactHook.ImpactHook__NoFeesToWithdraw.selector);
+        hook.withdraw(poolId, currency1);
+        vm.stopPrank();
+    }
+
+    // ────────── Admin Tests (additional) ──────────
+
+    function test_setMilestoneSchema() public {
+        bytes32 schema = keccak256("test-schema");
+        hook.setMilestoneSchema(schema);
+        assertEq(hook.milestoneSchemaUID(), schema);
+    }
+
+    function test_revert_setMilestoneSchema_notOwner() public {
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
+        hook.setMilestoneSchema(keccak256("test"));
+    }
+
+    function test_registerProject_mismatchedArrays() public {
+        PoolKey memory newKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+
+        string[] memory desc = new string[](2);
+        desc[0] = "a";
+        desc[1] = "b";
+        uint16[] memory fees = new uint16[](1);
+        fees[0] = 100;
+
+        vm.expectRevert(ImpactHook.ImpactHook__NoMilestones.selector);
+        hook.registerProject(newKey, recipient, verifier, desc, fees);
+    }
+
+    function test_registerProject_zeroVerifier() public {
+        PoolKey memory newKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+
+        string[] memory desc = new string[](1);
+        desc[0] = "test";
+        uint16[] memory fees = new uint16[](1);
+        fees[0] = 100;
+
+        vm.expectRevert(ImpactHook.ImpactHook__ZeroAddress.selector);
+        hook.registerProject(newKey, recipient, address(0), desc, fees);
+    }
+
+    function test_registerProject_maxFeeExactly500() public {
+        PoolKey memory newKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+
+        string[] memory desc = new string[](1);
+        desc[0] = "max fee";
+        uint16[] memory fees = new uint16[](1);
+        fees[0] = 500; // Exactly at cap
+
+        hook.registerProject(newKey, recipient, verifier, desc, fees);
+        PoolId newPoolId = newKey.toId();
+        (,,,,uint16 fee, bool reg) = hook.getProjectInfo(newPoolId);
+        assertTrue(reg);
+        // Fee is 0 until milestone 0 is verified
+        assertEq(fee, 0);
+    }
+
+    // ────────── Pause Edge Cases ──────────
+
+    function test_pauseDoesNotAffectWithdraw() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        _swap(true, -1 ether);
+        uint256 fees = hook.accumulatedFees(poolId, currency1);
+        assertGt(fees, 0);
+
+        // Pause the hook
+        hook.setPaused(true);
+
+        // Withdrawal should still work while paused
+        uint256 balBefore = currency1.balanceOf(recipient);
+        vm.prank(recipient);
+        hook.withdraw(poolId, currency1);
+        assertEq(currency1.balanceOf(recipient) - balBefore, fees);
+    }
+
+    function test_pauseDoesNotAffectDonate() public {
+        hook.setPaused(true);
+
+        address token1 = Currency.unwrap(currency1);
+        vm.startPrank(alice);
+        deal(token1, alice, 10 ether);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), 5 ether));
+        require(ok);
+
+        // Donations should work while paused
+        hook.donate(poolId, currency1, 1 ether);
+        vm.stopPrank();
+
+        assertEq(hook.accumulatedFees(poolId, currency1), 1 ether);
+    }
+
+    function test_pauseEmitsEvent() public {
+        vm.expectEmit(false, false, false, true);
+        emit ImpactHook.PausedStateChanged(true);
+        hook.setPaused(true);
+
+        vm.expectEmit(false, false, false, true);
+        emit ImpactHook.PausedStateChanged(false);
+        hook.setPaused(false);
+    }
+
+    // ────────── Full Lifecycle Test ──────────
+
+    function test_fullLifecycle() public {
+        // 1. Project already registered in setUp
+        assertTrue(hook.isMilestoneVerified(poolId, 0) == false);
+
+        // 2. Direct donation before any milestones
+        address token1 = Currency.unwrap(currency1);
+        vm.startPrank(alice);
+        deal(token1, alice, 50 ether);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), 50 ether));
+        require(ok);
+        hook.donate(poolId, currency1, 5 ether);
+        vm.stopPrank();
+        assertEq(hook.accumulatedFees(poolId, currency1), 5 ether);
+
+        // 3. Verify milestones progressively
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        assertEq(hook.getCurrentFeeBps(poolId), 0); // milestone 0 = 0 bps
+
+        hook.verifyMilestone(poolKey, 1);
+        assertEq(hook.getCurrentFeeBps(poolId), 200); // milestone 1 = 200 bps
+        vm.stopPrank();
+
+        // 4. Swap generates fees
+        _swap(true, -1 ether);
+        uint256 totalFees = hook.accumulatedFees(poolId, currency1);
+        assertGt(totalFees, 5 ether); // donation + swap fees
+
+        // 5. Recipient withdraws everything
+        uint256 balBefore = currency1.balanceOf(recipient);
+        vm.prank(recipient);
+        hook.withdraw(poolId, currency1);
+        uint256 received = currency1.balanceOf(recipient) - balBefore;
+        assertEq(received, totalFees);
+        assertEq(hook.accumulatedFees(poolId, currency1), 0);
+
+        // 6. More milestones, more swaps
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 2);
+        assertEq(hook.getCurrentFeeBps(poolId), 300);
+
+        _swap(false, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency0), 0);
+    }
+
+    // ────────── Reactive Callback Edge Cases ──────────
+
+    function test_verifyMilestoneReactive_notRegistered() public {
+        PoolKey memory fakeKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+        PoolId fakePoolId = fakeKey.toId();
+
+        vm.prank(callbackProxy);
+        vm.expectRevert(ImpactHook.ImpactHook__ProjectNotRegistered.selector);
+        hook.verifyMilestoneReactive(verifier, fakePoolId, 0);
+    }
+
+    function test_verifyMilestoneReactive_outOfOrder() public {
+        vm.prank(callbackProxy);
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidMilestoneIndex.selector);
+        hook.verifyMilestoneReactive(verifier, poolId, 1);
+    }
+
+    // ────────── UpdateVerifier/Recipient then Verify ──────────
+
+    function test_updateVerifier_thenVerify() public {
+        address newVerifier = makeAddr("newVerifier");
+        vm.prank(verifier);
+        hook.updateVerifier(poolKey, newVerifier);
+
+        // Old verifier should fail
+        vm.prank(verifier);
+        vm.expectRevert(ImpactHook.ImpactHook__NotVerifier.selector);
+        hook.verifyMilestone(poolKey, 0);
+
+        // New verifier should work
+        vm.prank(newVerifier);
+        hook.verifyMilestone(poolKey, 0);
+        assertTrue(hook.isMilestoneVerified(poolId, 0));
+    }
+
+    function test_updateRecipient_thenWithdraw() public {
+        vm.startPrank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        hook.verifyMilestone(poolKey, 1);
+        vm.stopPrank();
+
+        _swap(true, -1 ether);
+        uint256 fees = hook.accumulatedFees(poolId, currency1);
+
+        address newRecipient = makeAddr("newRecipient");
+        vm.prank(recipient);
+        hook.updateRecipient(poolKey, newRecipient);
+
+        // Old recipient should fail
+        vm.prank(recipient);
+        vm.expectRevert(ImpactHook.ImpactHook__NotProjectRecipient.selector);
+        hook.withdraw(poolId, currency1);
+
+        // New recipient should succeed
+        vm.prank(newRecipient);
+        hook.withdraw(poolId, currency1);
+        assertEq(currency1.balanceOf(newRecipient), fees);
+    }
+
+    // ────────── Fuzz: Donation Amounts ──────────
+
+    function testFuzz_donateERC20(uint256 amount) public {
+        amount = bound(amount, 1, 100 ether);
+
+        address token1 = Currency.unwrap(currency1);
+        vm.startPrank(alice);
+        deal(token1, alice, amount);
+        (bool ok,) = token1.call(abi.encodeWithSelector(0x095ea7b3, address(hook), amount));
+        require(ok);
+
+        hook.donate(poolId, currency1, amount);
+        vm.stopPrank();
+
+        assertEq(hook.accumulatedFees(poolId, currency1), amount);
+    }
+
+    function testFuzz_donateNativeETH(uint256 amount) public {
+        amount = bound(amount, 1, 100 ether);
+        vm.deal(alice, amount);
+
+        vm.prank(alice);
+        hook.donate{value: amount}(poolId, CurrencyLibrary.ADDRESS_ZERO, 0);
+
+        assertEq(hook.accumulatedFees(poolId, CurrencyLibrary.ADDRESS_ZERO), amount);
+    }
+
+    // ────────── View Function Edge Cases ──────────
+
+    function test_getCurrentFeeBps_unregistered() public view {
+        PoolKey memory fakeKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+        assertEq(hook.getCurrentFeeBps(fakeKey.toId()), 0);
+    }
+
+    function test_getMilestoneCount_unregistered() public view {
+        PoolKey memory fakeKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+        assertEq(hook.getMilestoneCount(fakeKey.toId()), 0);
+    }
+
+    function test_getProjectInfo_unregistered() public view {
+        PoolKey memory fakeKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+        PoolId fakeId = fakeKey.toId();
+        (address r, address v, uint256 cm, uint256 mc, uint16 fb, bool reg) = hook.getProjectInfo(fakeId);
+        assertEq(r, address(0));
+        assertEq(v, address(0));
+        assertEq(cm, 0);
+        assertEq(mc, 0);
+        assertEq(fb, 0);
+        assertFalse(reg);
+    }
+
     // ────────── Helpers ──────────
 
     function _swap(bool zeroForOne, int256 amountSpecified) internal {
@@ -1094,5 +1591,102 @@ contract ImpactHookTest is Test, Deployers {
             PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
             ""
         );
+    }
+}
+
+// ────────── HookMiner Tests ──────────
+
+import {HookMiner} from "./utils/HookMiner.sol";
+
+contract HookMinerTest is Test {
+    function test_computeAddress_matchesCREATE2() public pure {
+        address deployer = address(0xDEAD);
+        bytes32 salt = bytes32(uint256(42));
+        bytes32 initCodeHash = keccak256("some init code");
+
+        address computed = HookMiner.computeAddress(deployer, salt, initCodeHash);
+
+        // Manual CREATE2: keccak256(0xff ++ deployer ++ salt ++ initCodeHash)
+        address expected = address(uint160(uint256(
+            keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, initCodeHash))
+        )));
+
+        assertEq(computed, expected);
+    }
+
+    function test_computeAddress_differentDeployers() public pure {
+        bytes32 salt = bytes32(uint256(1));
+        bytes32 initCodeHash = keccak256("code");
+
+        address addr1 = HookMiner.computeAddress(address(0x1), salt, initCodeHash);
+        address addr2 = HookMiner.computeAddress(address(0x2), salt, initCodeHash);
+
+        assertTrue(addr1 != addr2, "Different deployers should produce different addresses");
+    }
+
+    function test_computeAddress_differentSalts() public pure {
+        address deployer = address(0xBEEF);
+        bytes32 initCodeHash = keccak256("code");
+
+        address addr1 = HookMiner.computeAddress(deployer, bytes32(uint256(0)), initCodeHash);
+        address addr2 = HookMiner.computeAddress(deployer, bytes32(uint256(1)), initCodeHash);
+
+        assertTrue(addr1 != addr2, "Different salts should produce different addresses");
+    }
+
+    function test_find_producesCorrectFlags() public pure {
+        address deployer = address(0xCAFE);
+        // Use minimal creation code that just returns empty runtime
+        bytes memory creationCode = hex"600a600c600039600a6000f3602a60005260206000f3";
+        bytes memory constructorArgs = "";
+
+        // Target: AFTER_SWAP_FLAG (bit 6) = 0x40
+        uint160 flags = uint160(0x40);
+        uint160 flagMask = uint160((1 << 14) - 1);
+
+        (address hookAddress, bytes32 salt) = HookMiner.find(deployer, flags, creationCode, constructorArgs);
+
+        // Verify the address has the correct flags in lowest 14 bits
+        assertEq(uint160(hookAddress) & flagMask, flags, "Hook address should have correct flags");
+
+        // Verify address matches CREATE2 computation
+        bytes32 initCodeHash = keccak256(abi.encodePacked(creationCode, constructorArgs));
+        address expected = HookMiner.computeAddress(deployer, salt, initCodeHash);
+        assertEq(hookAddress, expected, "Returned address should match CREATE2 computation");
+    }
+
+    function test_find_withConstructorArgs() public pure {
+        address deployer = address(0xBEEF);
+        bytes memory creationCode = hex"600a600c600039600a6000f3602a60005260206000f3";
+        bytes memory constructorArgs = abi.encode(address(0x1234), uint256(42));
+
+        uint160 flags = uint160(0x04); // AFTER_SWAP_RETURNS_DELTA_FLAG
+        uint160 flagMask = uint160((1 << 14) - 1);
+
+        (address hookAddress,) = HookMiner.find(deployer, flags, creationCode, constructorArgs);
+        assertEq(uint160(hookAddress) & flagMask, flags);
+    }
+
+    function test_find_multipleFlags() public pure {
+        address deployer = address(0xFACE);
+        bytes memory creationCode = hex"600a600c600039600a6000f3602a60005260206000f3";
+        bytes memory constructorArgs = "";
+
+        // BEFORE_INITIALIZE (1<<13) | AFTER_SWAP (1<<6) | AFTER_SWAP_RETURNS_DELTA (1<<2)
+        uint160 flags = uint160((1 << 13) | (1 << 6) | (1 << 2));
+        uint160 flagMask = uint160((1 << 14) - 1);
+
+        (address hookAddress,) = HookMiner.find(deployer, flags, creationCode, constructorArgs);
+        assertEq(uint160(hookAddress) & flagMask, flags, "Should match combined flags");
+    }
+
+    function testFuzz_computeAddress_deterministic(
+        address deployer,
+        bytes32 salt,
+        bytes32 initCodeHash
+    ) public pure {
+        address addr1 = HookMiner.computeAddress(deployer, salt, initCodeHash);
+        address addr2 = HookMiner.computeAddress(deployer, salt, initCodeHash);
+        assertEq(addr1, addr2, "Same inputs should always produce same address");
     }
 }

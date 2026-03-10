@@ -9,6 +9,8 @@ import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {Currency, CurrencyLibrary} from "v4-core/src/types/Currency.sol";
 import {BeforeSwapDelta} from "v4-core/src/types/BeforeSwapDelta.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IEAS} from "./interfaces/IEAS.sol";
 
 /// @title ImpactHook
@@ -20,6 +22,7 @@ import {IEAS} from "./interfaces/IEAS.sol";
 contract ImpactHook is IHooks {
     using PoolIdLibrary for PoolKey;
     using CurrencyLibrary for Currency;
+    using SafeERC20 for IERC20;
 
     // ──────────────────── Errors ────────────────────
 
@@ -429,14 +432,11 @@ contract ImpactHook is IHooks {
             donationAmount = msg.value;
         } else {
             // ERC20 donation - pull tokens from sender
-            donationAmount = amount;
-            // Use low-level call for transferFrom to handle non-standard ERC20s
-            (bool success, bytes memory data) = Currency.unwrap(currency).call(
-                abi.encodeWithSelector(0x23b872dd, msg.sender, address(this), donationAmount)
-            );
-            if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
-                revert ImpactHook__DonationTransferFailed();
-            }
+            // Use balance check to handle fee-on-transfer tokens correctly
+            IERC20 token = IERC20(Currency.unwrap(currency));
+            uint256 balBefore = token.balanceOf(address(this));
+            token.safeTransferFrom(msg.sender, address(this), amount);
+            donationAmount = token.balanceOf(address(this)) - balBefore;
         }
 
         if (donationAmount == 0) revert ImpactHook__ZeroDonation();

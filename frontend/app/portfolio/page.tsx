@@ -391,145 +391,120 @@ export default function PortfolioPage() {
           </p>
         </div>
 
-        {!isConnected ? (
+        {!isConnected && (
           <div
-            className="card card-glow animate-fade-up delay-200"
+            className="card card-glow animate-fade-up delay-100"
             style={{
-              padding: "48px 32px",
-              textAlign: "center",
+              padding: "16px 20px",
+              marginBottom: 24,
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              background: "rgba(167,139,250,0.06)",
+              borderColor: "rgba(167,139,250,0.15)",
             }}
           >
             <div
               style={{
-                fontSize: 40,
-                marginBottom: 16,
-                opacity: 0.6,
-              }}
-            >
-              {/* Wallet icon */}
-              <svg
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--accent-cyan)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ display: "inline-block" }}
-              >
-                <rect x="2" y="6" width="20" height="14" rx="2" />
-                <path d="M2 10h20" />
-                <circle cx="16" cy="14" r="1.5" fill="var(--accent-cyan)" />
-              </svg>
-            </div>
-            <div
-              className="font-display"
-              style={{
-                fontSize: 18,
+                padding: "3px 8px",
+                borderRadius: 2,
+                fontSize: 10,
                 fontWeight: 600,
-                color: "var(--text-bright)",
-                marginBottom: 8,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                background: "rgba(167,139,250,0.1)",
+                color: "var(--accent-violet)",
+                border: "1px solid rgba(167,139,250,0.2)",
+                flexShrink: 0,
               }}
             >
-              Connect your wallet to view your portfolio
+              Preview
             </div>
-            <p
-              style={{
-                fontSize: 14,
-                color: "var(--text-mid)",
-                lineHeight: 1.6,
-                maxWidth: 400,
-                margin: "0 auto",
-              }}
-            >
-              Your impact portfolio is tied to your wallet address. Connect
-              to see which projects you have funded through your swaps.
-            </p>
+            <span style={{ fontSize: 13, color: "var(--text-mid)" }}>
+              Connect your wallet to see your real portfolio. Showing example data below.
+            </span>
           </div>
-        ) : (
-          <>
-            {/* Summary cards */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gap: 16,
-                marginBottom: 40,
-              }}
-            >
-              <SummaryCard label="Total contributed" value="0.081 ETH" delay="delay-100" />
-              <SummaryCard label="Projects funded" value="3" delay="delay-200" />
-              <SummaryCard label="Milestones verified" value="4" delay="delay-300" />
-              <SummaryCard label="Beneficiaries reached" value="~1,400+" delay="delay-400" />
-            </div>
-
-            {/* Project cards */}
-            <div style={{ marginBottom: 40 }}>
-              <h2
-                className="font-display animate-fade-up delay-300"
-                style={{
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: "var(--text-bright)",
-                  marginBottom: 20,
-                }}
-              >
-                Funded Projects
-              </h2>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr",
-                  gap: 20,
-                }}
-              >
-                {FUNDED_PROJECTS.map((project, i) => (
-                  <ProjectCard
-                    key={project.name}
-                    project={project}
-                    delay={`delay-${(i + 4) * 100}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* How this works */}
-            <div
-              className="card animate-fade-up delay-800"
-              style={{
-                padding: "24px 28px",
-                borderLeft: "2px solid var(--accent-cyan)",
-              }}
-            >
-              <div
-                className="font-display"
-                style={{
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "var(--text-bright)",
-                  marginBottom: 8,
-                }}
-              >
-                How this works
-              </div>
-              <p
-                style={{
-                  fontSize: 14,
-                  color: "var(--text-mid)",
-                  lineHeight: 1.7,
-                  margin: 0,
-                }}
-              >
-                Your portfolio builds automatically from your swaps. There is
-                no opt-in or sign-up. Every trade routed through an impact pool
-                is recorded on-chain via the ImpactHook contract. As milestones
-                are verified, you can see the real-world outcomes your
-                contributions helped fund.
-              </p>
-            </div>
-          </>
         )}
+
+        {/* Summary cards */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 16,
+            marginBottom: 40,
+          }}
+        >
+          <SummaryCard label="Total contributed" value="0.081 ETH" delay="delay-100" />
+          <SummaryCard label="Projects funded" value="3" delay="delay-200" />
+          <SummaryCard label="Milestones verified" value="4" delay="delay-300" />
+          <SummaryCard label="Beneficiaries reached" value="~1,400+" delay="delay-400" />
+        </div>
+
+        {/* Project cards */}
+        <div style={{ marginBottom: 40 }}>
+          <h2
+            className="font-display animate-fade-up delay-300"
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+              color: "var(--text-bright)",
+              marginBottom: 20,
+            }}
+          >
+            Funded Projects
+          </h2>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: 20,
+            }}
+          >
+            {FUNDED_PROJECTS.map((project, i) => (
+              <ProjectCard
+                key={project.name}
+                project={project}
+                delay={`delay-${(i + 4) * 100}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* How this works */}
+        <div
+          className="card animate-fade-up delay-800"
+          style={{
+            padding: "24px 28px",
+            borderLeft: "2px solid var(--accent-cyan)",
+          }}
+        >
+          <div
+            className="font-display"
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: "var(--text-bright)",
+              marginBottom: 8,
+            }}
+          >
+            How this works
+          </div>
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--text-mid)",
+              lineHeight: 1.7,
+              margin: 0,
+            }}
+          >
+            Your portfolio builds automatically from your swaps. There is
+            no opt-in or sign-up. Every trade routed through an impact pool
+            is recorded on-chain via the ImpactHook contract. As milestones
+            are verified, you can see the real-world outcomes your
+            contributions helped fund.
+          </p>
+        </div>
       </main>
     </div>
   );

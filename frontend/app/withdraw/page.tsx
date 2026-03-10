@@ -213,6 +213,90 @@ export default function WithdrawPage() {
             </div>
           )}
         </div>
+
+        {/* Demo preview when no pool entered */}
+        {!poolIdInput && (
+          <div className="animate-fade-up delay-200" style={{ marginTop: 24, position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                padding: "3px 8px",
+                borderRadius: 2,
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                background: "rgba(167,139,250,0.1)",
+                color: "var(--accent-violet)",
+                border: "1px solid rgba(167,139,250,0.2)",
+                zIndex: 1,
+              }}
+            >
+              Preview
+            </div>
+            <div className="card" style={{ padding: 24 }}>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
+                Example: Clean Water - Kenya
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+                <div style={{ padding: 16, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (ETH)</div>
+                  <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--accent-emerald)" }}>0.284</div>
+                </div>
+                <div style={{ padding: 16, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (USDC)</div>
+                  <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--accent-emerald)" }}>412.50</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+                <div style={{ flex: 1, padding: 12, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Recipient</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>0x1a2B...9c4D</div>
+                </div>
+                <div style={{ flex: 1, padding: 12, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Current Fee</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>200 bps</div>
+                </div>
+              </div>
+              <button
+                disabled
+                style={{
+                  width: "100%",
+                  padding: "12px 20px",
+                  borderRadius: 2,
+                  border: "1px solid rgba(139,92,246,0.4)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  cursor: "not-allowed",
+                  background: "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))",
+                  color: "var(--text-bright)",
+                  fontFamily: "inherit",
+                  opacity: 0.6,
+                }}
+              >
+                Withdraw 0.284 ETH
+              </button>
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: "10px 14px",
+                  borderRadius: 2,
+                  background: "rgba(34,211,238,0.04)",
+                  border: "1px solid rgba(34,211,238,0.1)",
+                  fontSize: 12,
+                  color: "var(--text-mid)",
+                  lineHeight: 1.5,
+                }}
+              >
+                Enter a Pool ID and currency above to view real accumulated fees and withdraw.
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

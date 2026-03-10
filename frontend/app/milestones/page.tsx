@@ -368,21 +368,7 @@ export default function MilestonesPage() {
           />
         </div>
 
-        {!registered ? (
-          <div
-            className="card animate-fade-up delay-200"
-            style={{
-              padding: 40,
-              textAlign: 'center',
-              color: 'var(--text-dim)',
-              fontSize: 13,
-            }}
-          >
-            {poolIdInput
-              ? 'No project registered for this pool'
-              : 'Enter a Pool ID to view milestones'}
-          </div>
-        ) : (
+        {registered ? (
           <div className="animate-fade-up delay-200" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {isVerifier && (
               <div
@@ -407,6 +393,96 @@ export default function MilestonesPage() {
                 isVerifier={isVerifier}
               />
             ))}
+          </div>
+        ) : (
+          /* Demo milestones preview */
+          <div className="animate-fade-up delay-200" style={{ position: 'relative' }}>
+            <div
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                padding: '3px 8px',
+                borderRadius: 2,
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                background: 'rgba(167,139,250,0.1)',
+                color: 'var(--accent-violet)',
+                border: '1px solid rgba(167,139,250,0.2)',
+                zIndex: 1,
+              }}
+            >
+              Preview
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { desc: "Project registered", fee: 0, verified: true },
+                { desc: "Phase 1 - Equipment sourced & installed", fee: 100, verified: true },
+                { desc: "Phase 2 - 1,000 liters filtered", fee: 200, verified: false },
+                { desc: "Phase 3 - Community self-sustaining", fee: 300, verified: false },
+              ].map((m, i) => (
+                <div
+                  key={i}
+                  className="card"
+                  style={{
+                    padding: 20,
+                    background: m.verified ? 'rgba(52,211,153,0.04)' : 'var(--bg-card)',
+                    borderColor: m.verified ? 'rgba(52,211,153,0.15)' : undefined,
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <div
+                          className={m.verified ? 'milestone-verified' : 'milestone-pending'}
+                          style={{
+                            width: 24, height: 24, borderRadius: 2,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 12, fontWeight: 700,
+                            color: m.verified ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                          }}
+                        >
+                          {m.verified ? '\u2713' : i}
+                        </div>
+                        <span className="font-display" style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-bright)' }}>
+                          {m.desc}
+                        </span>
+                      </div>
+                      <span className="font-data" style={{ fontSize: 13, color: 'var(--text-dim)' }}>
+                        Fee tier: {m.fee} bps
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        padding: '3px 10px', borderRadius: 2,
+                        fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em',
+                        color: m.verified ? 'var(--accent-emerald)' : 'var(--text-dim)',
+                        background: m.verified ? 'rgba(52,211,153,0.08)' : 'var(--bg-elevated)',
+                        border: `1px solid ${m.verified ? 'rgba(52,211,153,0.15)' : 'var(--border-subtle)'}`,
+                      }}
+                    >
+                      {m.verified ? 'Verified' : 'Pending'}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div
+              style={{
+                marginTop: 16,
+                padding: '10px 14px',
+                borderRadius: 2,
+                background: 'rgba(34,211,238,0.04)',
+                border: '1px solid rgba(34,211,238,0.1)',
+                fontSize: 12,
+                color: 'var(--text-mid)',
+                lineHeight: 1.5,
+              }}
+            >
+              Enter a Pool ID above to view real milestone data, or connect your wallet to verify milestones.
+            </div>
           </div>
         )}
       </main>
