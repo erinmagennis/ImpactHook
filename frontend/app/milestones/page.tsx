@@ -296,9 +296,7 @@ function MilestoneCard({
 
 export default function MilestonesPage() {
   const { address, isConnected } = useAccount();
-  // Default to demo project (Clean Water - Chiapas Schools)
-  const DEMO_POOL_ID = "0x1805022333a4a6845aad5145365255f8d8e58423271abc73978eae385b1e06f7";
-  const [poolIdInput, setPoolIdInput] = useState(DEMO_POOL_ID);
+  const [poolIdInput, setPoolIdInput] = useState("");
   const poolId = (poolIdInput ||
     "0x0000000000000000000000000000000000000000000000000000000000000000") as `0x${string}`;
 
@@ -354,7 +352,7 @@ export default function MilestonesPage() {
           </label>
           <input
             type="text"
-            placeholder="0x..."
+            placeholder="0x1805022333a4a6845aad5145365255f8d8e58423271abc73978eae385b1e06f7"
             value={poolIdInput}
             onChange={(e) => setPoolIdInput(e.target.value)}
             style={{
