@@ -6,10 +6,10 @@ import { unichainSepolia } from "../../lib/chains";
 import { formatEther } from "viem";
 import { Navigation } from "../../components/Navigation";
 
-// Demo pool ID - in production this would come from event indexing
-// For now we'll show a "no pools" state until one is registered
+// Pool ID for demo project (Clean Water - Chiapas Schools)
+// Computed from PoolKey: token0=0x01, token1=0x02, fee=3000, tickSpacing=60, hooks=ImpactHook
 const DEMO_POOL_ID =
-  "0x0000000000000000000000000000000000000000000000000000000000000000";
+  "0x1805022333a4a6845aad5145365255f8d8e58423271abc73978eae385b1e06f7";
 
 function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   const { data: projectInfo } = useReadContract({
@@ -87,7 +87,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
               marginBottom: 6,
             }}
           >
-            {showDemo ? "Clean Water - Chiapas Schools" : "Active Pool"}
+            {showDemo ? "Clean Water - Chiapas Schools" : "Clean Water - Chiapas Schools"}
           </div>
           <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>
             {showDemo ? "0xa3f7c2...1b9e04d8" : `${poolId.slice(0, 10)}...${poolId.slice(-8)}`}

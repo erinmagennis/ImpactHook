@@ -62,7 +62,7 @@ export default function ImpactPage() {
             Liquidity with purpose
           </h1>
           <p className="text-[15px] leading-relaxed max-w-2xl" style={{ color: 'var(--text-mid)' }}>
-            45.8% of children in Mexico live in poverty. In Chiapas, 44% of children under 5
+            45.8% of children in Mexico live in poverty. In rural Chiapas, 44% of children under 5
             are stunted. $2.5 trillion in daily crypto trading volume generates zero social
             impact. ImpactHook connects the two.
           </p>

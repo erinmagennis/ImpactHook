@@ -80,7 +80,7 @@ const POOL = {
 const IMPACT_EXAMPLES = [
   {
     title: "Clean Water - Chiapas Schools",
-    description: "Water purification systems for 20 schools in Chiapas, where 44% of children under 5 are stunted from contaminated water.",
+    description: "Water purification systems for 20 schools in rural Chiapas, where 44% of children under 5 are stunted from contaminated water.",
     milestones: ["Baseline water testing", "Systems installed in 20 schools", "3-month quality verification", "Community management trained"],
     category: "WASH",
     accent: "cyan",
