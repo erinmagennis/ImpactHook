@@ -14,7 +14,9 @@ import { unichainSepolia } from "../../lib/chains";
 
 export default function WithdrawPage() {
   const { address, isConnected } = useAccount();
-  const [poolIdInput, setPoolIdInput] = useState("");
+  // Default to demo project (Clean Water - Chiapas Schools)
+  const DEMO_POOL_ID = "0x1805022333a4a6845aad5145365255f8d8e58423271abc73978eae385b1e06f7";
+  const [poolIdInput, setPoolIdInput] = useState(DEMO_POOL_ID);
   const [currencyInput, setCurrencyInput] = useState("");
 
   const poolId = (poolIdInput ||

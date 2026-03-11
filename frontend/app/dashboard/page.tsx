@@ -27,13 +27,28 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   const milestoneCount = projectInfo?.[3];
   const currentFeeBps = projectInfo?.[4];
 
+  const rawTotal = Number(milestoneCount) || 0;
+  const lastIndex = rawTotal > 0 ? rawTotal - 1 : 0;
+
+  // Check if the last milestone is verified (contract doesn't increment
+  // currentMilestone past the last index, so we check directly)
+  const { data: lastMilestoneVerified } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "isMilestoneVerified",
+    args: [poolId, BigInt(lastIndex)],
+    chainId: unichainSepolia.id,
+  });
+
   const showDemo = !registered;
 
   // Demo data for preview when no real pool exists
   const demoRecipient = "0x1a2B...9c4D";
   const demoVerifier = "0x7e8F...3a1B";
-  const demoCurrent = showDemo ? 2 : Number(currentMilestone);
-  const demoTotal = showDemo ? 4 : Number(milestoneCount);
+  const rawCurrent = Number(currentMilestone);
+  const verifiedCount = lastMilestoneVerified ? rawTotal : rawCurrent;
+  const demoCurrent = showDemo ? 2 : verifiedCount;
+  const demoTotal = showDemo ? 4 : rawTotal;
   const demoFee = showDemo ? 200 : (currentFeeBps || 0);
   const demoProgress = demoTotal ? demoCurrent / demoTotal : 0;
 
