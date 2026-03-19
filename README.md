@@ -6,18 +6,31 @@ ImpactHook is a Uniswap v4 hook that creates a new category of liquidity pool wh
 
 This is asset-class specific liquidity: pools with distinct characteristics shaped by milestone-gated funding, cross-chain verification, and performance-based fee progression. Traders self-select into impact-aligned venues. LPs provide liquidity knowing their pools serve a purpose beyond yield. The result is a new DeFi primitive that turns trading volume into measurable social impact.
 
-**LPs earn full yield. Traders choose their impact. Projects get funded when milestones are proven on-chain.**
+**Five funding channels. Three verification paths. All milestone-gated.**
+
+## What's Novel
+
+Most fee-charging hooks make pools less competitive for routing - aggregators skip them for cheaper alternatives. ImpactHook solves this with the **LP fee skim model**: a configurable percentage of LP earnings funds the project, while swap pricing stays identical to regular pools. Routers have no reason to skip it. LPs opt in. Swappers don't pay extra. Impact happens as a byproduct of normal DeFi activity.
+
+**Key features:**
+- **5 funding channels**: swap fees, LP fee skim, native v4 donate skim, direct donations, institutional escrow - all gated by the same milestones
+- **3 verification paths**: direct (EOA/multisig), Reactive Network cross-chain, EAS attestations
+- **Heartbeat expiration**: projects must prove they're still alive or fees stop automatically
+- **Loyalty discounts**: repeat contributors earn reduced swap fees
+- **Project templates**: reusable milestone configurations for common impact verticals
+- **On-chain registry**: project metadata stored on-chain for frontend discovery
+- **Per-project pause**: stop one project without affecting others
 
 ## Why This Matters
 
 $2.5 trillion in daily crypto trading volume generates zero social impact. Meanwhile, traditional impact funding is opaque and slow - grant recipients wait months for disbursement, donors can't verify outcomes, and intermediaries take cuts.
 
 ImpactHook connects these two worlds:
-- **Continuous funding**: Every swap generates fees, not once-a-year grants
+- **Continuous funding**: Every swap and LP fee collection generates funding, not once-a-year grants
 - **Milestone-gated**: No results, no funding. Verification happens on-chain before fees release
-- **Dual-channel**: DeFi swap fees and institutional escrow share the same source of truth
+- **Router-competitive**: LP skim model keeps swap pricing identical to regular pools
 - **Cross-chain**: Milestones can be verified from any supported chain via Reactive Network
-- **Permissionless**: Anyone can create an impact pool for any cause. No gatekeepers
+- **Self-enforcing accountability**: Heartbeat expiration auto-stops dead projects
 
 ## How It Works
 
