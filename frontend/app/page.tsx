@@ -324,7 +324,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════
           SECTION 2: HOW IT WORKS
           ═══════════════════════════════════════════ */}
-      <div className="section-warm">
+      <div style={{ background: "var(--bg-primary)" }}>
         <section
           style={{
             maxWidth: 1120,
@@ -430,7 +430,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════
           SECTION 3: ACCOUNTABILITY
           ═══════════════════════════════════════════ */}
-      <div className="section-cool">
+      <div style={{ background: "var(--bg-primary)" }}>
         <section
           style={{
             maxWidth: 1120,
