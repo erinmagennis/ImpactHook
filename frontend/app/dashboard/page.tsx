@@ -308,7 +308,7 @@ export default function DashboardPage() {
   const { isConnected } = useAccount();
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
+    <div style={{ minHeight: "100vh", background: "transparent" }}>
       <Navigation />
       <main style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 24px" }}>
         <div className="animate-fade-up" style={{ marginBottom: 32 }}>

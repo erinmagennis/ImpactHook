@@ -53,7 +53,7 @@ html {
 }
 
 body {
-  background: var(--bg-primary);
+  background: linear-gradient(180deg, #f0fdfa 0%, var(--bg-primary) 400px);
   color: var(--text-primary);
   font-family: 'Geist Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;

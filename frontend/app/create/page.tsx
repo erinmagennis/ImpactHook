@@ -95,7 +95,7 @@ export default function CreateProjectPage() {
   const isEnabled = isOwner && hasAllFields && !isLoading;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
+    <div style={{ minHeight: "100vh", background: "transparent" }}>
       <Navigation />
       <main style={{ maxWidth: 580, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ marginBottom: 32 }}>

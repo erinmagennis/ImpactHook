@@ -46,7 +46,7 @@ function MilestoneProof({ index, name, status, proof, date, feeBps }: {
 
 export default function ImpactPage() {
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
+    <div style={{ minHeight: "100vh", background: "transparent" }}>
       <Navigation />
       <main style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
 

@@ -99,7 +99,7 @@ export default function DonatePage() {
     : "0";
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
+    <div style={{ minHeight: "100vh", background: "transparent" }}>
       <Navigation />
       <main style={{ maxWidth: 520, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ marginBottom: 32 }}>
