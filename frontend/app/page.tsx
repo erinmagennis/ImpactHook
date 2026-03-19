@@ -415,12 +415,6 @@ export default function LandingPage() {
                 >
                   {step.description}
                 </p>
-                <div className="metric-bar">
-                  <div
-                    className="metric-bar-fill"
-                    style={{ width: step.barWidth }}
-                  />
-                </div>
               </div>
             ))}
           </div>
