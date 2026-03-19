@@ -230,7 +230,7 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
 
           <div className="card p-6" style={{ marginBottom: 16 }}>
             <div className="flex items-center gap-4 mb-6">
-              <div className="font-data text-3xl" style={{ color: 'var(--success)' }}>147</div>
+              <div className="font-data text-3xl" style={{ color: 'var(--success)' }}>155</div>
               <div>
                 <div className="text-[13px]" style={{ color: 'var(--text-primary)' }}>tests passing</div>
                 <div className="text-[11px]" style={{ color: 'var(--text-dim)' }}>0 failed, 0 skipped</div>

@@ -60,18 +60,24 @@ Each pool has a `Project` config with:
 
 | Contract | Description |
 |----------|-------------|
-| `ImpactHook.sol` | Core Uniswap v4 hook - fee routing, milestone tracking, withdrawal, cross-chain callback handler |
+| `ImpactHook.sol` | Core Uniswap v4 hook - swap fee routing, LP fee skim, afterDonate skim, milestone tracking, loyalty discounts, project templates, heartbeat expiration, per-project pause, on-chain project registry |
 | `MilestoneArbiter.sol` | Alkahest IArbiter - gates escrow release on milestone verification |
 | `MilestoneReactor.sol` | Reactive Network RSC - subscribes to origin chain events, emits cross-chain callbacks |
 | `MilestoneOracle.sol` | Origin chain event emitter - milestone submissions trigger the cross-chain flow |
 
-### Two Funding Channels, One Source of Truth
+### Multiple Funding Channels, One Source of Truth
 
 1. **Swap fees** (DeFi-native): The hook charges a small fee on swap output via `afterSwapReturnDelta`. Continuous funding from trading activity.
 
-2. **Grant escrow** (institutional): Integration with [Alkahest](https://github.com/arkhai-io/alkahest) (Zellic-audited) escrow. `MilestoneArbiter` reads milestone state from the hook to gate escrow release.
+2. **LP fee skim**: A configurable percentage of LP fees is routed to the project when LPs collect earnings. Swap pricing stays competitive for router aggregation.
 
-Both channels are gated by the same on-chain milestone state.
+3. **Native v4 donate skim**: When someone tips LPs via `PoolManager.donate()`, a percentage is routed to the project via `afterDonate`.
+
+4. **Direct donations**: Anyone can donate ERC20 or native ETH directly to a project's fund.
+
+5. **Grant escrow** (institutional): Integration with [Alkahest](https://github.com/arkhai-io/alkahest) (Zellic-audited) escrow. `MilestoneArbiter` reads milestone state from the hook to gate escrow release.
+
+All channels are gated by the same on-chain milestone state, heartbeat expiration, and per-project pause controls.
 
 ### Cross-Chain Milestone Verification
 
@@ -157,8 +163,8 @@ The LP skim makes impact pools viable even in a fully agentic routing environmen
 ## Quick Start
 
 ```shell
-forge test         # 130 tests, all passing
-forge coverage     # 93%+ line coverage on core hook, 100% on supporting contracts
+forge test         # 155 tests, all passing
+forge coverage     # 94%+ line coverage on core hook, 100% on supporting contracts
 ```
 
 Frontend (live at [impacthook.vercel.app](https://impacthook.vercel.app)):
@@ -180,7 +186,7 @@ forge build
 forge test
 ```
 
-130 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
+155 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
 
 
 ### Deploy (Unichain Sepolia)
