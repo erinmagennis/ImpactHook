@@ -90,7 +90,7 @@ export default function WithdrawPage() {
             <label style={labelStyle}>POOL ID</label>
             <input
               type="text"
-              placeholder="0x1805022333a4a6845aad5145365255f8d8e58423271abc73978eae385b1e06f7"
+              placeholder="0x8aacd18e0dedc2317591fd43b6bd25d5ee9268950181bb6b34a5550b06b215db"
               value={poolIdInput}
               onChange={(e) => setPoolIdInput(e.target.value)}
               style={inputStyle}

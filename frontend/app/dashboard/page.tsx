@@ -9,7 +9,7 @@ import { Navigation } from "../../components/Navigation";
 // Pool ID for demo project (Clean Water - Chiapas Schools)
 // Computed from PoolKey: token0=0x01, token1=0x02, fee=3000, tickSpacing=60, hooks=ImpactHook
 const DEMO_POOL_ID =
-  "0x1805022333a4a6845aad5145365255f8d8e58423271abc73978eae385b1e06f7";
+  "0x8aacd18e0dedc2317591fd43b6bd25d5ee9268950181bb6b34a5550b06b215db";
 
 function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   const { data: projectInfo } = useReadContract({
