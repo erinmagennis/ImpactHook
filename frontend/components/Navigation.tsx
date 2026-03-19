@@ -3,21 +3,98 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 
-const navItems = [
-  { href: "/swap", label: "Swap" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/milestones", label: "Milestones" },
-  { href: "/withdraw", label: "Withdraw" },
-  { href: "/donate", label: "Donate" },
-  { href: "/create", label: "Create" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/impact", label: "Impact" },
-  { href: "/technical", label: "Technical" },
-];
+type Role = "trader" | "project" | "sponsor" | "explore";
+
+const roleConfig: Record<
+  Role,
+  { label: string; description: string; nav: { href: string; label: string }[] }
+> = {
+  trader: {
+    label: "Trader",
+    description: "Swap tokens, fund impact automatically",
+    nav: [
+      { href: "/swap", label: "Swap" },
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/donate", label: "Donate" },
+    ],
+  },
+  project: {
+    label: "Project",
+    description: "Register, verify milestones, withdraw",
+    nav: [
+      { href: "/create", label: "Create" },
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/milestones", label: "Milestones" },
+      { href: "/withdraw", label: "Withdraw" },
+    ],
+  },
+  sponsor: {
+    label: "LP / Sponsor",
+    description: "Provide liquidity, fund impact through yield",
+    nav: [
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/swap", label: "Swap" },
+      { href: "/donate", label: "Donate" },
+    ],
+  },
+  explore: {
+    label: "Explore All",
+    description: "See everything",
+    nav: [
+      { href: "/swap", label: "Swap" },
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/milestones", label: "Milestones" },
+      { href: "/withdraw", label: "Withdraw" },
+      { href: "/donate", label: "Donate" },
+      { href: "/create", label: "Create" },
+      { href: "/impact", label: "Impact" },
+      { href: "/technical", label: "Technical" },
+    ],
+  },
+};
+
+const roleOrder: Role[] = ["trader", "project", "sponsor", "explore"];
+
+const roleColors: Record<Role, string> = {
+  trader: "var(--accent-cyan)",
+  project: "var(--accent-emerald)",
+  sponsor: "var(--accent-violet)",
+  explore: "var(--text-mid)",
+};
 
 export function Navigation() {
   const pathname = usePathname();
+  const [role, setRole] = useState<Role>("explore");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load saved role
+  useEffect(() => {
+    const saved = localStorage.getItem("impacthook-role") as Role | null;
+    if (saved && roleConfig[saved]) setRole(saved);
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selectRole = (r: Role) => {
+    setRole(r);
+    localStorage.setItem("impacthook-role", r);
+    setDropdownOpen(false);
+  };
+
+  const currentRole = roleConfig[role];
+  const color = roleColors[role];
 
   return (
     <nav
@@ -41,7 +118,7 @@ export function Navigation() {
           height: 64,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           <Link
             href="/"
             className="font-display"
@@ -55,8 +132,102 @@ export function Navigation() {
           >
             <span className="text-hero-gradient">Impact</span>Hook
           </Link>
+
+          {/* Role selector */}
+          <div ref={dropdownRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 12px",
+                borderRadius: 2,
+                border: `1px solid ${color}33`,
+                background: `${color}0d`,
+                color: color,
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                transition: "all 0.15s",
+              }}
+            >
+              {currentRole.label}
+              <span style={{ fontSize: 9, opacity: 0.7 }}>
+                {dropdownOpen ? "\u25B2" : "\u25BC"}
+              </span>
+            </button>
+
+            {dropdownOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 6px)",
+                  left: 0,
+                  minWidth: 220,
+                  borderRadius: 2,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "var(--bg-card)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                  overflow: "hidden",
+                }}
+              >
+                {roleOrder.map((r) => {
+                  const rc = roleConfig[r];
+                  const isSelected = r === role;
+                  const rColor = roleColors[r];
+                  return (
+                    <button
+                      key={r}
+                      onClick={() => selectRole(r)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "10px 14px",
+                        border: "none",
+                        borderLeft: isSelected
+                          ? `2px solid ${rColor}`
+                          : "2px solid transparent",
+                        background: isSelected
+                          ? `${rColor}0d`
+                          : "transparent",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        fontFamily: "inherit",
+                        transition: "all 0.1s",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: isSelected ? rColor : "var(--text-bright)",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {rc.label}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: "var(--text-dim)",
+                        }}
+                      >
+                        {rc.description}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Nav links for current role */}
           <div style={{ display: "flex", gap: 4 }}>
-            {navItems.map((item) => {
+            {currentRole.nav.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -72,7 +243,9 @@ export function Navigation() {
                     backgroundColor: isActive
                       ? "rgba(99,102,241,0.15)"
                       : "transparent",
-                    border: isActive ? "1px solid rgba(99,102,241,0.2)" : "1px solid transparent",
+                    border: isActive
+                      ? "1px solid rgba(99,102,241,0.2)"
+                      : "1px solid transparent",
                     textDecoration: "none",
                     transition: "all 0.15s",
                   }}

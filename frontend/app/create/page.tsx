@@ -111,7 +111,9 @@ export default function CreateProjectPage() {
             Create Project
           </h1>
           <p style={{ fontSize: 13, color: "var(--text-mid)" }}>
-            Register a new impact project for a Uniswap v4 pool. Owner only.
+            Register a new impact project for a Uniswap v4 pool. Currently
+            owner-gated for safety. Permissionless registration is on the
+            roadmap.
           </p>
         </div>
 
@@ -345,6 +347,25 @@ export default function CreateProjectPage() {
                       : "Register Project"}
             </button>
           </div>
+
+          {isConnected && !isOwner && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: "10px 14px",
+                borderRadius: 2,
+                background: "rgba(251,191,36,0.06)",
+                border: "1px solid rgba(251,191,36,0.15)",
+                color: "var(--accent-amber)",
+                fontSize: 12,
+                lineHeight: 1.5,
+              }}
+            >
+              Project registration is currently restricted to the hook owner
+              for quality control. Connect the owner wallet to register, or
+              contact the team to have your project added.
+            </div>
+          )}
 
           {isSuccess && (
             <div

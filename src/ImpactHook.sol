@@ -85,6 +85,12 @@ contract ImpactHook is IHooks {
     event LpFeesSkimmed(PoolId indexed poolId, Currency indexed currency, uint256 amount);
     /// @notice Emitted when the LP skim rate is set for a project
     event LpSkimBpsSet(PoolId indexed poolId, uint16 lpSkimBps);
+    /// @notice Emitted when a project is paused or unpaused
+    event ProjectPausedStateChanged(PoolId indexed poolId, bool paused);
+    /// @notice Emitted when a project sends a heartbeat (proof of life)
+    event Heartbeat(PoolId indexed poolId, uint256 timestamp);
+    /// @notice Emitted when a project's heartbeat interval is updated
+    event HeartbeatIntervalSet(PoolId indexed poolId, uint256 interval);
 
     // ──────────────────── Constants ────────────────────
 
@@ -105,6 +111,8 @@ contract ImpactHook is IHooks {
         bool registered;        // slot 0: 1 byte (packed with recipient)
         address verifier;       // slot 1: 20 bytes
         uint96 currentMilestone; // slot 1: 12 bytes (packed with verifier, max 2^96 milestones)
+        uint256 lastHeartbeat;  // slot 2: timestamp of last proof-of-life
+        uint256 heartbeatInterval; // slot 3: max time between heartbeats (0 = no expiration)
     }
 
     struct ProjectTemplate {
@@ -150,6 +158,8 @@ contract ImpactHook is IHooks {
     mapping(PoolId => LoyaltyTier[]) public loyaltyTiers;
     // LP fee skim percentage per pool (bps of LP fees routed to project, max 5000 = 50%)
     mapping(PoolId => uint16) public lpSkimBps;
+    // Per-project pause (stops fee collection for a single project without affecting others)
+    mapping(PoolId => bool) public projectPaused;
 
     // ──────────────────── Modifiers ────────────────────
 
@@ -241,7 +251,9 @@ contract ImpactHook is IHooks {
             recipient: recipient,
             registered: true,
             verifier: verifier,
-            currentMilestone: 0
+            currentMilestone: 0,
+            lastHeartbeat: block.timestamp,
+            heartbeatInterval: 0
         });
 
         for (uint256 i = 0; i < descriptions.length; ++i) {
@@ -279,12 +291,17 @@ contract ImpactHook is IHooks {
         BalanceDelta delta,
         bytes calldata
     ) external override onlyPoolManager returns (bytes4, int128) {
-        // If paused, skip fee collection
+        // If globally paused, skip fee collection
         if (paused) {
             return (this.afterSwap.selector, 0);
         }
 
         PoolId poolId = key.toId();
+
+        // If this project is paused or heartbeat expired, skip fee collection
+        if (projectPaused[poolId] || _isHeartbeatExpired(poolId)) {
+            return (this.afterSwap.selector, 0);
+        }
 
         // Get current fee rate
         uint16 feeBps = _getCurrentFeeBps(poolId);
@@ -368,6 +385,7 @@ contract ImpactHook is IHooks {
             project.currentMilestone = uint96(milestoneIndex + 1);
         }
 
+        project.lastHeartbeat = block.timestamp; // milestone verification refreshes heartbeat
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
     }
 
@@ -396,6 +414,7 @@ contract ImpactHook is IHooks {
             project.currentMilestone = uint96(milestoneIndex + 1);
         }
 
+        project.lastHeartbeat = block.timestamp; // milestone verification refreshes heartbeat
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
     }
 
@@ -436,6 +455,7 @@ contract ImpactHook is IHooks {
             project.currentMilestone = uint96(milestoneIndex + 1);
         }
 
+        project.lastHeartbeat = block.timestamp; // milestone verification refreshes heartbeat
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
     }
 
@@ -550,7 +570,9 @@ contract ImpactHook is IHooks {
             recipient: recipient,
             registered: true,
             verifier: verifier,
-            currentMilestone: 0
+            currentMilestone: 0,
+            lastHeartbeat: block.timestamp,
+            heartbeatInterval: 0
         });
 
         for (uint256 i = 0; i < t.descriptions.length; ++i) {
@@ -593,6 +615,30 @@ contract ImpactHook is IHooks {
         emit LoyaltyDiscountSet(poolId, thresholds, discountBps);
     }
 
+    // ──────────────────── Heartbeat (Proof of Life) ────────────────────
+
+    /// @notice Send a heartbeat to prove the project is still active.
+    /// Callable by the project recipient or verifier. Resets the expiration timer.
+    /// @param poolId The pool ID
+    function heartbeat(PoolId poolId) external {
+        Project storage project = projects[poolId];
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+        if (msg.sender != project.recipient && msg.sender != project.verifier) revert ImpactHook__NotVerifier();
+
+        project.lastHeartbeat = block.timestamp;
+        emit Heartbeat(poolId, block.timestamp);
+    }
+
+    /// @notice Set the heartbeat interval for a project. Only callable by owner.
+    /// If a project doesn't send a heartbeat within this interval, fees stop automatically.
+    /// Set to 0 to disable expiration.
+    /// @param poolId The pool ID
+    /// @param interval The heartbeat interval in seconds (e.g., 30 days = 2592000)
+    function setHeartbeatInterval(PoolId poolId, uint256 interval) external onlyOwner {
+        projects[poolId].heartbeatInterval = interval;
+        emit HeartbeatIntervalSet(poolId, interval);
+    }
+
     // ──────────────────── LP Fee Skim ────────────────────
 
     /// @notice Set the LP fee skim rate for a pool. A percentage of LP fees collected
@@ -621,12 +667,21 @@ contract ImpactHook is IHooks {
         milestoneSchemaUID = _schemaUID;
     }
 
-    /// @notice Pause or unpause fee collection. Only callable by owner.
+    /// @notice Pause or unpause fee collection globally. Only callable by owner.
     /// When paused, afterSwap returns 0 fee. Existing accumulated fees can still be withdrawn.
     /// @param _paused Whether to pause
     function setPaused(bool _paused) external onlyOwner {
         paused = _paused;
         emit PausedStateChanged(_paused);
+    }
+
+    /// @notice Pause or unpause fee collection for a single project. Only callable by owner.
+    /// Allows stopping a compromised or abandoned project without affecting others.
+    /// @param poolId The pool ID
+    /// @param _paused Whether to pause this project
+    function setProjectPaused(PoolId poolId, bool _paused) external onlyOwner {
+        projectPaused[poolId] = _paused;
+        emit ProjectPausedStateChanged(poolId, _paused);
     }
 
     /// @notice Initiate ownership transfer (2-step). Only callable by current owner.
@@ -806,14 +861,21 @@ contract ImpactHook is IHooks {
         return 0;
     }
 
+    /// @dev Check if a project's heartbeat has expired
+    function _isHeartbeatExpired(PoolId poolId) internal view returns (bool) {
+        Project storage project = projects[poolId];
+        if (project.heartbeatInterval == 0) return false; // no expiration
+        return block.timestamp > project.lastHeartbeat + project.heartbeatInterval;
+    }
+
     /// @dev Skim a percentage of LP fees for the impact project.
     /// Returns a BalanceDelta representing the hook's take (positive = hook takes).
     function _skimLpFees(PoolKey calldata key, BalanceDelta feesAccrued) internal returns (BalanceDelta) {
         PoolId poolId = key.toId();
         uint16 skimBps = lpSkimBps[poolId];
 
-        // No skim configured or paused - return zero delta
-        if (skimBps == 0 || paused) {
+        // No skim configured, paused, project paused, expired, or no milestones verified
+        if (skimBps == 0 || paused || projectPaused[poolId] || _isHeartbeatExpired(poolId) || _getCurrentFeeBps(poolId) == 0) {
             return BalanceDeltaLibrary.ZERO_DELTA;
         }
 
