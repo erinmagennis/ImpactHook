@@ -78,7 +78,7 @@ contract DeployLivePoolScript is Script {
         fees[2] = 200;
         fees[3] = 300;
 
-        ImpactHook(HOOK).registerProject(key, msg.sender, msg.sender, descriptions, fees);
+        ImpactHook(HOOK).registerProject(key, msg.sender, msg.sender, "Clean Water - Chiapas Schools", "Climate", descriptions, fees);
 
         console.log("Pool ID:");
         console.logBytes32(PoolId.unwrap(poolId));

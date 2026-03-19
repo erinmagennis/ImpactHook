@@ -80,7 +80,7 @@ contract DemoRegister is DemoBase {
         console.log("  Project: Clean Water - Chiapas Schools");
 
         vm.startBroadcast();
-        ImpactHook(HOOK).registerProject(key, deployer, deployer, descriptions, fees);
+        ImpactHook(HOOK).registerProject(key, deployer, deployer, "Clean Water - Chiapas Schools", "Climate", descriptions, fees);
         vm.stopBroadcast();
 
         console.log("Project registered successfully!");

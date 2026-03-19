@@ -5,12 +5,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
-type Role = "trader" | "project" | "sponsor" | "explore";
+type Role = "none" | "trader" | "project" | "sponsor" | "learn";
 
 const roleConfig: Record<
   Role,
   { label: string; description: string; nav: { href: string; label: string }[] }
 > = {
+  none: {
+    label: "I'm a...",
+    description: "",
+    nav: [
+      { href: "/swap", label: "Swap" },
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/donate", label: "Donate" },
+      { href: "/impact", label: "Impact" },
+      { href: "/technical", label: "Technical" },
+    ],
+  },
   trader: {
     label: "Trader",
     description: "Swap tokens, fund impact automatically",
@@ -21,8 +32,8 @@ const roleConfig: Record<
     ],
   },
   project: {
-    label: "Project",
-    description: "Register, verify milestones, withdraw",
+    label: "Project Owner",
+    description: "Register, verify milestones, withdraw funds",
     nav: [
       { href: "/create", label: "Create" },
       { href: "/dashboard", label: "Dashboard" },
@@ -39,44 +50,38 @@ const roleConfig: Record<
       { href: "/donate", label: "Donate" },
     ],
   },
-  explore: {
-    label: "Explore All",
-    description: "See everything",
+  learn: {
+    label: "Learn More",
+    description: "How ImpactHook works",
     nav: [
-      { href: "/swap", label: "Swap" },
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/milestones", label: "Milestones" },
-      { href: "/withdraw", label: "Withdraw" },
-      { href: "/donate", label: "Donate" },
-      { href: "/create", label: "Create" },
       { href: "/impact", label: "Impact" },
       { href: "/technical", label: "Technical" },
+      { href: "/dashboard", label: "Dashboard" },
     ],
   },
 };
 
-const roleOrder: Role[] = ["trader", "project", "sponsor", "explore"];
+const roleOrder: Role[] = ["trader", "project", "sponsor", "learn"];
 
 const roleColors: Record<Role, string> = {
+  none: "var(--text-dim)",
   trader: "var(--accent-cyan)",
   project: "var(--accent-emerald)",
   sponsor: "var(--accent-violet)",
-  explore: "var(--text-mid)",
+  learn: "var(--accent-amber)",
 };
 
 export function Navigation() {
   const pathname = usePathname();
-  const [role, setRole] = useState<Role>("explore");
+  const [role, setRole] = useState<Role>("none");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load saved role
   useEffect(() => {
     const saved = localStorage.getItem("impacthook-role") as Role | null;
     if (saved && roleConfig[saved]) setRole(saved);
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -116,9 +121,10 @@ export function Navigation() {
           alignItems: "center",
           justifyContent: "space-between",
           height: 64,
+          gap: 16,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: 0 }}>
           <Link
             href="/"
             className="font-display"
@@ -128,13 +134,14 @@ export function Navigation() {
               color: "#fff",
               textDecoration: "none",
               letterSpacing: "-0.02em",
+              flexShrink: 0,
             }}
           >
             <span className="text-hero-gradient">Impact</span>Hook
           </Link>
 
           {/* Role selector */}
-          <div ref={dropdownRef} style={{ position: "relative" }}>
+          <div ref={dropdownRef} style={{ position: "relative", flexShrink: 0 }}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               style={{
@@ -143,9 +150,9 @@ export function Navigation() {
                 gap: 6,
                 padding: "5px 12px",
                 borderRadius: 2,
-                border: `1px solid ${color}33`,
-                background: `${color}0d`,
-                color: color,
+                border: role === "none" ? "1px solid rgba(255,255,255,0.12)" : `1px solid ${color}33`,
+                background: role === "none" ? "rgba(255,255,255,0.04)" : `${color}0d`,
+                color: role === "none" ? "var(--text-mid)" : color,
                 fontSize: 11,
                 fontWeight: 600,
                 letterSpacing: "0.1em",
@@ -153,6 +160,7 @@ export function Navigation() {
                 cursor: "pointer",
                 fontFamily: "inherit",
                 transition: "all 0.15s",
+                whiteSpace: "nowrap",
               }}
             >
               {currentRole.label}
@@ -167,7 +175,7 @@ export function Navigation() {
                   position: "absolute",
                   top: "calc(100% + 6px)",
                   left: 0,
-                  minWidth: 220,
+                  minWidth: 240,
                   borderRadius: 2,
                   border: "1px solid rgba(255,255,255,0.08)",
                   background: "var(--bg-card)",
@@ -210,12 +218,7 @@ export function Navigation() {
                       >
                         {rc.label}
                       </div>
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: "var(--text-dim)",
-                        }}
-                      >
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
                         {rc.description}
                       </div>
                     </button>
@@ -226,7 +229,7 @@ export function Navigation() {
           </div>
 
           {/* Nav links for current role */}
-          <div style={{ display: "flex", gap: 4 }}>
+          <div style={{ display: "flex", gap: 4, overflow: "hidden" }}>
             {currentRole.nav.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -234,7 +237,7 @@ export function Navigation() {
                   key={item.href}
                   href={item.href}
                   style={{
-                    padding: "6px 14px",
+                    padding: "6px 12px",
                     borderRadius: 2,
                     fontSize: 13,
                     fontWeight: 500,
@@ -248,6 +251,7 @@ export function Navigation() {
                       : "1px solid transparent",
                     textDecoration: "none",
                     transition: "all 0.15s",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {item.label}
@@ -256,11 +260,13 @@ export function Navigation() {
             })}
           </div>
         </div>
-        <ConnectButton
-          chainStatus="icon"
-          accountStatus="address"
-          showBalance={false}
-        />
+        <div style={{ flexShrink: 0 }}>
+          <ConnectButton
+            chainStatus="icon"
+            accountStatus="address"
+            showBalance={false}
+          />
+        </div>
       </div>
     </nav>
   );

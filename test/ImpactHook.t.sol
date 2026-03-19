@@ -49,6 +49,7 @@ contract ImpactHookTest is Test, Deployers {
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG
             | Hooks.AFTER_ADD_LIQUIDITY_FLAG | Hooks.AFTER_REMOVE_LIQUIDITY_FLAG
             | Hooks.AFTER_ADD_LIQUIDITY_RETURNS_DELTA_FLAG | Hooks.AFTER_REMOVE_LIQUIDITY_RETURNS_DELTA_FLAG
+            | Hooks.AFTER_DONATE_FLAG
         );
         address hookAddress = address(flags);
 
@@ -85,7 +86,7 @@ contract ImpactHookTest is Test, Deployers {
         poolId = poolKey.toId();
 
         // Register project, then initialize pool
-        hook.registerProject(poolKey, recipient, verifier, descriptions, feeBpsValues);
+        hook.registerProject(poolKey, recipient, verifier, "Clean Water - Chiapas", "Climate", descriptions, feeBpsValues);
         manager.initialize(poolKey, SQRT_PRICE_1_1);
 
         // Add liquidity
@@ -115,7 +116,7 @@ contract ImpactHookTest is Test, Deployers {
 
     function test_revert_doubleRegister() public {
         vm.expectRevert(ImpactHook.ImpactHook__ProjectAlreadyRegistered.selector);
-        hook.registerProject(poolKey, recipient, verifier, descriptions, feeBpsValues);
+        hook.registerProject(poolKey, recipient, verifier, "Clean Water - Chiapas", "Climate", descriptions, feeBpsValues);
     }
 
     function test_revert_initWithoutRegistration() public {
@@ -147,7 +148,7 @@ contract ImpactHookTest is Test, Deployers {
         fees[0] = 501; // Over MAX_FEE_BPS (500)
 
         vm.expectRevert(ImpactHook.ImpactHook__FeeBpsTooHigh.selector);
-        hook.registerProject(newKey, recipient, verifier, desc, fees);
+        hook.registerProject(newKey, recipient, verifier, "Test Project", "Education", desc, fees);
     }
 
     function test_revert_noMilestones() public {
@@ -163,7 +164,7 @@ contract ImpactHookTest is Test, Deployers {
         uint16[] memory fees = new uint16[](0);
 
         vm.expectRevert(ImpactHook.ImpactHook__NoMilestones.selector);
-        hook.registerProject(newKey, recipient, verifier, desc, fees);
+        hook.registerProject(newKey, recipient, verifier, "Test Project", "Education", desc, fees);
     }
 
     function test_revert_registerProject_notOwner() public {
@@ -182,7 +183,7 @@ contract ImpactHookTest is Test, Deployers {
 
         vm.prank(alice);
         vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
-        hook.registerProject(newKey, recipient, verifier, desc, fees);
+        hook.registerProject(newKey, recipient, verifier, "Test Project", "Education", desc, fees);
     }
 
     function test_revert_registerProject_zeroRecipient() public {
@@ -200,7 +201,7 @@ contract ImpactHookTest is Test, Deployers {
         fees[0] = 100;
 
         vm.expectRevert(ImpactHook.ImpactHook__ZeroAddress.selector);
-        hook.registerProject(newKey, address(0), verifier, desc, fees);
+        hook.registerProject(newKey, address(0), verifier, "Test", "Test", desc, fees);
     }
 
     // ────────── Swap + Fee Tests ──────────
@@ -341,7 +342,7 @@ contract ImpactHookTest is Test, Deployers {
         fees2[0] = 100; // 1% from the start
         fees2[1] = 400; // 4% after milestone 1
 
-        hook.registerProject(poolKey2, recipient2, verifier2, desc2, fees2);
+        hook.registerProject(poolKey2, recipient2, verifier2, "Solar Schools", "Energy", desc2, fees2);
         manager.initialize(poolKey2, SQRT_PRICE_1_1);
 
         modifyLiquidityRouter.modifyLiquidity(
@@ -668,7 +669,7 @@ contract ImpactHookTest is Test, Deployers {
         uint16[] memory fees = new uint16[](1);
         fees[0] = feeBps;
 
-        hook.registerProject(newKey, recipient, verifier, desc, fees);
+        hook.registerProject(newKey, recipient, verifier, "Test Project", "Education", desc, fees);
         manager.initialize(newKey, SQRT_PRICE_1_1);
 
         modifyLiquidityRouter.modifyLiquidity(
@@ -1309,7 +1310,7 @@ contract ImpactHookTest is Test, Deployers {
         fees[0] = 100;
 
         vm.expectRevert(ImpactHook.ImpactHook__NoMilestones.selector);
-        hook.registerProject(newKey, recipient, verifier, desc, fees);
+        hook.registerProject(newKey, recipient, verifier, "Test Project", "Education", desc, fees);
     }
 
     function test_registerProject_zeroVerifier() public {
@@ -1327,7 +1328,7 @@ contract ImpactHookTest is Test, Deployers {
         fees[0] = 100;
 
         vm.expectRevert(ImpactHook.ImpactHook__ZeroAddress.selector);
-        hook.registerProject(newKey, recipient, address(0), desc, fees);
+        hook.registerProject(newKey, recipient, address(0), "Test", "Test", desc, fees);
     }
 
     function test_registerProject_maxFeeExactly500() public {
@@ -1344,7 +1345,7 @@ contract ImpactHookTest is Test, Deployers {
         uint16[] memory fees = new uint16[](1);
         fees[0] = 500; // Exactly at cap
 
-        hook.registerProject(newKey, recipient, verifier, desc, fees);
+        hook.registerProject(newKey, recipient, verifier, "Test Project", "Education", desc, fees);
         PoolId newPoolId = newKey.toId();
         (,,,,uint16 fee, bool reg) = hook.getProjectInfo(newPoolId);
         assertTrue(reg);
@@ -1725,7 +1726,7 @@ contract ImpactHookTest is Test, Deployers {
         });
         PoolId newPoolId = newKey.toId();
 
-        hook.registerProjectFromTemplate(newKey, recipient, verifier, 0);
+        hook.registerProjectFromTemplate(newKey, recipient, verifier, "Climate Project", "Climate", 0);
 
         (address r, address v, uint256 cm, uint256 mc, uint16 fb, bool reg) = hook.getProjectInfo(newPoolId);
         assertEq(r, recipient);
@@ -1746,7 +1747,7 @@ contract ImpactHookTest is Test, Deployers {
         });
 
         vm.expectRevert(ImpactHook.ImpactHook__TemplateNotFound.selector);
-        hook.registerProjectFromTemplate(newKey, recipient, verifier, 0);
+        hook.registerProjectFromTemplate(newKey, recipient, verifier, "Climate Project", "Climate", 0);
     }
 
     function test_revert_registerFromTemplate_alreadyRegistered() public {
@@ -1758,7 +1759,7 @@ contract ImpactHookTest is Test, Deployers {
 
         // poolKey is already registered in setUp
         vm.expectRevert(ImpactHook.ImpactHook__ProjectAlreadyRegistered.selector);
-        hook.registerProjectFromTemplate(poolKey, recipient, verifier, 0);
+        hook.registerProjectFromTemplate(poolKey, recipient, verifier, "Duplicate", "Test", 0);
     }
 
     function test_revert_registerFromTemplate_notOwner() public {
@@ -1778,7 +1779,7 @@ contract ImpactHookTest is Test, Deployers {
 
         vm.prank(alice);
         vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
-        hook.registerProjectFromTemplate(newKey, recipient, verifier, 0);
+        hook.registerProjectFromTemplate(newKey, recipient, verifier, "Climate Project", "Climate", 0);
     }
 
     function test_revert_getTemplate_notFound() public {
@@ -2024,7 +2025,7 @@ contract ImpactHookTest is Test, Deployers {
         f[0] = 0;
         f[1] = 1; // 1 bps = 0.01%
 
-        hook.registerProject(lowFeeKey, recipient, verifier, d, f);
+        hook.registerProject(lowFeeKey, recipient, verifier, "Low Fee Test", "Test", d, f);
         manager.initialize(lowFeeKey, SQRT_PRICE_1_1);
         modifyLiquidityRouter.modifyLiquidity(
             lowFeeKey,
@@ -2281,6 +2282,70 @@ contract ImpactHookTest is Test, Deployers {
         assertEq(hook.accumulatedFees(poolId, currency0), feesBefore0, "No skim when heartbeat expired");
     }
 
+    // ────────── Project Metadata Tests ──────────
+
+    function test_projectMetadata() public view {
+        (string memory name, string memory category, string memory imageUrl) = hook.getProjectMetadata(poolId);
+        assertEq(name, "Clean Water - Chiapas");
+        assertEq(category, "Climate");
+        assertEq(bytes(imageUrl).length, 0);
+    }
+
+    function test_updateProjectMetadata() public {
+        vm.prank(recipient);
+        hook.updateProjectMetadata(poolId, "Updated Name", "Education", "https://example.com/img.png");
+        (string memory name, string memory category, string memory imageUrl) = hook.getProjectMetadata(poolId);
+        assertEq(name, "Updated Name");
+        assertEq(category, "Education");
+        assertEq(imageUrl, "https://example.com/img.png");
+    }
+
+    function test_revert_updateMetadata_notRecipient() public {
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotProjectRecipient.selector);
+        hook.updateProjectMetadata(poolId, "Bad", "Bad", "");
+    }
+
+    function test_registeredPoolsRegistry() public view {
+        assertEq(hook.getRegisteredPoolCount(), 1);
+        PoolId registeredId = hook.getRegisteredPool(0);
+        assertEq(PoolId.unwrap(registeredId), PoolId.unwrap(poolId));
+    }
+
+    function test_registeredPoolsGrowsOnRegister() public {
+        PoolKey memory newKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+        string[] memory d = new string[](1);
+        d[0] = "Test";
+        uint16[] memory f = new uint16[](1);
+        f[0] = 100;
+        hook.registerProject(newKey, recipient, verifier, "New Project", "Health", d, f);
+        assertEq(hook.getRegisteredPoolCount(), 2);
+    }
+
+    // ────────── Donate Skim Tests ──────────
+
+    function test_setDonateSkimBps() public {
+        hook.setDonateSkimBps(poolId, 1000);
+        assertEq(hook.donateSkimBps(poolId), 1000);
+    }
+
+    function test_revert_setDonateSkimBps_tooHigh() public {
+        vm.expectRevert(ImpactHook.ImpactHook__LpSkimBpsTooHigh.selector);
+        hook.setDonateSkimBps(poolId, 5001);
+    }
+
+    function test_revert_setDonateSkimBps_notOwner() public {
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
+        hook.setDonateSkimBps(poolId, 1000);
+    }
+
     function test_stubCallbacksRevert() public {
         // Cover all stub callbacks that should revert when called directly
         vm.expectRevert();
@@ -2298,6 +2363,7 @@ contract ImpactHookTest is Test, Deployers {
         vm.expectRevert();
         hook.beforeDonate(address(0), poolKey, 0, 0, "");
 
+        // afterDonate now has onlyPoolManager guard (not a stub)
         vm.expectRevert();
         hook.afterDonate(address(0), poolKey, 0, 0, "");
     }

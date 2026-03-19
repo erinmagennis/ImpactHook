@@ -91,6 +91,10 @@ contract ImpactHook is IHooks {
     event Heartbeat(PoolId indexed poolId, uint256 timestamp);
     /// @notice Emitted when a project's heartbeat interval is updated
     event HeartbeatIntervalSet(PoolId indexed poolId, uint256 interval);
+    /// @notice Emitted when native v4 LP donations are skimmed for a project
+    event DonateSkimmed(PoolId indexed poolId, Currency indexed currency, uint256 amount);
+    /// @notice Emitted when the donate skim rate is set
+    event DonateSkimBpsSet(PoolId indexed poolId, uint16 donateSkimBps);
 
     // ──────────────────── Constants ────────────────────
 
@@ -113,6 +117,9 @@ contract ImpactHook is IHooks {
         uint96 currentMilestone; // slot 1: 12 bytes (packed with verifier, max 2^96 milestones)
         uint256 lastHeartbeat;  // slot 2: timestamp of last proof-of-life
         uint256 heartbeatInterval; // slot 3: max time between heartbeats (0 = no expiration)
+        string name;            // project display name
+        string category;        // e.g. "Climate", "Education", "Health", "Open Source"
+        string imageUrl;        // project image/logo URL
     }
 
     struct ProjectTemplate {
@@ -160,6 +167,10 @@ contract ImpactHook is IHooks {
     mapping(PoolId => uint16) public lpSkimBps;
     // Per-project pause (stops fee collection for a single project without affecting others)
     mapping(PoolId => bool) public projectPaused;
+    // Registry of all registered pool IDs (for frontend discovery)
+    PoolId[] public registeredPools;
+    // Percentage of native v4 LP donations to route to impact project (bps, max 5000)
+    mapping(PoolId => uint16) public donateSkimBps;
 
     // ──────────────────── Modifiers ────────────────────
 
@@ -210,7 +221,7 @@ contract ImpactHook is IHooks {
             beforeSwap: false,
             afterSwap: true,
             beforeDonate: false,
-            afterDonate: false,
+            afterDonate: true,
             beforeSwapReturnDelta: false,
             afterSwapReturnDelta: true,
             afterAddLiquidityReturnDelta: true,
@@ -225,12 +236,16 @@ contract ImpactHook is IHooks {
     /// @param key The pool key
     /// @param recipient Address that receives accumulated fees
     /// @param verifier Address authorized to verify milestones
+    /// @param name Project display name
+    /// @param category Project category (e.g. "Climate", "Education")
     /// @param descriptions Milestone descriptions
     /// @param feeBpsValues Fee bps for each milestone
     function registerProject(
         PoolKey calldata key,
         address recipient,
         address verifier,
+        string calldata name,
+        string calldata category,
         string[] calldata descriptions,
         uint16[] calldata feeBpsValues
     ) external onlyOwner {
@@ -247,14 +262,15 @@ contract ImpactHook is IHooks {
             if (feeBpsValues[i] > MAX_FEE_BPS) revert ImpactHook__FeeBpsTooHigh();
         }
 
-        projects[poolId] = Project({
-            recipient: recipient,
-            registered: true,
-            verifier: verifier,
-            currentMilestone: 0,
-            lastHeartbeat: block.timestamp,
-            heartbeatInterval: 0
-        });
+        Project storage project = projects[poolId];
+        project.recipient = recipient;
+        project.registered = true;
+        project.verifier = verifier;
+        project.currentMilestone = 0;
+        project.lastHeartbeat = block.timestamp;
+        project.heartbeatInterval = 0;
+        project.name = name;
+        project.category = category;
 
         for (uint256 i = 0; i < descriptions.length; ++i) {
             milestones[poolId].push(Milestone({
@@ -264,6 +280,7 @@ contract ImpactHook is IHooks {
             }));
         }
 
+        registeredPools.push(poolId);
         emit ProjectRegistered(poolId, recipient, verifier, descriptions.length);
     }
 
@@ -550,11 +567,15 @@ contract ImpactHook is IHooks {
     /// @param key The pool key
     /// @param recipient Address that receives accumulated fees
     /// @param verifier Address authorized to verify milestones
+    /// @param name Project display name
+    /// @param category Project category
     /// @param templateId The template to use
     function registerProjectFromTemplate(
         PoolKey calldata key,
         address recipient,
         address verifier,
+        string calldata name,
+        string calldata category,
         uint256 templateId
     ) external onlyOwner {
         if (recipient == address(0)) revert ImpactHook__ZeroAddress();
@@ -566,14 +587,15 @@ contract ImpactHook is IHooks {
 
         ProjectTemplate storage t = _templates[templateId];
 
-        projects[poolId] = Project({
-            recipient: recipient,
-            registered: true,
-            verifier: verifier,
-            currentMilestone: 0,
-            lastHeartbeat: block.timestamp,
-            heartbeatInterval: 0
-        });
+        Project storage project = projects[poolId];
+        project.recipient = recipient;
+        project.registered = true;
+        project.verifier = verifier;
+        project.currentMilestone = 0;
+        project.lastHeartbeat = block.timestamp;
+        project.heartbeatInterval = 0;
+        project.name = name;
+        project.category = category;
 
         for (uint256 i = 0; i < t.descriptions.length; ++i) {
             milestones[poolId].push(Milestone({
@@ -583,6 +605,7 @@ contract ImpactHook is IHooks {
             }));
         }
 
+        registeredPools.push(poolId);
         emit ProjectRegistered(poolId, recipient, verifier, t.descriptions.length);
     }
 
@@ -650,6 +673,19 @@ contract ImpactHook is IHooks {
         if (_lpSkimBps > 5000) revert ImpactHook__LpSkimBpsTooHigh();
         lpSkimBps[poolId] = _lpSkimBps;
         emit LpSkimBpsSet(poolId, _lpSkimBps);
+    }
+
+    // ──────────────────── Native v4 Donate Skim ────────────────────
+
+    /// @notice Set the skim rate for native v4 PoolManager.donate() calls.
+    /// When someone donates to LPs via the v4 donate function, a percentage
+    /// is routed to the impact project.
+    /// @param poolId The pool ID
+    /// @param _donateSkimBps Percentage of donations to skim (bps, max 5000)
+    function setDonateSkimBps(PoolId poolId, uint16 _donateSkimBps) external onlyOwner {
+        if (_donateSkimBps > 5000) revert ImpactHook__LpSkimBpsTooHigh();
+        donateSkimBps[poolId] = _donateSkimBps;
+        emit DonateSkimBpsSet(poolId, _donateSkimBps);
     }
 
     // ──────────────────── Admin Functions ────────────────────
@@ -754,6 +790,44 @@ contract ImpactHook is IHooks {
             _getCurrentFeeBps(poolId),
             project.registered
         );
+    }
+
+    /// @notice Get the total number of registered projects
+    function getRegisteredPoolCount() external view returns (uint256) {
+        return registeredPools.length;
+    }
+
+    /// @notice Get a registered pool ID by index
+    function getRegisteredPool(uint256 index) external view returns (PoolId) {
+        return registeredPools[index];
+    }
+
+    /// @notice Get project metadata
+    /// @param poolId The pool ID
+    /// @return name Project name
+    /// @return category Project category
+    /// @return imageUrl Project image URL
+    function getProjectMetadata(PoolId poolId)
+        external
+        view
+        returns (string memory name, string memory category, string memory imageUrl)
+    {
+        Project storage project = projects[poolId];
+        return (project.name, project.category, project.imageUrl);
+    }
+
+    /// @notice Update project metadata. Only callable by the project recipient.
+    function updateProjectMetadata(
+        PoolId poolId,
+        string calldata name,
+        string calldata category,
+        string calldata imageUrl
+    ) external {
+        Project storage project = projects[poolId];
+        if (msg.sender != project.recipient) revert ImpactHook__NotProjectRecipient();
+        project.name = name;
+        project.category = category;
+        project.imageUrl = imageUrl;
     }
 
     /// @notice Get a contributor's impact stats
@@ -1011,12 +1085,41 @@ contract ImpactHook is IHooks {
         revert();
     }
 
-    function afterDonate(address, PoolKey calldata, uint256, uint256, bytes calldata)
-        external
-        pure
-        override
-        returns (bytes4)
-    {
-        revert();
+    /// @notice Called after a native v4 PoolManager.donate(). Skims a percentage
+    /// of LP donations for the impact project if configured.
+    function afterDonate(
+        address,
+        PoolKey calldata key,
+        uint256 amount0,
+        uint256 amount1,
+        bytes calldata
+    ) external override onlyPoolManager returns (bytes4) {
+        PoolId poolId = key.toId();
+        uint16 skimBps = donateSkimBps[poolId];
+
+        if (skimBps == 0 || paused || projectPaused[poolId] || _isHeartbeatExpired(poolId) || _getCurrentFeeBps(poolId) == 0) {
+            return this.afterDonate.selector;
+        }
+
+        // Skim a percentage of the donated amounts
+        if (amount0 > 0) {
+            uint256 skim0 = (amount0 * skimBps) / 10_000;
+            if (skim0 > 0) {
+                accumulatedFees[poolId][key.currency0] += skim0;
+                POOL_MANAGER.take(key.currency0, address(this), skim0);
+                emit DonateSkimmed(poolId, key.currency0, skim0);
+            }
+        }
+
+        if (amount1 > 0) {
+            uint256 skim1 = (amount1 * skimBps) / 10_000;
+            if (skim1 > 0) {
+                accumulatedFees[poolId][key.currency1] += skim1;
+                POOL_MANAGER.take(key.currency1, address(this), skim1);
+                emit DonateSkimmed(poolId, key.currency1, skim1);
+            }
+        }
+
+        return this.afterDonate.selector;
     }
 }
