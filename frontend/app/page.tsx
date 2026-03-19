@@ -44,7 +44,7 @@ function LandingNav() {
             letterSpacing: "-0.02em",
           }}
         >
-          ImpactHook
+          Impact<span style={{ color: "var(--accent)" }}>Hook</span>
         </Link>
         <div style={{ display: "flex", gap: 8 }}>
           {[
@@ -583,8 +583,8 @@ export default function LandingPage() {
               Deployed contracts
             </div>
             {[
-              { name: "ImpactHook", chain: "Unichain Sepolia", addr: "0x6b3C...2044" },
-              { name: "MilestoneArbiter", chain: "Unichain Sepolia", addr: "0xfF42...Bf63" },
+              { name: "ImpactHook", chain: "Unichain Sepolia", addr: "0x2caD...2557" },
+              { name: "MilestoneArbiter", chain: "Unichain Sepolia", addr: "0x4C4e...9468" },
               { name: "MilestoneOracle", chain: "Ethereum Sepolia", addr: "0x9845...A4Ca" },
               { name: "MilestoneReactor", chain: "Reactive Lasna", addr: "0x4CB8...8a4" },
             ].map((c, i) => (
@@ -718,7 +718,7 @@ export default function LandingPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1.1fr 0.9fr 1fr",
+            gridTemplateColumns: "1fr 1fr 1fr",
             gap: 20,
             alignItems: "start",
           }}
@@ -787,14 +787,13 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* LPs / Sponsors - shorter, offset */}
+          {/* LPs / Sponsors */}
           <div
             style={{
               background: "var(--bg-card)",
               border: "1px solid var(--border-subtle)",
               borderRadius: 8,
               padding: 32,
-              marginTop: 24,
               transition: "border-color 0.2s",
             }}
             onMouseEnter={(e) =>

@@ -137,7 +137,7 @@ export function Navigation() {
               fontFamily: "inherit",
             }}
           >
-            <span style={{ color: "var(--accent, #0d9488)" }}>Impact</span>Hook
+            Impact<span style={{ color: "var(--accent, #0d9488)" }}>Hook</span>
           </Link>
 
           {/* Role selector */}
