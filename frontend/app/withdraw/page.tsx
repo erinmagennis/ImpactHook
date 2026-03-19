@@ -158,7 +158,7 @@ export default function WithdrawPage() {
             style={{
               width: "100%",
               padding: "12px 20px",
-              borderRadius: 8,
+              borderRadius: 6,
               border: isEnabled
                 ? "1px solid var(--accent)"
                 : "1px solid var(--border-subtle)",
@@ -193,7 +193,7 @@ export default function WithdrawPage() {
               style={{
                 marginTop: 12,
                 padding: "10px 14px",
-                borderRadius: 8,
+                borderRadius: 6,
                 background: "rgba(5,150,105,0.06)",
                 border: "1px solid rgba(5,150,105,0.12)",
                 color: "var(--success)",
@@ -223,7 +223,7 @@ export default function WithdrawPage() {
                 top: 10,
                 right: 10,
                 padding: "3px 8px",
-                borderRadius: 8,
+                borderRadius: 6,
                 fontSize: 10,
                 fontWeight: 600,
                 textTransform: "uppercase",
@@ -265,7 +265,7 @@ export default function WithdrawPage() {
                 style={{
                   width: "100%",
                   padding: "12px 20px",
-                  borderRadius: 8,
+                  borderRadius: 6,
                   border: "1px solid rgba(124,58,237,0.3)",
                   fontSize: 13,
                   fontWeight: 600,

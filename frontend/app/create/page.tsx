@@ -243,9 +243,9 @@ export default function CreateProjectPage() {
               onClick={addMilestone}
               style={{
                 padding: "4px 10px",
-                borderRadius: 8,
-                border: "1px solid rgba(34,211,238,0.2)",
-                background: "rgba(34,211,238,0.06)",
+                borderRadius: 6,
+                border: "1px solid rgba(13,148,136,0.2)",
+                background: "rgba(13,148,136,0.05)",
                 color: "var(--accent)",
                 fontSize: 11,
                 cursor: "pointer",
@@ -297,7 +297,7 @@ export default function CreateProjectPage() {
                 onClick={() => removeMilestone(i)}
                 style={{
                   padding: "10px 0",
-                  borderRadius: 8,
+                  borderRadius: 6,
                   border: "1px solid var(--border-subtle)",
                   background: "var(--bg-elevated)",
                   color: "var(--text-dim)",
@@ -319,9 +319,9 @@ export default function CreateProjectPage() {
               style={{
                 width: "100%",
                 padding: "12px 20px",
-                borderRadius: 8,
+                borderRadius: 6,
                 border: isEnabled
-                  ? "1px solid rgba(139,92,246,0.4)"
+                  ? "1px solid var(--accent)"
                   : "1px solid var(--border-subtle)",
                 fontSize: 13,
                 fontWeight: 600,
@@ -329,9 +329,9 @@ export default function CreateProjectPage() {
                 textTransform: "uppercase",
                 cursor: isEnabled ? "pointer" : "not-allowed",
                 background: isEnabled
-                  ? "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))"
+                  ? "var(--accent)"
                   : "var(--bg-elevated)",
-                color: isEnabled ? "var(--text-primary)" : "var(--text-dim)",
+                color: isEnabled ? "#ffffff" : "var(--text-dim)",
                 transition: "all 0.2s",
                 fontFamily: "inherit",
               }}
@@ -353,9 +353,9 @@ export default function CreateProjectPage() {
               style={{
                 marginTop: 12,
                 padding: "10px 14px",
-                borderRadius: 8,
-                background: "rgba(251,191,36,0.06)",
-                border: "1px solid rgba(251,191,36,0.15)",
+                borderRadius: 6,
+                background: "rgba(217,119,6,0.06)",
+                border: "1px solid rgba(217,119,6,0.12)",
                 color: "var(--warning)",
                 fontSize: 12,
                 lineHeight: 1.5,
@@ -372,9 +372,9 @@ export default function CreateProjectPage() {
               style={{
                 marginTop: 12,
                 padding: "10px 14px",
-                borderRadius: 8,
-                background: "rgba(52,211,153,0.06)",
-                border: "1px solid rgba(52,211,153,0.15)",
+                borderRadius: 6,
+                background: "rgba(5,150,105,0.06)",
+                border: "1px solid rgba(5,150,105,0.12)",
                 color: "var(--success)",
                 fontSize: 13,
                 textAlign: "center",
@@ -412,7 +412,7 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
-  borderRadius: 8,
+  borderRadius: 6,
   border: "1px solid var(--border-subtle)",
   background: "var(--bg-elevated)",
   color: "var(--text-primary)",

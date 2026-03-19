@@ -307,7 +307,7 @@ export default function DonatePage() {
             style={{
               width: "100%",
               padding: "12px 20px",
-              borderRadius: 8,
+              borderRadius: 6,
               border: isEnabled
                 ? "1px solid var(--accent)"
                 : "1px solid var(--border-subtle)",
@@ -340,7 +340,7 @@ export default function DonatePage() {
               style={{
                 marginTop: 12,
                 padding: "10px 14px",
-                borderRadius: 8,
+                borderRadius: 6,
                 background: "rgba(5,150,105,0.06)",
                 border: "1px solid rgba(5,150,105,0.12)",
                 color: "var(--success)",
@@ -376,7 +376,7 @@ export default function DonatePage() {
                 top: 10,
                 right: 10,
                 padding: "3px 8px",
-                borderRadius: 8,
+                borderRadius: 6,
                 fontSize: 10,
                 fontWeight: 600,
                 textTransform: "uppercase",
@@ -466,8 +466,8 @@ export default function DonatePage() {
                 style={{
                   padding: 16,
                   borderRadius: 8,
-                  background: "rgba(34,211,238,0.04)",
-                  border: "1px solid rgba(34,211,238,0.1)",
+                  background: "var(--accent-bg)",
+                  border: "1px solid rgba(13,148,136,0.08)",
                   marginBottom: 16,
                 }}
               >
@@ -538,15 +538,14 @@ export default function DonatePage() {
                 style={{
                   width: "100%",
                   padding: "12px 20px",
-                  borderRadius: 8,
-                  border: "1px solid rgba(139,92,246,0.4)",
+                  borderRadius: 6,
+                  border: "1px solid rgba(124,58,237,0.3)",
                   fontSize: 13,
                   fontWeight: 600,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   cursor: "not-allowed",
-                  background:
-                    "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))",
+                  background: "rgba(124,58,237,0.08)",
                   color: "var(--text-primary)",
                   fontFamily: "inherit",
                   opacity: 0.6,
@@ -559,8 +558,8 @@ export default function DonatePage() {
                   marginTop: 12,
                   padding: "10px 14px",
                   borderRadius: 8,
-                  background: "rgba(34,211,238,0.04)",
-                  border: "1px solid rgba(34,211,238,0.1)",
+                  background: "var(--accent-bg)",
+                  border: "1px solid rgba(13,148,136,0.08)",
                   fontSize: 12,
                   color: "var(--text-secondary)",
                   lineHeight: 1.5,
@@ -589,7 +588,7 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
-  borderRadius: 8,
+  borderRadius: 6,
   border: "1px solid var(--border-subtle)",
   background: "var(--bg-elevated)",
   color: "var(--text-primary)",
