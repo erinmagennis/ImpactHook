@@ -49,6 +49,9 @@ contract ImpactHook is IHooks {
     error ImpactHook__PoolIdMismatch();
     error ImpactHook__ZeroDonation();
     error ImpactHook__DonationTransferFailed();
+    error ImpactHook__UnexpectedETH();
+    error ImpactHook__AttestationExpired();
+    error ImpactHook__Reentrancy();
     error ImpactHook__TemplateAlreadyExists();
     error ImpactHook__TemplateNotFound();
     error ImpactHook__InvalidDiscountBps();
@@ -161,7 +164,7 @@ contract ImpactHook is IHooks {
     }
 
     modifier nonReentrant() {
-        if (_locked) revert ImpactHook__Paused();
+        if (_locked) revert ImpactHook__Reentrancy();
         _locked = true;
         _;
         _locked = false;
@@ -290,6 +293,8 @@ contract ImpactHook is IHooks {
         }
 
         // Apply loyalty discount if configured
+        // Note: `sender` is the swap router address in standard v4 flows, not the EOA.
+        // Loyalty tracking is per-router until hookData-based user identification is added.
         feeBps = _applyLoyaltyDiscount(poolId, sender, feeBps);
         if (feeBps == 0) {
             return (this.afterSwap.selector, 0);
@@ -324,15 +329,13 @@ contract ImpactHook is IHooks {
         // Bounds check: feeAmount must fit in int128 for the return delta
         if (feeAmount > uint128(type(int128).max)) revert ImpactHook__FeeAmountOverflow();
 
-        // Take the fee from the pool manager into this contract
-        POOL_MANAGER.take(feeCurrency, address(this), feeAmount);
-
-        // Track accumulated fees
+        // Effects first (checks-effects-interactions)
         accumulatedFees[poolId][feeCurrency] += feeAmount;
-
-        // Track impact contributions for the sender
         contributions[sender][poolId] += feeAmount;
         globalContributions[sender] += feeAmount;
+
+        // Interaction: take the fee from the pool manager
+        POOL_MANAGER.take(feeCurrency, address(this), feeAmount);
 
         emit FeesAccumulated(poolId, feeCurrency, feeAmount);
 
@@ -413,6 +416,7 @@ contract ImpactHook is IHooks {
         if (att.schema != milestoneSchemaUID) revert ImpactHook__InvalidSchema();
         if (att.attester != project.verifier) revert ImpactHook__NotVerifier();
         if (att.revocationTime != 0) revert ImpactHook__AttestationRevoked();
+        if (att.expirationTime != 0 && block.timestamp > att.expirationTime) revert ImpactHook__AttestationExpired();
 
         // Decode attestation data: (bytes32 poolId, uint256 milestoneIndex, string evidence)
         (bytes32 attestedPoolId, uint256 milestoneIndex,) =
@@ -475,7 +479,8 @@ contract ImpactHook is IHooks {
             // Native ETH donation
             donationAmount = msg.value;
         } else {
-            // ERC20 donation - pull tokens from sender
+            // ERC20 donation - reject ETH sent alongside
+            if (msg.value != 0) revert ImpactHook__UnexpectedETH();
             // Use balance check to handle fee-on-transfer tokens correctly
             IERC20 token = IERC20(Currency.unwrap(currency));
             uint256 balBefore = token.balanceOf(address(this));
@@ -821,20 +826,27 @@ contract ImpactHook is IHooks {
 
         if (fees0 > 0) {
             skim0 = int128(int256(uint256(uint128(fees0)) * skimBps / 10_000));
-            if (skim0 > 0) {
-                POOL_MANAGER.take(key.currency0, address(this), uint256(uint128(skim0)));
-                accumulatedFees[poolId][key.currency0] += uint256(uint128(skim0));
-                emit LpFeesSkimmed(poolId, key.currency0, uint256(uint128(skim0)));
-            }
         }
-
         if (fees1 > 0) {
             skim1 = int128(int256(uint256(uint128(fees1)) * skimBps / 10_000));
-            if (skim1 > 0) {
-                POOL_MANAGER.take(key.currency1, address(this), uint256(uint128(skim1)));
-                accumulatedFees[poolId][key.currency1] += uint256(uint128(skim1));
-                emit LpFeesSkimmed(poolId, key.currency1, uint256(uint128(skim1)));
-            }
+        }
+
+        // Effects first (checks-effects-interactions)
+        if (skim0 > 0) {
+            accumulatedFees[poolId][key.currency0] += uint256(uint128(skim0));
+        }
+        if (skim1 > 0) {
+            accumulatedFees[poolId][key.currency1] += uint256(uint128(skim1));
+        }
+
+        // Interactions
+        if (skim0 > 0) {
+            POOL_MANAGER.take(key.currency0, address(this), uint256(uint128(skim0)));
+            emit LpFeesSkimmed(poolId, key.currency0, uint256(uint128(skim0)));
+        }
+        if (skim1 > 0) {
+            POOL_MANAGER.take(key.currency1, address(this), uint256(uint128(skim1)));
+            emit LpFeesSkimmed(poolId, key.currency1, uint256(uint128(skim1)));
         }
 
         // Return positive delta = hook took these tokens from the LP's share
