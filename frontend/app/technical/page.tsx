@@ -22,22 +22,22 @@ export default function TechnicalPage() {
   const progress = (MILESTONES.filter(m => m.verified).length / MILESTONES.length) * 100;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-void)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       <Navigation />
       <main style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
 
         {/* Header */}
         <div className="animate-fade-up" style={{ marginBottom: 48 }}>
-          <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: 'var(--accent-cyan)' }}>
+          <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: 'var(--accent)' }}>
             Technical Deep Dive
           </span>
           <h1
             className="font-display text-[clamp(1.8rem,5vw,2.8rem)] mt-3 mb-4"
-            style={{ color: 'var(--text-bright)', lineHeight: 1.1 }}
+            style={{ color: 'var(--text-primary)', lineHeight: 1.1 }}
           >
             Architecture
           </h1>
-          <p className="text-[14px] leading-relaxed max-w-2xl" style={{ color: 'var(--text-mid)' }}>
+          <p className="text-[14px] leading-relaxed max-w-2xl" style={{ color: 'var(--text-secondary)' }}>
             A Uniswap v4 hook creating asset-class specific liquidity via milestone-gated
             fee routing. Four contracts across three chains.
           </p>
@@ -84,7 +84,7 @@ export default function TechnicalPage() {
           <div className="text-[11px] tracking-[0.12em] uppercase mb-4" style={{ color: 'var(--text-dim)' }}>
             Cross-Chain Milestone Verification
           </div>
-          <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-mid)', whiteSpace: 'pre' }}>
+          <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)', whiteSpace: 'pre' }}>
 {`Origin Chain              Reactive Network           Destination Chain
 (any supported)           (ReactVM)                  (Unichain)
 
@@ -94,31 +94,31 @@ MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
           </pre>
           <p className="text-[12px] mt-4 leading-relaxed" style={{ color: 'var(--text-dim)' }}>
             Authorization: Reactive Network overwrites the first callback argument with the ReactVM ID.
-            The hook checks <span className="font-data" style={{ color: 'var(--accent-cyan)' }}>msg.sender == callbackProxy</span> and{' '}
-            <span className="font-data" style={{ color: 'var(--accent-cyan)' }}>rvmId == project.verifier</span>.
+            The hook checks <span className="font-data" style={{ color: 'var(--accent)' }}>msg.sender == callbackProxy</span> and{' '}
+            <span className="font-data" style={{ color: 'var(--accent)' }}>rvmId == project.verifier</span>.
           </p>
         </div>
 
         {/* Verification paths */}
         <div className="animate-fade-up delay-300" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-bright)' }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
             Three verification paths
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-cyan)', boxShadow: '0 0 8px var(--accent-cyan)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-bright)' }}>Direct</span>
+                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
+                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Direct</span>
               </div>
               <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Verifier calls <span className="font-data" style={{ color: 'var(--accent-cyan)' }}>verifyMilestone()</span> directly.
+                Verifier calls <span className="font-data" style={{ color: 'var(--accent)' }}>verifyMilestone()</span> directly.
                 Simple, gas-efficient. Works for EOAs, multisigs, DAOs.
               </p>
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-violet)', boxShadow: '0 0 8px var(--accent-violet)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-bright)' }}>Reactive Cross-Chain</span>
+                <div className="w-2 h-2 rounded-full" style={{ background: '#7c3aed' }} />
+                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Reactive Cross-Chain</span>
               </div>
               <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
                 Oracle on origin chain emits event. Reactor RSC on Reactive Network
@@ -127,12 +127,12 @@ MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-emerald)', boxShadow: '0 0 8px var(--accent-emerald)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-bright)' }}>EAS Attestation</span>
+                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--success)' }} />
+                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>EAS Attestation</span>
               </div>
               <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
                 Verifier creates EAS attestation with evidence. Anyone can
-                call <span className="font-data" style={{ color: 'var(--accent-emerald)' }}>verifyMilestoneEAS()</span> permissionlessly.
+                call <span className="font-data" style={{ color: 'var(--success)' }}>verifyMilestoneEAS()</span> permissionlessly.
               </p>
             </div>
           </div>
@@ -146,7 +146,7 @@ MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
             <span className="w-2 h-2 rounded-full" style={{ background: '#28c840' }} />
             <span className="ml-3 text-[11px] tracking-wider" style={{ color: 'var(--text-dim)' }}>ImpactHook.sol : afterSwap()</span>
           </div>
-          <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-mid)' }}>
+          <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
             <code>{`// Fee on TOP of LP fee - LPs earn full yield
 uint16 feeBps = _getCurrentFeeBps(poolId);
 uint256 feeAmount = (uint256(uint128(outputAmount)) * feeBps) / 10_000;
@@ -162,16 +162,16 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
 
         {/* Fee model */}
         <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-bright)' }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
             Fee model
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="card p-5">
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-mid)' }}>
-                The hook charges a fee <strong style={{ color: 'var(--text-bright)' }}>on top of</strong> the
-                standard LP fee via <span className="font-data" style={{ color: 'var(--accent-cyan)' }}>afterSwapReturnDelta</span>.
+              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                The hook charges a fee <strong style={{ color: 'var(--text-primary)' }}>on top of</strong> the
+                standard LP fee via <span className="font-data" style={{ color: 'var(--accent)' }}>afterSwapReturnDelta</span>.
                 LP yield is completely unaffected. Fee rate is determined by the current verified
-                milestone&apos;s <span className="font-data" style={{ color: 'var(--accent-cyan)' }}>projectFeeBps</span>.
+                milestone&apos;s <span className="font-data" style={{ color: 'var(--accent)' }}>projectFeeBps</span>.
                 Maximum capped at 500 bps (5%).
               </p>
             </div>
@@ -182,7 +182,7 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
               <div className="relative">
                 <div className="absolute left-[11px] top-[12px] bottom-[12px] w-px"
                   style={{
-                    background: `linear-gradient(180deg, var(--accent-cyan) 0%, var(--accent-cyan) ${progress}%, var(--border-subtle) ${progress}%)`
+                    background: `linear-gradient(180deg, var(--accent) 0%, var(--accent) ${progress}%, var(--border-subtle) ${progress}%)`
                   }} />
                 <div className="flex flex-col gap-4">
                   {MILESTONES.map((m, i) => {
@@ -192,18 +192,18 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
                       <div key={m.index} className="flex items-center gap-4">
                         <div className={`milestone-node ${nodeClass}`} style={{ width: 22, height: 22 }}>
                           {m.verified ? (
-                            <span style={{ color: 'var(--accent-cyan)' }}><CheckIcon /></span>
+                            <span style={{ color: 'var(--accent)' }}><CheckIcon /></span>
                           ) : isActive ? (
-                            <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-violet)' }} />
+                            <span className="w-2 h-2 rounded-full" style={{ background: '#7c3aed' }} />
                           ) : (
                             <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--text-dim)' }} />
                           )}
                         </div>
                         <div className="flex-1 flex items-center justify-between">
-                          <span className="text-[12px]" style={{ color: m.verified ? 'var(--text-bright)' : 'var(--text-dim)' }}>
+                          <span className="text-[12px]" style={{ color: m.verified ? 'var(--text-primary)' : 'var(--text-dim)' }}>
                             {m.name}
                           </span>
-                          <span className="font-data text-[12px]" style={{ color: m.verified ? 'var(--text-mid)' : 'var(--text-dim)' }}>
+                          <span className="font-data text-[12px]" style={{ color: m.verified ? 'var(--text-secondary)' : 'var(--text-dim)' }}>
                             {m.feeBps} bps
                           </span>
                         </div>
@@ -221,18 +221,18 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
 
         {/* Test coverage */}
         <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: 'var(--accent-emerald)' }}>
+          <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: 'var(--success)' }}>
             Quality
           </span>
-          <h2 className="font-display text-[clamp(1.4rem,4vw,2rem)] mt-3 mb-6" style={{ color: 'var(--text-bright)' }}>
+          <h2 className="font-display text-[clamp(1.4rem,4vw,2rem)] mt-3 mb-6" style={{ color: 'var(--text-primary)' }}>
             Test coverage
           </h2>
 
           <div className="card p-6" style={{ marginBottom: 16 }}>
             <div className="flex items-center gap-4 mb-6">
-              <div className="font-data text-3xl" style={{ color: 'var(--accent-emerald)' }}>147</div>
+              <div className="font-data text-3xl" style={{ color: 'var(--success)' }}>147</div>
               <div>
-                <div className="text-[13px]" style={{ color: 'var(--text-bright)' }}>tests passing</div>
+                <div className="text-[13px]" style={{ color: 'var(--text-primary)' }}>tests passing</div>
                 <div className="text-[11px]" style={{ color: 'var(--text-dim)' }}>0 failed, 0 skipped</div>
               </div>
             </div>
@@ -258,7 +258,7 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
 
         {/* Deployed addresses */}
         <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-bright)' }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
             Deployed contracts
           </h2>
           <div className="card p-5" style={{ overflowX: 'auto' }}>
@@ -278,9 +278,9 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
                   { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x4CB877dee81E9e68533FFaf8495Ce9bCdc9518a4" },
                 ].map((c) => (
                   <tr key={c.name} style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                    <td className="py-3 text-[13px]" style={{ color: 'var(--text-bright)' }}>{c.name}</td>
+                    <td className="py-3 text-[13px]" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
                     <td className="py-3 text-[12px]" style={{ color: 'var(--text-dim)' }}>{c.chain}</td>
-                    <td className="py-3 font-data text-[11px]" style={{ color: 'var(--accent-cyan)' }}>{c.address}</td>
+                    <td className="py-3 font-data text-[11px]" style={{ color: 'var(--accent)' }}>{c.address}</td>
                   </tr>
                 ))}
               </tbody>
@@ -289,7 +289,7 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
           <div className="card p-4 mt-4">
             <div className="flex items-center justify-between">
               <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>EAS Schema UID</span>
-              <span className="font-data text-[10px]" style={{ color: 'var(--accent-cyan)' }}>
+              <span className="font-data text-[10px]" style={{ color: 'var(--accent)' }}>
                 0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bfb52
               </span>
             </div>
@@ -310,7 +310,7 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{item.label}</span>
-                <span className="font-data text-[10px]" style={{ color: 'var(--text-mid)' }}>{item.address}</span>
+                <span className="font-data text-[10px]" style={{ color: 'var(--text-secondary)' }}>{item.address}</span>
               </div>
             ))}
           </div>
@@ -319,12 +319,12 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
         {/* CTA */}
         <div className="flex justify-center gap-4 animate-fade-up">
           <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer"
-             className="cta-primary inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide" style={{ borderRadius: 2, textDecoration: 'none' }}>
+             className="cta-primary inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide" style={{ borderRadius: 6, textDecoration: 'none' }}>
             View on GitHub
           </a>
           <a href="/dashboard"
              className="inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide"
-             style={{ color: 'var(--text-mid)', border: '1px solid var(--border-subtle)', borderRadius: 2, textDecoration: 'none' }}>
+             style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 6, textDecoration: 'none' }}>
             Launch App
           </a>
         </div>
@@ -338,10 +338,10 @@ function ContractCard({ name, role, description, chain, address, accent }: {
   accent: 'cyan' | 'violet' | 'emerald' | 'amber';
 }) {
   const accentColors = {
-    cyan: 'var(--accent-cyan)',
-    violet: 'var(--accent-violet)',
-    emerald: 'var(--accent-emerald)',
-    amber: 'var(--accent-amber)',
+    cyan: 'var(--accent)',
+    violet: '#7c3aed',
+    emerald: 'var(--success)',
+    amber: '#d97706',
   };
 
   return (
@@ -349,28 +349,28 @@ function ContractCard({ name, role, description, chain, address, accent }: {
       <div className="flex items-center justify-between mb-2">
         <span className="font-data text-[13px]" style={{ color: accentColors[accent] }}>{name}</span>
         <span className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5"
-              style={{ color: 'var(--text-dim)', border: '1px solid var(--border-subtle)' }}>
+              style={{ color: 'var(--text-dim)', border: '1px solid var(--border-subtle)', borderRadius: 6 }}>
           {chain}
         </span>
       </div>
       <div className="text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: 'var(--text-dim)' }}>{role}</div>
       <p className="text-[12px] leading-relaxed mb-3" style={{ color: 'var(--text-dim)' }}>{description}</p>
-      <div className="font-data text-[10px]" style={{ color: 'var(--text-mid)' }}>{address}</div>
+      <div className="font-data text-[10px]" style={{ color: 'var(--text-secondary)' }}>{address}</div>
     </div>
   );
 }
 
 function TestGroup({ name, count, items }: { name: string; count: number; items: string[] }) {
   return (
-    <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: '2px' }}>
+    <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
       <div className="flex items-center gap-2 mb-3">
-        <span className="font-data text-[15px]" style={{ color: 'var(--accent-emerald)' }}>{count}</span>
+        <span className="font-data text-[15px]" style={{ color: 'var(--success)' }}>{count}</span>
         <span className="text-[11px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>{name}</span>
       </div>
       <ul className="flex flex-col gap-1">
         {items.map(item => (
           <li key={item} className="text-[11px] flex items-center gap-2" style={{ color: 'var(--text-dim)' }}>
-            <span style={{ color: 'var(--accent-emerald)' }}>+</span> {item}
+            <span style={{ color: 'var(--success)' }}>+</span> {item}
           </li>
         ))}
       </ul>
@@ -381,7 +381,7 @@ function TestGroup({ name, count, items }: { name: string; count: number; items:
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-4 text-center">
-      <div className="font-data text-[18px] mb-1" style={{ color: 'var(--text-bright)' }}>{value}</div>
+      <div className="font-data text-[18px] mb-1" style={{ color: 'var(--text-primary)' }}>{value}</div>
       <div className="text-[10px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>{label}</div>
     </div>
   );

@@ -65,10 +65,10 @@ const roleOrder: Role[] = ["trader", "project", "sponsor", "learn"];
 
 const roleColors: Record<Role, string> = {
   none: "var(--text-dim)",
-  trader: "var(--accent-cyan)",
-  project: "var(--accent-emerald)",
-  sponsor: "var(--accent-violet)",
-  learn: "var(--accent-amber)",
+  trader: "#0d9488",
+  project: "#059669",
+  sponsor: "#7c3aed",
+  learn: "#d97706",
 };
 
 export function Navigation() {
@@ -107,9 +107,9 @@ export function Navigation() {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        backdropFilter: "blur(20px)",
-        backgroundColor: "rgba(5,5,8,0.88)",
+        borderBottom: "1px solid var(--border-subtle, #e4e4e7)",
+        backdropFilter: "blur(16px)",
+        backgroundColor: "rgba(255, 255, 255, 0.92)",
       }}
     >
       <div
@@ -127,17 +127,17 @@ export function Navigation() {
         <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: 0 }}>
           <Link
             href="/"
-            className="font-display"
             style={{
               fontSize: 18,
               fontWeight: 700,
-              color: "#fff",
+              color: "var(--text-primary, #18181b)",
               textDecoration: "none",
               letterSpacing: "-0.02em",
               flexShrink: 0,
+              fontFamily: "inherit",
             }}
           >
-            <span className="text-hero-gradient">Impact</span>Hook
+            <span style={{ color: "var(--accent, #0d9488)" }}>Impact</span>Hook
           </Link>
 
           {/* Role selector */}
@@ -149,10 +149,14 @@ export function Navigation() {
                 alignItems: "center",
                 gap: 6,
                 padding: "5px 12px",
-                borderRadius: 2,
-                border: role === "none" ? "1px solid rgba(255,255,255,0.12)" : `1px solid ${color}33`,
-                background: role === "none" ? "rgba(255,255,255,0.04)" : `${color}0d`,
-                color: role === "none" ? "var(--text-mid)" : color,
+                borderRadius: 6,
+                border: role === "none"
+                  ? "1px solid var(--border-subtle, #e4e4e7)"
+                  : `1px solid ${color}33`,
+                background: role === "none"
+                  ? "var(--bg-elevated, #f4f4f5)"
+                  : `${color}0d`,
+                color: role === "none" ? "var(--text-secondary, #52525b)" : color,
                 fontSize: 11,
                 fontWeight: 600,
                 letterSpacing: "0.1em",
@@ -164,7 +168,7 @@ export function Navigation() {
               }}
             >
               {currentRole.label}
-              <span style={{ fontSize: 9, opacity: 0.7 }}>
+              <span style={{ fontSize: 9, opacity: 0.6 }}>
                 {dropdownOpen ? "\u25B2" : "\u25BC"}
               </span>
             </button>
@@ -176,10 +180,10 @@ export function Navigation() {
                   top: "calc(100% + 6px)",
                   left: 0,
                   minWidth: 240,
-                  borderRadius: 2,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "var(--bg-card)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                  borderRadius: 8,
+                  border: "1px solid var(--border-subtle, #e4e4e7)",
+                  background: "#ffffff",
+                  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04)",
                   overflow: "hidden",
                 }}
               >
@@ -200,7 +204,7 @@ export function Navigation() {
                           ? `2px solid ${rColor}`
                           : "2px solid transparent",
                         background: isSelected
-                          ? `${rColor}0d`
+                          ? `${rColor}08`
                           : "transparent",
                         cursor: "pointer",
                         textAlign: "left",
@@ -212,13 +216,18 @@ export function Navigation() {
                         style={{
                           fontSize: 13,
                           fontWeight: 600,
-                          color: isSelected ? rColor : "var(--text-bright)",
+                          color: isSelected ? rColor : "var(--text-primary, #18181b)",
                           marginBottom: 2,
                         }}
                       >
                         {rc.label}
                       </div>
-                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: "var(--text-dim, #a1a1aa)",
+                        }}
+                      >
                         {rc.description}
                       </div>
                     </button>
@@ -238,20 +247,23 @@ export function Navigation() {
                   href={item.href}
                   style={{
                     padding: "6px 12px",
-                    borderRadius: 2,
+                    borderRadius: 6,
                     fontSize: 13,
                     fontWeight: 500,
                     letterSpacing: "0.02em",
-                    color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
+                    color: isActive
+                      ? "var(--text-primary, #18181b)"
+                      : "var(--text-secondary, #52525b)",
                     backgroundColor: isActive
-                      ? "rgba(99,102,241,0.15)"
+                      ? "var(--bg-elevated, #f4f4f5)"
                       : "transparent",
                     border: isActive
-                      ? "1px solid rgba(99,102,241,0.2)"
+                      ? "1px solid var(--border-subtle, #e4e4e7)"
                       : "1px solid transparent",
                     textDecoration: "none",
                     transition: "all 0.15s",
                     whiteSpace: "nowrap",
+                    fontFamily: "inherit",
                   }}
                 >
                   {item.label}

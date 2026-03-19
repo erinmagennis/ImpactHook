@@ -63,7 +63,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
         style={{ width: 20, height: 20 }}
       >
         {isVerified && (
-          <span style={{ fontSize: 10, color: "var(--accent-cyan)" }}>&#10003;</span>
+          <span style={{ fontSize: 10, color: "var(--accent)" }}>&#10003;</span>
         )}
       </div>
     );
@@ -78,14 +78,14 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
             top: 10,
             right: 10,
             padding: "3px 8px",
-            borderRadius: 2,
+            borderRadius: 6,
             fontSize: 10,
             fontWeight: 600,
             textTransform: "uppercase",
             letterSpacing: "0.1em",
-            background: "rgba(167,139,250,0.1)",
-            color: "var(--accent-violet)",
-            border: "1px solid rgba(167,139,250,0.2)",
+            background: "rgba(124,58,237,0.08)",
+            color: "#7c3aed",
+            border: "1px solid rgba(124,58,237,0.15)",
           }}
         >
           Preview
@@ -104,28 +104,28 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
           >
             {showDemo ? "Clean Water - Chiapas Schools" : "Clean Water - Chiapas Schools"}
           </div>
-          <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>
+          <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             {showDemo ? "0xa3f7c2...1b9e04d8" : `${poolId.slice(0, 10)}...${poolId.slice(-8)}`}
           </div>
         </div>
         <div
           style={{
             padding: "4px 10px",
-            borderRadius: 2,
+            borderRadius: 6,
             fontSize: 12,
             fontWeight: 600,
             letterSpacing: "0.04em",
             background:
               demoFee > 0
-                ? "rgba(52, 211, 153, 0.1)"
+                ? "rgba(5,150,105,0.08)"
                 : "var(--bg-elevated)",
             color:
               demoFee > 0
-                ? "var(--accent-emerald)"
+                ? "var(--success)"
                 : "var(--text-dim)",
             border: `1px solid ${
               demoFee > 0
-                ? "rgba(52, 211, 153, 0.25)"
+                ? "rgba(5,150,105,0.2)"
                 : "var(--border-subtle)"
             }`,
           }}
@@ -140,7 +140,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
           <span style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Milestone Progress
           </span>
-          <span className="font-data" style={{ fontSize: 13, color: "var(--text-bright)" }}>
+          <span className="font-data" style={{ fontSize: 13, color: "var(--text-primary)" }}>
             {demoCurrent} / {demoTotal}
           </span>
         </div>
@@ -158,7 +158,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
               height: "100%",
               width: `${demoProgress * 100}%`,
               borderRadius: 1,
-              background: "linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald))",
+              background: "var(--accent)",
               transition: "width 0.5s ease",
             }}
           />
@@ -179,11 +179,11 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
           style={{
             marginTop: 16,
             padding: "10px 14px",
-            borderRadius: 2,
-            background: "rgba(34,211,238,0.04)",
-            border: "1px solid rgba(34,211,238,0.1)",
+            borderRadius: 8,
+            background: "var(--accent-bg)",
+            border: "1px solid rgba(13,148,136,0.08)",
             fontSize: 12,
-            color: "var(--text-mid)",
+            color: "var(--text-secondary)",
             lineHeight: 1.5,
           }}
         >
@@ -199,7 +199,7 @@ function InfoItem({ label, value }: { label: string; value?: string }) {
     <div
       style={{
         padding: 12,
-        borderRadius: 2,
+        borderRadius: 8,
         background: "var(--bg-elevated)",
         border: "1px solid var(--border-subtle)",
       }}
@@ -215,7 +215,7 @@ function InfoItem({ label, value }: { label: string; value?: string }) {
       >
         {label}
       </div>
-      <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>
+      <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
         {value || "-"}
       </div>
     </div>
@@ -254,12 +254,12 @@ function HookStatus() {
   return (
     <div className="card card-glow animate-fade-up delay-100" style={{ padding: 24 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <span className="font-display" style={{ fontSize: 14, color: "var(--text-bright)" }}>
+        <span className="font-display" style={{ fontSize: 14, color: "var(--text-primary)" }}>
           Hook Status
         </span>
         <span
           className="status-live"
-          style={{ fontSize: 12, color: isPaused ? "#ef4444" : "var(--accent-emerald)" }}
+          style={{ fontSize: 12, color: isPaused ? "var(--error)" : "var(--success)" }}
         >
           {isPaused ? "Paused" : "Live"}
         </span>
@@ -295,7 +295,7 @@ function StatusRow({ label, value }: { label: string; value?: string }) {
         className="font-data"
         style={{
           fontSize: 12,
-          color: "var(--text-mid)",
+          color: "var(--text-secondary)",
         }}
       >
         {value ? (value.length > 20 ? `${value.slice(0, 8)}...${value.slice(-6)}` : value) : "-"}
@@ -308,7 +308,7 @@ export default function DashboardPage() {
   const { isConnected } = useAccount();
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-void)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       <Navigation />
       <main style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 24px" }}>
         <div className="animate-fade-up" style={{ marginBottom: 32 }}>
@@ -317,13 +317,13 @@ export default function DashboardPage() {
             style={{
               fontSize: 28,
               fontWeight: 700,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 8,
             }}
           >
             Dashboard
           </h1>
-          <p style={{ fontSize: 13, color: "var(--text-mid)", margin: 0 }}>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
             {isConnected
               ? "Live contract state from Unichain Sepolia"
               : "Connect your wallet to interact with ImpactHook"}
@@ -341,7 +341,7 @@ export default function DashboardPage() {
             className="font-display"
             style={{
               fontSize: 15,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 16,
               textTransform: "uppercase",
               letterSpacing: "0.06em",
@@ -350,10 +350,10 @@ export default function DashboardPage() {
             Your Impact
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
-            <ImpactMetric label="Total Contributed" value="2.134 ETH" accent="var(--accent-emerald)" />
-            <ImpactMetric label="Projects Supported" value="3" accent="var(--accent-cyan)" />
-            <ImpactMetric label="People Reached" value="~1,240" accent="var(--accent-violet)" />
-            <ImpactMetric label="Loyalty Tier" value="Silver" accent="var(--accent-amber)" />
+            <ImpactMetric label="Total Contributed" value="2.134 ETH" accent="var(--success)" />
+            <ImpactMetric label="Projects Supported" value="3" accent="var(--accent)" />
+            <ImpactMetric label="People Reached" value="~1,240" accent="#7c3aed" />
+            <ImpactMetric label="Loyalty Tier" value="Silver" accent="var(--warning)" />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
@@ -362,21 +362,21 @@ export default function DashboardPage() {
               contributed="0.847"
               impact="420 students with clean water"
               milestones="4/4"
-              accent="var(--accent-cyan)"
+              accent="var(--accent)"
             />
             <ProjectImpactCard
               name="Solar Schools - Oaxaca"
               contributed="0.892"
               impact="8 schools powered by solar"
               milestones="2/3"
-              accent="var(--accent-emerald)"
+              accent="var(--success)"
             />
             <ProjectImpactCard
               name="Reforestation - Yucatan"
               contributed="0.395"
               impact="2,400 trees planted"
               milestones="1/4"
-              accent="var(--accent-violet)"
+              accent="#7c3aed"
             />
           </div>
 
@@ -384,9 +384,9 @@ export default function DashboardPage() {
             style={{
               marginTop: 12,
               padding: "10px 14px",
-              borderRadius: 2,
-              background: "rgba(167,139,250,0.04)",
-              border: "1px solid rgba(167,139,250,0.1)",
+              borderRadius: 8,
+              background: "rgba(124,58,237,0.04)",
+              border: "1px solid rgba(124,58,237,0.08)",
               fontSize: 11,
               color: "var(--text-dim)",
               textAlign: "center",
@@ -402,7 +402,7 @@ export default function DashboardPage() {
             className="font-display animate-fade-up delay-300"
             style={{
               fontSize: 15,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 16,
               textTransform: "uppercase",
               letterSpacing: "0.06em",
@@ -415,21 +415,21 @@ export default function DashboardPage() {
               title="Direct"
               description="Verifier calls verifyMilestone() directly on Unichain Sepolia"
               status="active"
-              accent="var(--accent-cyan)"
+              accent="var(--accent)"
               delay="delay-400"
             />
             <PathCard
               title="Reactive Cross-Chain"
               description="Oracle (Sepolia) -> Reactor (Reactive) -> Hook (Unichain)"
               status="active"
-              accent="var(--accent-violet)"
+              accent="#7c3aed"
               delay="delay-500"
             />
             <PathCard
               title="EAS Attestation"
               description="Create attestation on EAS, then call verifyMilestoneEAS()"
               status="active"
-              accent="var(--accent-emerald)"
+              accent="var(--success)"
               delay="delay-600"
             />
           </div>
@@ -467,7 +467,7 @@ function ProjectImpactCard({
 }) {
   return (
     <div className="card" style={{ padding: 16 }}>
-      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-bright)", marginBottom: 8 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>
         {name}
       </div>
       <div style={{ display: "grid", gap: 6 }}>
@@ -477,13 +477,13 @@ function ProjectImpactCard({
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
           <span style={{ color: "var(--text-dim)" }}>Milestones</span>
-          <span className="font-data" style={{ color: "var(--text-mid)" }}>{milestones}</span>
+          <span className="font-data" style={{ color: "var(--text-secondary)" }}>{milestones}</span>
         </div>
         <div
           style={{
             marginTop: 4,
             padding: "6px 10px",
-            borderRadius: 2,
+            borderRadius: 6,
             background: `${accent}0d`,
             border: `1px solid ${accent}22`,
             fontSize: 11,
@@ -526,18 +526,18 @@ function PathCard({
             width: 6,
             height: 6,
             borderRadius: "50%",
-            background: status === "active" ? accent : "#ef4444",
+            background: status === "active" ? accent : "var(--error)",
             boxShadow: status === "active" ? `0 0 8px ${accent}` : "none",
           }}
         />
-        <span className="font-display" style={{ fontSize: 13, color: "var(--text-bright)" }}>
+        <span className="font-display" style={{ fontSize: 13, color: "var(--text-primary)" }}>
           {title}
         </span>
       </div>
       <p
         style={{
           fontSize: 12,
-          color: "var(--text-mid)",
+          color: "var(--text-secondary)",
           lineHeight: 1.6,
           margin: 0,
         }}

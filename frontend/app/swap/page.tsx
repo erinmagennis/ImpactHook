@@ -60,7 +60,7 @@ export default function SwapPage() {
     : "0";
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-void)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       <Navigation />
       <main style={{ maxWidth: 520, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ marginBottom: 32 }}>
@@ -69,13 +69,13 @@ export default function SwapPage() {
             style={{
               fontSize: 28,
               fontWeight: 700,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 8,
             }}
           >
             Swap
           </h1>
-          <p style={{ fontSize: 13, color: "var(--text-mid)" }}>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             Swap tokens through an impact pool. A small fee funds verified
             projects.
           </p>
@@ -104,18 +104,18 @@ export default function SwapPage() {
                   onClick={() => setDirection(d)}
                   style={{
                     padding: "10px 12px",
-                    borderRadius: 2,
+                    borderRadius: 6,
                     border:
                       direction === d
-                        ? "1px solid rgba(99,102,241,0.4)"
+                        ? "1px solid rgba(13,148,136,0.4)"
                         : "1px solid var(--border-subtle)",
                     background:
                       direction === d
-                        ? "rgba(99,102,241,0.1)"
+                        ? "rgba(13,148,136,0.08)"
                         : "var(--bg-elevated)",
                     color:
                       direction === d
-                        ? "var(--text-bright)"
+                        ? "var(--text-primary)"
                         : "var(--text-dim)",
                     fontSize: 13,
                     cursor: "pointer",
@@ -150,7 +150,7 @@ export default function SwapPage() {
               <div
                 style={{
                   fontSize: 11,
-                  color: "var(--accent-cyan)",
+                  color: "var(--accent)",
                   textTransform: "uppercase",
                   letterSpacing: "0.12em",
                   marginBottom: 12,
@@ -163,7 +163,7 @@ export default function SwapPage() {
               >
                 <div style={feeRowStyle}>
                   <span style={{ color: "var(--text-dim)" }}>Impact fee rate</span>
-                  <span className="font-data" style={{ color: "var(--text-mid)" }}>
+                  <span className="font-data" style={{ color: "var(--text-secondary)" }}>
                     {feeBps} bps ({(feeBps / 100).toFixed(2)}%)
                   </span>
                 </div>
@@ -174,7 +174,7 @@ export default function SwapPage() {
                     </span>
                     <span
                       className="font-data"
-                      style={{ color: "var(--accent-emerald)" }}
+                      style={{ color: "var(--success)" }}
                     >
                       -{discount / 100}%
                     </span>
@@ -182,7 +182,7 @@ export default function SwapPage() {
                 )}
                 <div style={feeRowStyle}>
                   <span style={{ color: "var(--text-dim)" }}>Effective fee</span>
-                  <span className="font-data" style={{ color: "var(--text-mid)" }}>
+                  <span className="font-data" style={{ color: "var(--text-secondary)" }}>
                     {effectiveFeeBps} bps ({(effectiveFeeBps / 100).toFixed(2)}%)
                   </span>
                 </div>
@@ -197,7 +197,7 @@ export default function SwapPage() {
                   <span style={{ color: "var(--text-dim)" }}>Impact contribution</span>
                   <span
                     className="font-data"
-                    style={{ color: "var(--accent-emerald)", fontWeight: 700 }}
+                    style={{ color: "var(--success)", fontWeight: 700 }}
                   >
                     {estimatedFee.toFixed(6)}
                   </span>
@@ -206,7 +206,7 @@ export default function SwapPage() {
                   <span style={{ color: "var(--text-dim)" }}>Estimated output</span>
                   <span
                     className="font-data"
-                    style={{ color: "var(--text-bright)", fontWeight: 700 }}
+                    style={{ color: "var(--text-primary)", fontWeight: 700 }}
                   >
                     ~{estimatedOutput.toFixed(6)}
                   </span>
@@ -229,7 +229,7 @@ export default function SwapPage() {
                 <div style={infoLabelStyle}>Current Fee</div>
                 <div
                   className="font-data"
-                  style={{ fontSize: 13, color: "var(--text-mid)" }}
+                  style={{ fontSize: 13, color: "var(--text-secondary)" }}
                 >
                   {feeBps} bps
                 </div>
@@ -238,7 +238,7 @@ export default function SwapPage() {
                 <div style={infoLabelStyle}>Milestones</div>
                 <div
                   className="font-data"
-                  style={{ fontSize: 13, color: "var(--text-mid)" }}
+                  style={{ fontSize: 13, color: "var(--text-secondary)" }}
                 >
                   {currentMilestone?.toString()}/{milestoneCount?.toString()}
                 </div>
@@ -251,16 +251,16 @@ export default function SwapPage() {
             <div
               style={{
                 padding: 16,
-                borderRadius: 2,
-                background: "rgba(34,211,238,0.04)",
-                border: "1px solid rgba(34,211,238,0.1)",
+                borderRadius: 8,
+                background: "var(--accent-bg)",
+                border: "1px solid rgba(13,148,136,0.08)",
                 marginBottom: 20,
               }}
             >
               <div
                 style={{
                   fontSize: 11,
-                  color: "var(--accent-cyan)",
+                  color: "var(--accent)",
                   textTransform: "uppercase",
                   letterSpacing: "0.12em",
                   marginBottom: 10,
@@ -284,7 +284,7 @@ export default function SwapPage() {
                     style={{
                       fontSize: 16,
                       fontWeight: 700,
-                      color: "var(--accent-emerald)",
+                      color: "var(--success)",
                     }}
                   >
                     {poolContribution}
@@ -299,7 +299,7 @@ export default function SwapPage() {
                     style={{
                       fontSize: 16,
                       fontWeight: 700,
-                      color: "var(--accent-emerald)",
+                      color: "var(--success)",
                     }}
                   >
                     {globalContribution}
@@ -315,7 +315,7 @@ export default function SwapPage() {
             style={{
               width: "100%",
               padding: "12px 20px",
-              borderRadius: 2,
+              borderRadius: 6,
               border: "1px solid var(--border-subtle)",
               fontSize: 13,
               fontWeight: 600,
@@ -357,14 +357,14 @@ export default function SwapPage() {
                 top: 10,
                 right: 10,
                 padding: "3px 8px",
-                borderRadius: 2,
+                borderRadius: 6,
                 fontSize: 10,
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
-                background: "rgba(167,139,250,0.1)",
-                color: "var(--accent-violet)",
-                border: "1px solid rgba(167,139,250,0.2)",
+                background: "rgba(124,58,237,0.08)",
+                color: "#7c3aed",
+                border: "1px solid rgba(124,58,237,0.15)",
                 zIndex: 1,
               }}
             >
@@ -387,7 +387,7 @@ export default function SwapPage() {
                 <div
                   style={{
                     fontSize: 11,
-                    color: "var(--accent-cyan)",
+                    color: "var(--accent)",
                     textTransform: "uppercase",
                     letterSpacing: "0.12em",
                     marginBottom: 12,
@@ -398,7 +398,7 @@ export default function SwapPage() {
                 <div style={{ display: "grid", gap: 8 }}>
                   <div style={feeRowStyle}>
                     <span style={{ color: "var(--text-dim)" }}>Impact fee rate</span>
-                    <span className="font-data" style={{ color: "var(--text-mid)" }}>
+                    <span className="font-data" style={{ color: "var(--text-secondary)" }}>
                       300 bps (3.00%)
                     </span>
                   </div>
@@ -406,14 +406,14 @@ export default function SwapPage() {
                     <span style={{ color: "var(--text-dim)" }}>Loyalty discount</span>
                     <span
                       className="font-data"
-                      style={{ color: "var(--accent-emerald)" }}
+                      style={{ color: "var(--success)" }}
                     >
                       -10% (repeat contributor)
                     </span>
                   </div>
                   <div style={feeRowStyle}>
                     <span style={{ color: "var(--text-dim)" }}>Effective fee</span>
-                    <span className="font-data" style={{ color: "var(--text-mid)" }}>
+                    <span className="font-data" style={{ color: "var(--text-secondary)" }}>
                       270 bps (2.70%)
                     </span>
                   </div>
@@ -431,7 +431,7 @@ export default function SwapPage() {
                     <span
                       className="font-data"
                       style={{
-                        color: "var(--accent-emerald)",
+                        color: "var(--success)",
                         fontWeight: 700,
                       }}
                     >
@@ -442,7 +442,7 @@ export default function SwapPage() {
                     <span style={{ color: "var(--text-dim)" }}>Estimated output</span>
                     <span
                       className="font-data"
-                      style={{ color: "var(--text-bright)", fontWeight: 700 }}
+                      style={{ color: "var(--text-primary)", fontWeight: 700 }}
                     >
                       ~0.973000
                     </span>
@@ -453,16 +453,16 @@ export default function SwapPage() {
               <div
                 style={{
                   padding: 16,
-                  borderRadius: 2,
-                  background: "rgba(34,211,238,0.04)",
-                  border: "1px solid rgba(34,211,238,0.1)",
+                  borderRadius: 8,
+                  background: "var(--accent-bg)",
+                  border: "1px solid rgba(13,148,136,0.08)",
                   marginBottom: 16,
                 }}
               >
                 <div
                   style={{
                     fontSize: 11,
-                    color: "var(--accent-cyan)",
+                    color: "var(--accent)",
                     textTransform: "uppercase",
                     letterSpacing: "0.12em",
                     marginBottom: 8,
@@ -492,7 +492,7 @@ export default function SwapPage() {
                       style={{
                         fontSize: 16,
                         fontWeight: 700,
-                        color: "var(--accent-emerald)",
+                        color: "var(--success)",
                       }}
                     >
                       0.847
@@ -513,7 +513,7 @@ export default function SwapPage() {
                       style={{
                         fontSize: 16,
                         fontWeight: 700,
-                        color: "var(--accent-emerald)",
+                        color: "var(--success)",
                       }}
                     >
                       2.134
@@ -527,16 +527,15 @@ export default function SwapPage() {
                 style={{
                   width: "100%",
                   padding: "12px 20px",
-                  borderRadius: 2,
-                  border: "1px solid rgba(139,92,246,0.4)",
+                  borderRadius: 6,
+                  border: "1px solid rgba(124,58,237,0.3)",
                   fontSize: 13,
                   fontWeight: 600,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   cursor: "not-allowed",
-                  background:
-                    "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))",
-                  color: "var(--text-bright)",
+                  background: "rgba(124,58,237,0.08)",
+                  color: "var(--text-primary)",
                   fontFamily: "inherit",
                   opacity: 0.6,
                 }}
@@ -547,11 +546,11 @@ export default function SwapPage() {
                 style={{
                   marginTop: 12,
                   padding: "10px 14px",
-                  borderRadius: 2,
-                  background: "rgba(34,211,238,0.04)",
-                  border: "1px solid rgba(34,211,238,0.1)",
+                  borderRadius: 8,
+                  background: "var(--accent-bg)",
+                  border: "1px solid rgba(13,148,136,0.08)",
                   fontSize: 12,
-                  color: "var(--text-mid)",
+                  color: "var(--text-secondary)",
                   lineHeight: 1.5,
                 }}
               >
@@ -579,10 +578,10 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
-  borderRadius: 2,
+  borderRadius: 6,
   border: "1px solid var(--border-subtle)",
   background: "var(--bg-elevated)",
-  color: "var(--text-bright)",
+  color: "var(--text-primary)",
   fontSize: 13,
   outline: "none",
   fontFamily: "inherit",
@@ -597,7 +596,7 @@ const feeRowStyle: React.CSSProperties = {
 
 const infoBoxStyle: React.CSSProperties = {
   padding: 12,
-  borderRadius: 2,
+  borderRadius: 8,
   background: "var(--bg-elevated)",
   border: "1px solid var(--border-subtle)",
 };

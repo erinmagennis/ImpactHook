@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/style.css');
 
 @font-face {
   font-family: 'Departure Mono';
@@ -8,21 +9,40 @@
   font-display: swap;
 }
 
+/* ========================================
+   Design tokens
+   ======================================== */
+
 :root {
-  --bg-void: #050508;
-  --bg-surface: #0c0d12;
-  --bg-elevated: #12141c;
-  --bg-card: #181a24;
-  --accent-cyan: #22d3ee;
-  --accent-emerald: #34d399;
-  --accent-violet: #a78bfa;
-  --accent-amber: #fbbf24;
-  --text-bright: #f0f4f8;
-  --text-mid: #9ca3b8;
-  --text-dim: #6b7394;
-  --border-subtle: rgba(136, 146, 164, 0.08);
-  --border-active: rgba(34, 211, 238, 0.2);
+  --bg-primary: #fafaf9;
+  --bg-card: #ffffff;
+  --bg-elevated: #f4f4f5;
+  --bg-surface: #e4e4e7;
+  --accent: #0d9488;
+  --accent-light: #14b8a6;
+  --accent-bg: #f0fdfa;
+  --accent-border: #99f6e4;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-dim: #a1a1aa;
+  --border-subtle: #e4e4e7;
+  --border-active: #0d9488;
+  --success: #059669;
+  --warning: #d97706;
+  --error: #dc2626;
+  --shadow-sm: 0 1px 2px rgba(120, 113, 108, 0.06);
+  --shadow-md: 0 2px 8px rgba(120, 113, 108, 0.08), 0 1px 2px rgba(120, 113, 108, 0.04);
+  --shadow-lg: 0 8px 24px rgba(120, 113, 108, 0.10), 0 2px 8px rgba(120, 113, 108, 0.06);
+  --radius-card: 8px;
+  --radius-btn: 6px;
+  --radius-sm: 4px;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
 }
+
+/* ========================================
+   Reset & base
+   ======================================== */
 
 * {
   box-sizing: border-box;
@@ -33,186 +53,200 @@ html {
 }
 
 body {
-  background: var(--bg-void);
-  color: var(--text-bright);
-  font-family: 'Departure Mono', 'SF Mono', 'Fira Code', monospace;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Geist Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  line-height: 1.6;
 }
 
-/* --- Noise overlay for texture --- */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px;
-}
+/* ========================================
+   Typography
+   ======================================== */
 
-/* --- Gradient mesh background --- */
-.bg-mesh {
-  position: relative;
-}
-.bg-mesh::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 600px 400px at 20% 10%, rgba(34, 211, 238, 0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 500px 500px at 80% 20%, rgba(167, 139, 250, 0.03) 0%, transparent 70%),
-    radial-gradient(ellipse 400px 300px at 50% 80%, rgba(52, 211, 153, 0.03) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* --- Typography --- */
 .font-display {
-  font-family: 'Departure Mono', monospace;
-  letter-spacing: -0.02em;
+  font-family: 'Geist Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.025em;
 }
 
 .font-data {
-  font-family: 'Departure Mono', 'SF Mono', monospace;
+  font-family: 'Departure Mono', 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
 }
 
-/* --- Gradient utilities --- */
-.text-gradient-cyan {
-  background: linear-gradient(135deg, #22d3ee, #34d399);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* ========================================
+   Card system
+   ======================================== */
 
-.text-gradient-violet {
-  background: linear-gradient(135deg, #a78bfa, #22d3ee);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-full {
-  background: linear-gradient(135deg, #22d3ee, #a78bfa, #34d399);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Hero title gradient - keeps original gradient feel */
-.text-hero-gradient {
-  background: linear-gradient(135deg, #22d3ee, #a78bfa, #34d399);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* CTA primary button */
-.cta-primary {
-  background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(139,92,246,0.35));
-  border: 1px solid rgba(139,92,246,0.5);
-  color: #fff;
-  position: relative;
-}
-.cta-primary::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.cta-primary:hover::before {
-  opacity: 1;
-}
-
-/* --- Impact gradient section --- */
-.impact-gradient {
-  position: relative;
-  background: linear-gradient(135deg, #0a2a2e 0%, #0f1a2e 25%, #1a0f2e 50%, #0e2a1e 75%, #0a2a2e 100%);
-  overflow: hidden;
-}
-.impact-gradient::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 800px 500px at 10% 30%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 600px 600px at 90% 40%, rgba(167, 139, 250, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 700px 400px at 50% 90%, rgba(52, 211, 153, 0.10) 0%, transparent 60%);
-  pointer-events: none;
-}
-.impact-gradient::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, var(--bg-void) 0%, transparent 8%),
-    linear-gradient(0deg, var(--bg-void) 0%, transparent 8%);
-  pointer-events: none;
-}
-
-.impact-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 2px;
-  backdrop-filter: blur(8px);
-  transition: border-color 0.3s ease, background 0.3s ease;
-}
-.impact-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-/* --- Card system --- */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 2px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
+
 .card:hover {
-  border-color: var(--border-active);
-  box-shadow: 0 0 40px rgba(34, 211, 238, 0.03);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: #d4d4d8;
 }
 
 .card-glow {
-  box-shadow:
-    0 0 0 1px rgba(34, 211, 238, 0.08),
-    0 4px 40px rgba(34, 211, 238, 0.04),
-    0 8px 80px rgba(167, 139, 250, 0.02);
+  box-shadow: var(--shadow-md);
 }
 
-/* --- Milestone timeline --- */
+.card-glow:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Impact card (for featured sections) */
+.impact-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.impact-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-border);
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+
+.cta-primary {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #ffffff;
+  border-radius: var(--radius-btn);
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.cta-primary:hover {
+  background: #0f766e;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.2);
+}
+
+.cta-primary:active {
+  transform: scale(0.98);
+}
+
+.cta-primary:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   Focus ring (accessibility)
+   ======================================== */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   Form inputs
+   ======================================== */
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-btn);
+  color: var(--text-primary);
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: inherit;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-dim);
+}
+
+/* ========================================
+   Hero gradient text - solid teal
+   ======================================== */
+
+.text-hero-gradient {
+  color: var(--accent);
+}
+
+/* Legacy gradient utilities - mapped to teal */
+.text-gradient-cyan {
+  color: var(--accent);
+}
+
+.text-gradient-violet {
+  color: var(--accent);
+}
+
+.text-gradient-full {
+  color: var(--accent);
+}
+
+/* ========================================
+   Milestone timeline
+   ======================================== */
+
 .timeline-line {
   position: absolute;
   left: 11px;
   top: 24px;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-emerald) 50%, var(--border-subtle) 50%);
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-border) 50%, var(--border-subtle) 50%);
 }
 
 .milestone-node {
   width: 24px;
   height: 24px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
 }
 
 .milestone-verified {
-  background: rgba(34, 211, 238, 0.12);
-  border: 1.5px solid var(--accent-cyan);
-  box-shadow: 0 0 16px rgba(34, 211, 238, 0.15);
+  background: var(--accent-bg);
+  border: 1.5px solid var(--accent);
 }
 
 .milestone-pending {
@@ -221,15 +255,19 @@ body::before {
 }
 
 .milestone-active {
-  background: rgba(167, 139, 250, 0.1);
-  border: 1.5px solid var(--accent-violet);
-  box-shadow: 0 0 16px rgba(167, 139, 250, 0.12);
+  background: var(--accent-bg);
+  border: 1.5px solid var(--accent-light);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
-/* --- Flow arrows --- */
+/* ========================================
+   Flow connectors
+   ======================================== */
+
 .flow-connector {
   position: relative;
 }
+
 .flow-connector::after {
   content: ">";
   position: absolute;
@@ -239,30 +277,52 @@ body::before {
   color: var(--text-dim);
   font-size: 14px;
 }
+
 .flow-connector:last-child::after {
   display: none;
 }
 
-/* --- Status indicators --- */
+/* ========================================
+   Status indicators
+   ======================================== */
+
 .status-live {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
+
 .status-live::before {
   content: "";
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--accent-emerald);
-  box-shadow: 0 0 8px var(--accent-emerald);
-  animation: pulse-glow 2s ease-in-out infinite;
+  background: var(--success);
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 
-/* --- Animations --- */
+/* ========================================
+   Dividers
+   ======================================== */
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fade-in {
@@ -270,14 +330,9 @@ body::before {
   to { opacity: 1; }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
-}
-
-@keyframes scan-line {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
 }
 
 @keyframes progress-fill {
@@ -287,7 +342,7 @@ body::before {
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-3px); }
 }
 
 @keyframes type-in {
@@ -296,12 +351,12 @@ body::before {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
 }
 
 .animate-fade-in {
-  animation: fade-in 0.6s ease-out forwards;
+  animation: fade-in 0.5s ease-out forwards;
   opacity: 0;
 }
 
@@ -315,8 +370,8 @@ body::before {
 .delay-800 { animation-delay: 800ms; }
 
 .animate-progress-bar {
-  animation: progress-fill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 0.6s;
+  animation: progress-fill 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.4s;
   transform-origin: left;
   transform: scaleX(0);
 }
@@ -325,41 +380,58 @@ body::before {
   animation: float 6s ease-in-out infinite;
 }
 
-/* --- Dividers --- */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
-}
+/* ========================================
+   Selection
+   ======================================== */
 
-/* --- Scanline effect on hero --- */
-.scanline::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(255, 255, 255, 0.008) 2px,
-    rgba(255, 255, 255, 0.008) 4px
-  );
-  pointer-events: none;
-}
-
-/* --- Selection color --- */
 ::selection {
-  background: rgba(34, 211, 238, 0.2);
-  color: var(--text-bright);
+  background: rgba(13, 148, 136, 0.15);
+  color: var(--text-primary);
 }
 
-/* --- Scrollbar --- */
+/* ========================================
+   Scrollbar
+   ======================================== */
+
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: var(--bg-void);
+  background: var(--bg-elevated);
 }
+
 ::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
   background: var(--text-dim);
-  border-radius: 2px;
+}
+
+/* ========================================
+   Legacy class stubs (prevent breakage)
+   ======================================== */
+
+.bg-mesh {
+  position: relative;
+}
+
+.bg-mesh::after {
+  display: none;
+}
+
+.impact-gradient {
+  position: relative;
+  background: var(--bg-primary);
+}
+
+.impact-gradient::before,
+.impact-gradient::after {
+  display: none;
+}
+
+.scanline::after {
+  display: none;
 }

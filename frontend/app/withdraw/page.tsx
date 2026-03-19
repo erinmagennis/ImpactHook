@@ -64,7 +64,7 @@ export default function WithdrawPage() {
   const isEnabled = hasFees && isRecipient && !isLoading;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-void)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       <Navigation />
       <main style={{ maxWidth: 520, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ marginBottom: 32 }}>
@@ -73,13 +73,13 @@ export default function WithdrawPage() {
             style={{
               fontSize: 28,
               fontWeight: 700,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 8,
             }}
           >
             Withdraw Fees
           </h1>
-          <p style={{ fontSize: 13, color: "var(--text-mid)" }}>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             Withdraw accumulated swap fees for your impact project
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function WithdrawPage() {
                   fontSize: 28,
                   fontWeight: 700,
                   color: hasFees
-                    ? "var(--accent-emerald)"
+                    ? "var(--success)"
                     : "var(--text-dim)",
                 }}
               >
@@ -158,9 +158,9 @@ export default function WithdrawPage() {
             style={{
               width: "100%",
               padding: "12px 20px",
-              borderRadius: 2,
+              borderRadius: 8,
               border: isEnabled
-                ? "1px solid rgba(139,92,246,0.4)"
+                ? "1px solid var(--accent)"
                 : "1px solid var(--border-subtle)",
               fontSize: 13,
               fontWeight: 600,
@@ -168,9 +168,9 @@ export default function WithdrawPage() {
               textTransform: "uppercase",
               cursor: isEnabled ? "pointer" : "not-allowed",
               background: isEnabled
-                ? "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))"
+                ? "var(--accent)"
                 : "var(--bg-elevated)",
-              color: isEnabled ? "var(--text-bright)" : "var(--text-dim)",
+              color: isEnabled ? "#ffffff" : "var(--text-dim)",
               transition: "all 0.2s",
               fontFamily: "inherit",
             }}
@@ -193,10 +193,10 @@ export default function WithdrawPage() {
               style={{
                 marginTop: 12,
                 padding: "10px 14px",
-                borderRadius: 2,
-                background: "rgba(52,211,153,0.06)",
-                border: "1px solid rgba(52,211,153,0.15)",
-                color: "var(--accent-emerald)",
+                borderRadius: 8,
+                background: "rgba(5,150,105,0.06)",
+                border: "1px solid rgba(5,150,105,0.12)",
+                color: "var(--success)",
                 fontSize: 13,
                 textAlign: "center",
               }}
@@ -206,7 +206,7 @@ export default function WithdrawPage() {
                 href={`https://sepolia.uniscan.xyz/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "var(--accent-violet)", textDecoration: "underline" }}
+                style={{ color: "#7c3aed", textDecoration: "underline" }}
               >
                 View transaction
               </a>
@@ -223,14 +223,14 @@ export default function WithdrawPage() {
                 top: 10,
                 right: 10,
                 padding: "3px 8px",
-                borderRadius: 2,
+                borderRadius: 8,
                 fontSize: 10,
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
-                background: "rgba(167,139,250,0.1)",
-                color: "var(--accent-violet)",
-                border: "1px solid rgba(167,139,250,0.2)",
+                background: "rgba(124,58,237,0.08)",
+                color: "#7c3aed",
+                border: "1px solid rgba(124,58,237,0.15)",
                 zIndex: 1,
               }}
             >
@@ -241,23 +241,23 @@ export default function WithdrawPage() {
                 Example: Clean Water - Chiapas Schools
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-                <div style={{ padding: 16, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ padding: 16, borderRadius: 8, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (ETH)</div>
-                  <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--accent-emerald)" }}>0.284</div>
+                  <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--success)" }}>0.284</div>
                 </div>
-                <div style={{ padding: 16, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ padding: 16, borderRadius: 8, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (USDC)</div>
-                  <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--accent-emerald)" }}>412.50</div>
+                  <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--success)" }}>412.50</div>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                <div style={{ flex: 1, padding: 12, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ flex: 1, padding: 12, borderRadius: 8, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Recipient</div>
-                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>0x1a2B...9c4D</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>0x1a2B...9c4D</div>
                 </div>
-                <div style={{ flex: 1, padding: 12, borderRadius: 2, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ flex: 1, padding: 12, borderRadius: 8, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Current Fee</div>
-                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-mid)" }}>200 bps</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>200 bps</div>
                 </div>
               </div>
               <button
@@ -265,15 +265,15 @@ export default function WithdrawPage() {
                 style={{
                   width: "100%",
                   padding: "12px 20px",
-                  borderRadius: 2,
-                  border: "1px solid rgba(139,92,246,0.4)",
+                  borderRadius: 8,
+                  border: "1px solid rgba(124,58,237,0.3)",
                   fontSize: 13,
                   fontWeight: 600,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   cursor: "not-allowed",
-                  background: "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))",
-                  color: "var(--text-bright)",
+                  background: "rgba(124,58,237,0.08)",
+                  color: "var(--text-primary)",
                   fontFamily: "inherit",
                   opacity: 0.6,
                 }}
@@ -284,11 +284,11 @@ export default function WithdrawPage() {
                 style={{
                   marginTop: 12,
                   padding: "10px 14px",
-                  borderRadius: 2,
-                  background: "rgba(34,211,238,0.04)",
-                  border: "1px solid rgba(34,211,238,0.1)",
+                  borderRadius: 8,
+                  background: "var(--accent-bg)",
+                  border: "1px solid rgba(13,148,136,0.08)",
                   fontSize: 12,
-                  color: "var(--text-mid)",
+                  color: "var(--text-secondary)",
                   lineHeight: 1.5,
                 }}
               >
@@ -314,10 +314,10 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
-  borderRadius: 2,
+  borderRadius: 6,
   border: "1px solid var(--border-subtle)",
   background: "var(--bg-elevated)",
-  color: "var(--text-bright)",
+  color: "var(--text-primary)",
   fontSize: 13,
   outline: "none",
   fontFamily: "inherit",

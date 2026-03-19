@@ -95,7 +95,7 @@ export default function CreateProjectPage() {
   const isEnabled = isOwner && hasAllFields && !isLoading;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-void)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       <Navigation />
       <main style={{ maxWidth: 580, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ marginBottom: 32 }}>
@@ -104,13 +104,13 @@ export default function CreateProjectPage() {
             style={{
               fontSize: 28,
               fontWeight: 700,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 8,
             }}
           >
             Create Project
           </h1>
-          <p style={{ fontSize: 13, color: "var(--text-mid)" }}>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             Register a new impact project for a Uniswap v4 pool. Currently
             owner-gated for safety. Permissionless registration is on the
             roadmap.
@@ -122,7 +122,7 @@ export default function CreateProjectPage() {
           <div
             style={{
               fontSize: 11,
-              color: "var(--accent-cyan)",
+              color: "var(--accent)",
               textTransform: "uppercase",
               letterSpacing: "0.12em",
               marginBottom: 12,
@@ -191,7 +191,7 @@ export default function CreateProjectPage() {
           <div
             style={{
               fontSize: 11,
-              color: "var(--accent-cyan)",
+              color: "var(--accent)",
               textTransform: "uppercase",
               letterSpacing: "0.12em",
               marginBottom: 12,
@@ -232,7 +232,7 @@ export default function CreateProjectPage() {
             <div
               style={{
                 fontSize: 11,
-                color: "var(--accent-cyan)",
+                color: "var(--accent)",
                 textTransform: "uppercase",
                 letterSpacing: "0.12em",
               }}
@@ -243,10 +243,10 @@ export default function CreateProjectPage() {
               onClick={addMilestone}
               style={{
                 padding: "4px 10px",
-                borderRadius: 2,
+                borderRadius: 8,
                 border: "1px solid rgba(34,211,238,0.2)",
                 background: "rgba(34,211,238,0.06)",
-                color: "var(--accent-cyan)",
+                color: "var(--accent)",
                 fontSize: 11,
                 cursor: "pointer",
                 fontFamily: "inherit",
@@ -297,7 +297,7 @@ export default function CreateProjectPage() {
                 onClick={() => removeMilestone(i)}
                 style={{
                   padding: "10px 0",
-                  borderRadius: 2,
+                  borderRadius: 8,
                   border: "1px solid var(--border-subtle)",
                   background: "var(--bg-elevated)",
                   color: "var(--text-dim)",
@@ -319,7 +319,7 @@ export default function CreateProjectPage() {
               style={{
                 width: "100%",
                 padding: "12px 20px",
-                borderRadius: 2,
+                borderRadius: 8,
                 border: isEnabled
                   ? "1px solid rgba(139,92,246,0.4)"
                   : "1px solid var(--border-subtle)",
@@ -331,7 +331,7 @@ export default function CreateProjectPage() {
                 background: isEnabled
                   ? "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))"
                   : "var(--bg-elevated)",
-                color: isEnabled ? "var(--text-bright)" : "var(--text-dim)",
+                color: isEnabled ? "var(--text-primary)" : "var(--text-dim)",
                 transition: "all 0.2s",
                 fontFamily: "inherit",
               }}
@@ -353,10 +353,10 @@ export default function CreateProjectPage() {
               style={{
                 marginTop: 12,
                 padding: "10px 14px",
-                borderRadius: 2,
+                borderRadius: 8,
                 background: "rgba(251,191,36,0.06)",
                 border: "1px solid rgba(251,191,36,0.15)",
-                color: "var(--accent-amber)",
+                color: "var(--warning)",
                 fontSize: 12,
                 lineHeight: 1.5,
               }}
@@ -372,10 +372,10 @@ export default function CreateProjectPage() {
               style={{
                 marginTop: 12,
                 padding: "10px 14px",
-                borderRadius: 2,
+                borderRadius: 8,
                 background: "rgba(52,211,153,0.06)",
                 border: "1px solid rgba(52,211,153,0.15)",
-                color: "var(--accent-emerald)",
+                color: "var(--success)",
                 fontSize: 13,
                 textAlign: "center",
               }}
@@ -386,7 +386,7 @@ export default function CreateProjectPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  color: "var(--accent-violet)",
+                  color: "#7c3aed",
                   textDecoration: "underline",
                 }}
               >
@@ -412,10 +412,10 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
-  borderRadius: 2,
+  borderRadius: 8,
   border: "1px solid var(--border-subtle)",
   background: "var(--bg-elevated)",
-  color: "var(--text-bright)",
+  color: "var(--text-primary)",
   fontSize: 13,
   outline: "none",
   fontFamily: "inherit",

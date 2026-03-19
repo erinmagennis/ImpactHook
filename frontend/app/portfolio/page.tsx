@@ -52,9 +52,9 @@ const FUNDED_PROJECTS = [
 ];
 
 const ACCENT_COLORS = {
-  cyan: { color: "var(--accent-cyan)", bg: "rgba(34, 211, 238, 0.08)", border: "rgba(34, 211, 238, 0.2)" },
-  emerald: { color: "var(--accent-emerald)", bg: "rgba(52, 211, 153, 0.08)", border: "rgba(52, 211, 153, 0.2)" },
-  violet: { color: "var(--accent-violet)", bg: "rgba(167, 139, 250, 0.08)", border: "rgba(167, 139, 250, 0.2)" },
+  cyan: { color: "var(--accent)", bg: "rgba(34, 211, 238, 0.08)", border: "rgba(34, 211, 238, 0.2)" },
+  emerald: { color: "var(--success)", bg: "rgba(52, 211, 153, 0.08)", border: "rgba(52, 211, 153, 0.2)" },
+  violet: { color: "#7c3aed", bg: "rgba(167, 139, 250, 0.08)", border: "rgba(167, 139, 250, 0.2)" },
 };
 
 function SummaryCard({
@@ -87,7 +87,7 @@ function SummaryCard({
         style={{
           fontSize: 28,
           fontWeight: 700,
-          color: "var(--text-bright)",
+          color: "var(--text-primary)",
           lineHeight: 1.1,
         }}
       >
@@ -124,7 +124,7 @@ function MilestoneTimeline({
             style={{
               width: 20,
               height: 20,
-              borderRadius: 2,
+              borderRadius: 8,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -141,7 +141,7 @@ function MilestoneTimeline({
               >
                 <path
                   d="M2.5 6L5 8.5L9.5 4"
-                  stroke="var(--accent-cyan)"
+                  stroke="var(--accent)"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -153,7 +153,7 @@ function MilestoneTimeline({
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  background: "var(--accent-violet)",
+                  background: "#7c3aed",
                 }}
               />
             ) : (
@@ -172,9 +172,9 @@ function MilestoneTimeline({
               fontSize: 13,
               color:
                 m.status === "verified"
-                  ? "var(--text-bright)"
+                  ? "var(--text-primary)"
                   : m.status === "active"
-                  ? "var(--text-mid)"
+                  ? "var(--text-secondary)"
                   : "var(--text-dim)",
             }}
           >
@@ -217,7 +217,7 @@ function ProjectCard({
             style={{
               fontSize: 18,
               fontWeight: 700,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 4,
             }}
           >
@@ -237,7 +237,7 @@ function ProjectCard({
         <div
           style={{
             padding: "4px 10px",
-            borderRadius: 2,
+            borderRadius: 8,
             fontSize: 11,
             fontWeight: 600,
             textTransform: "uppercase",
@@ -273,7 +273,7 @@ function ProjectCard({
           style={{
             fontSize: 16,
             fontWeight: 600,
-            color: "var(--text-bright)",
+            color: "var(--text-primary)",
           }}
         >
           {project.contributed} ETH
@@ -295,7 +295,7 @@ function ProjectCard({
           </span>
           <span
             className="font-data"
-            style={{ fontSize: 13, color: "var(--text-mid)" }}
+            style={{ fontSize: 13, color: "var(--text-secondary)" }}
           >
             {project.currentMilestone} / {project.totalMilestones}
           </span>
@@ -303,7 +303,7 @@ function ProjectCard({
         <div
           style={{
             height: 4,
-            borderRadius: 2,
+            borderRadius: 8,
             background: "var(--bg-elevated)",
             overflow: "hidden",
           }}
@@ -312,7 +312,7 @@ function ProjectCard({
             style={{
               height: "100%",
               width: `${progressPct}%`,
-              borderRadius: 2,
+              borderRadius: 8,
               background: `linear-gradient(90deg, ${accent.color}, ${accent.color}88)`,
               transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
@@ -324,7 +324,7 @@ function ProjectCard({
       <div
         style={{
           padding: "12px 14px",
-          borderRadius: 2,
+          borderRadius: 8,
           background: "rgba(52, 211, 153, 0.06)",
           border: "1px solid rgba(52, 211, 153, 0.12)",
           marginBottom: 20,
@@ -344,7 +344,7 @@ function ProjectCard({
         <div
           style={{
             fontSize: 14,
-            color: "var(--accent-emerald)",
+            color: "var(--success)",
             lineHeight: 1.5,
           }}
         >
@@ -362,7 +362,7 @@ export default function PortfolioPage() {
   const { isConnected } = useAccount();
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-void)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       <Navigation />
       <main style={{ maxWidth: 1000, margin: "0 auto", padding: "48px 24px 80px" }}>
         {/* Header */}
@@ -381,7 +381,7 @@ export default function PortfolioPage() {
           <p
             style={{
               fontSize: 15,
-              color: "var(--text-mid)",
+              color: "var(--text-secondary)",
               lineHeight: 1.6,
               maxWidth: 520,
             }}
@@ -407,20 +407,20 @@ export default function PortfolioPage() {
             <div
               style={{
                 padding: "3px 8px",
-                borderRadius: 2,
+                borderRadius: 8,
                 fontSize: 10,
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
                 background: "rgba(167,139,250,0.1)",
-                color: "var(--accent-violet)",
+                color: "#7c3aed",
                 border: "1px solid rgba(167,139,250,0.2)",
                 flexShrink: 0,
               }}
             >
               Preview
             </div>
-            <span style={{ fontSize: 13, color: "var(--text-mid)" }}>
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
               Connect your wallet to see your real portfolio. Showing example data below.
             </span>
           </div>
@@ -448,7 +448,7 @@ export default function PortfolioPage() {
             style={{
               fontSize: 18,
               fontWeight: 600,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 20,
             }}
           >
@@ -476,7 +476,7 @@ export default function PortfolioPage() {
           className="card animate-fade-up delay-800"
           style={{
             padding: "24px 28px",
-            borderLeft: "2px solid var(--accent-cyan)",
+            borderLeft: "2px solid var(--accent)",
           }}
         >
           <div
@@ -484,7 +484,7 @@ export default function PortfolioPage() {
             style={{
               fontSize: 15,
               fontWeight: 600,
-              color: "var(--text-bright)",
+              color: "var(--text-primary)",
               marginBottom: 8,
             }}
           >
@@ -493,7 +493,7 @@ export default function PortfolioPage() {
           <p
             style={{
               fontSize: 14,
-              color: "var(--text-mid)",
+              color: "var(--text-secondary)",
               lineHeight: 1.7,
               margin: 0,
             }}
