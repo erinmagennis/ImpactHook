@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
+  { href: "/swap", label: "Swap" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/milestones", label: "Milestones" },
   { href: "/withdraw", label: "Withdraw" },
   { href: "/donate", label: "Donate" },
+  { href: "/create", label: "Create" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/impact", label: "Impact" },
   { href: "/technical", label: "Technical" },
