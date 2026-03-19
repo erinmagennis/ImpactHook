@@ -198,8 +198,8 @@ The deployment script mines a CREATE2 salt to produce a hook address with the co
 
 | Contract | Chain | Address |
 |----------|-------|---------|
-| ImpactHook | Unichain Sepolia | `0x6b3C6687e712c8f4AbA76362f73Ea2ef088b2044` |
-| MilestoneArbiter | Unichain Sepolia | `0xfF42b8650B7C1957a60Dc1dc6133d30fBE20Bf63` |
+| ImpactHook | Unichain Sepolia | `0x4A5EC52aa4F86F2947bB710cD34Cd272adC62547` |
+| MilestoneArbiter | Unichain Sepolia | `0x1af58d1A851Ab874776329b11838C6C37C81Ce62` |
 | MilestoneOracle | Ethereum Sepolia | `0x9845d22Fbb33f30E241824aCB1813c041291A4Ca` |
 | MilestoneReactor | Reactive Lasna | `0x4CB877dee81E9e68533FFaf8495Ce9bCdc9518a4` |
 
