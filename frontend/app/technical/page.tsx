@@ -48,9 +48,9 @@ export default function TechnicalPage() {
           <ContractCard
             name="ImpactHook.sol"
             role="Core Hook"
-            description="afterSwap fee routing, milestone tracking, 3 verification paths, withdrawal, direct donations"
+            description="afterSwap fee routing, LP fee skim, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates"
             chain="Unichain Sepolia"
-            address="0x6b3C6687e712c8f4AbA76362f73Ea2ef088b2044"
+            address="0x4A5EC52aa4F86F2947bB710cD34Cd272adC62547"
             accent="cyan"
           />
           <ContractCard
@@ -58,7 +58,7 @@ export default function TechnicalPage() {
             role="Escrow Gate"
             description="Alkahest IArbiter - gates escrow release on verified milestone state"
             chain="Unichain Sepolia"
-            address="0xfF42b8650B7C1957a60Dc1dc6133d30fBE20Bf63"
+            address="0x1af58d1A851Ab874776329b11838C6C37C81Ce62"
             accent="violet"
           />
           <ContractCard
@@ -230,7 +230,7 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
 
           <div className="card p-6" style={{ marginBottom: 16 }}>
             <div className="flex items-center gap-4 mb-6">
-              <div className="font-data text-3xl" style={{ color: 'var(--accent-emerald)' }}>102</div>
+              <div className="font-data text-3xl" style={{ color: 'var(--accent-emerald)' }}>147</div>
               <div>
                 <div className="text-[13px]" style={{ color: 'var(--text-bright)' }}>tests passing</div>
                 <div className="text-[11px]" style={{ color: 'var(--text-dim)' }}>0 failed, 0 skipped</div>
@@ -238,10 +238,10 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <TestGroup name="Core Hook" count={24} items={["Registration", "Fee routing (both dirs)", "Milestone progression", "Withdrawal", "Fee precision"]} />
-              <TestGroup name="Access Control" count={16} items={["Verifier auth", "Recipient auth", "Callback proxy", "Owner checks", "Update then verify"]} />
+              <TestGroup name="Core Hook" count={35} items={["Registration", "Fee routing (both dirs)", "Milestone progression", "Withdrawal", "Impact tracking", "LP fee skim"]} />
+              <TestGroup name="Access & Safety" count={28} items={["Verifier auth", "Recipient auth", "Callback proxy", "Owner checks", "Heartbeat expiry", "Per-project pause"]} />
               <TestGroup name="Integrations" count={19} items={["MilestoneArbiter (3)", "Reactive callbacks (5)", "Oracle events (4)", "EAS verification (7)"]} />
-              <TestGroup name="Donations & Fuzz" count={22} items={["ERC20 donations (8)", "Native ETH (4)", "Fuzz: amounts (2)", "Fuzz: fee calc", "HookMiner (7)"]} />
+              <TestGroup name="Features & Fuzz" count={30} items={["Loyalty discounts (6)", "Templates (7)", "Donations (8)", "Fuzz tests", "HookMiner (7)", "Edge cases"]} />
             </div>
           </div>
 
@@ -272,8 +272,8 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
               </thead>
               <tbody>
                 {[
-                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0x6b3C6687e712c8f4AbA76362f73Ea2ef088b2044" },
-                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0xfF42b8650B7C1957a60Dc1dc6133d30fBE20Bf63" },
+                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0x4A5EC52aa4F86F2947bB710cD34Cd272adC62547" },
+                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0x1af58d1A851Ab874776329b11838C6C37C81Ce62" },
                   { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: "0x9845d22Fbb33f30E241824aCB1813c041291A4Ca" },
                   { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x4CB877dee81E9e68533FFaf8495Ce9bCdc9518a4" },
                 ].map((c) => (

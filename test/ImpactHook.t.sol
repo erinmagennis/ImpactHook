@@ -2078,6 +2078,209 @@ contract ImpactHookTest is Test, Deployers {
         assertTrue(true, "Covered loyalty-reduces-to-zero path");
     }
 
+    // ────────── Heartbeat Tests ──────────
+
+    function test_heartbeat() public {
+        vm.prank(recipient);
+        hook.heartbeat(poolId);
+        // Should not revert - recipient can heartbeat
+    }
+
+    function test_heartbeat_verifier() public {
+        vm.prank(verifier);
+        hook.heartbeat(poolId);
+    }
+
+    function test_revert_heartbeat_notAuthorized() public {
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotVerifier.selector);
+        hook.heartbeat(poolId);
+    }
+
+    function test_heartbeatExpiration_stopsFees() public {
+        // Set 1 second heartbeat interval
+        hook.setHeartbeatInterval(poolId, 1);
+
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 1); // 200 bps
+
+        // Swap immediately - should collect fees
+        _swap(true, -1 ether);
+        uint256 feesWithHeartbeat = hook.accumulatedFees(poolId, currency1);
+        assertGt(feesWithHeartbeat, 0, "Should collect fees before expiry");
+
+        // Warp past heartbeat interval
+        vm.warp(block.timestamp + 2);
+
+        // Swap again - should NOT collect fees (expired)
+        _swap(true, -1 ether);
+        uint256 feesAfterExpiry = hook.accumulatedFees(poolId, currency1);
+        assertEq(feesAfterExpiry, feesWithHeartbeat, "Should not collect fees after expiry");
+
+        // Send heartbeat to revive
+        vm.prank(recipient);
+        hook.heartbeat(poolId);
+
+        // Swap again - should collect fees again
+        _swap(true, -1 ether);
+        uint256 feesAfterRevive = hook.accumulatedFees(poolId, currency1);
+        assertGt(feesAfterRevive, feesAfterExpiry, "Should collect fees after heartbeat");
+    }
+
+    function test_heartbeatInterval_zeroMeansNoExpiry() public {
+        // Default interval is 0 (no expiry)
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 1);
+
+        // Warp far into the future
+        vm.warp(block.timestamp + 365 days);
+
+        // Should still collect fees
+        _swap(true, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency1), 0, "Should collect fees with no expiry");
+    }
+
+    function test_milestoneVerification_refreshesHeartbeat() public {
+        hook.setHeartbeatInterval(poolId, 100);
+
+        // Warp close to expiry
+        vm.warp(block.timestamp + 90);
+
+        // Verify milestone - should refresh heartbeat
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+
+        // Warp another 90 seconds (would be expired if heartbeat wasn't refreshed)
+        vm.warp(block.timestamp + 90);
+
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 1);
+
+        _swap(true, -1 ether);
+        assertGt(hook.accumulatedFees(poolId, currency1), 0, "Milestone verify should refresh heartbeat");
+    }
+
+    // ────────── Per-Project Pause Tests ──────────
+
+    function test_projectPause_stopsFees() public {
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 1);
+
+        _swap(true, -1 ether);
+        uint256 feesBefore = hook.accumulatedFees(poolId, currency1);
+        assertGt(feesBefore, 0);
+
+        // Pause this project
+        hook.setProjectPaused(poolId, true);
+
+        // Swap - should not collect fees
+        _swap(true, -1 ether);
+        uint256 feesAfterPause = hook.accumulatedFees(poolId, currency1);
+        assertEq(feesAfterPause, feesBefore, "Should not collect fees when project paused");
+
+        // Unpause
+        hook.setProjectPaused(poolId, false);
+
+        // Swap - should collect again
+        _swap(true, -1 ether);
+        uint256 feesAfterUnpause = hook.accumulatedFees(poolId, currency1);
+        assertGt(feesAfterUnpause, feesAfterPause, "Should collect after unpause");
+    }
+
+    function test_revert_setProjectPaused_notOwner() public {
+        vm.prank(alice);
+        vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
+        hook.setProjectPaused(poolId, true);
+    }
+
+    function test_lpSkim_stopsWhenNoMilestonesVerified() public {
+        // Set LP skim but don't verify any milestones
+        hook.setLpSkimBps(poolId, 1000);
+
+        // Add/remove liquidity - should NOT skim (no milestones verified = fee is 0)
+        uint256 feesBefore = hook.accumulatedFees(poolId, currency0);
+        modifyLiquidityRouter.modifyLiquidity(
+            poolKey,
+            IPoolManager.ModifyLiquidityParams({
+                tickLower: -600,
+                tickUpper: 600,
+                liquidityDelta: -10 ether,
+                salt: bytes32(0)
+            }),
+            ""
+        );
+        uint256 feesAfter = hook.accumulatedFees(poolId, currency0);
+        assertEq(feesAfter, feesBefore, "LP skim should not run before milestones verified");
+    }
+
+    function test_lpSkim_stopsWhenProjectPaused() public {
+        hook.setLpSkimBps(poolId, 1000);
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 1);
+
+        // Generate some LP fees
+        _swap(true, -1 ether);
+        _swap(false, -1 ether);
+
+        // Pause project
+        hook.setProjectPaused(poolId, true);
+
+        uint256 feesBefore0 = hook.accumulatedFees(poolId, currency0);
+        uint256 feesBefore1 = hook.accumulatedFees(poolId, currency1);
+
+        modifyLiquidityRouter.modifyLiquidity(
+            poolKey,
+            IPoolManager.ModifyLiquidityParams({
+                tickLower: -600,
+                tickUpper: 600,
+                liquidityDelta: -10 ether,
+                salt: bytes32(0)
+            }),
+            ""
+        );
+
+        assertEq(hook.accumulatedFees(poolId, currency0), feesBefore0, "No skim when project paused");
+        assertEq(hook.accumulatedFees(poolId, currency1), feesBefore1, "No skim when project paused");
+    }
+
+    function test_lpSkim_stopsWhenHeartbeatExpired() public {
+        hook.setLpSkimBps(poolId, 1000);
+        hook.setHeartbeatInterval(poolId, 1);
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 1);
+
+        _swap(true, -1 ether);
+        _swap(false, -1 ether);
+
+        // Expire heartbeat
+        vm.warp(block.timestamp + 2);
+
+        uint256 feesBefore0 = hook.accumulatedFees(poolId, currency0);
+
+        modifyLiquidityRouter.modifyLiquidity(
+            poolKey,
+            IPoolManager.ModifyLiquidityParams({
+                tickLower: -600,
+                tickUpper: 600,
+                liquidityDelta: -10 ether,
+                salt: bytes32(0)
+            }),
+            ""
+        );
+
+        assertEq(hook.accumulatedFees(poolId, currency0), feesBefore0, "No skim when heartbeat expired");
+    }
+
     function test_stubCallbacksRevert() public {
         // Cover all stub callbacks that should revert when called directly
         vm.expectRevert();

@@ -233,8 +233,8 @@ export default function ImpactPage() {
 
               <div className="p-4" style={{ background: 'rgba(167, 139, 250, 0.04)', border: '1px solid rgba(167, 139, 250, 0.1)', borderRadius: '2px' }}>
                 <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-mid)' }}>
-                  Two funding paths, same on-chain accountability. Whether funds come from
-                  DeFi trading or institutional grants, milestones must be verified before a single dollar moves.
+                  Multiple funding channels, same on-chain accountability. Whether funds come from
+                  swap fees, LP yield, direct donations, or institutional escrow, milestones must be verified before a single dollar moves.
                 </p>
               </div>
             </div>
