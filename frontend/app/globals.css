@@ -411,6 +411,104 @@ textarea::placeholder {
 }
 
 /* ========================================
+   Section accents (visual interest)
+   ======================================== */
+
+.section-teal {
+  background: linear-gradient(180deg, var(--accent-bg) 0%, var(--bg-primary) 100%);
+}
+
+.section-warm {
+  background: linear-gradient(180deg, #fef3c7 0%, var(--bg-primary) 100%);
+}
+
+.section-cool {
+  background: linear-gradient(180deg, #ede9fe 0%, var(--bg-primary) 100%);
+}
+
+/* Accent left border cards */
+.card-accent {
+  border-left: 3px solid var(--accent);
+}
+
+.card-accent-success {
+  border-left: 3px solid var(--success);
+}
+
+.card-accent-violet {
+  border-left: 3px solid #7c3aed;
+}
+
+/* Stat highlight */
+.stat-highlight {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  text-align: center;
+}
+
+/* Teal dot decoration */
+.teal-dot::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* Subtle pattern for hero/feature sections */
+.pattern-dots {
+  background-image: radial-gradient(circle, var(--border-subtle) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Number badge */
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Feature tag */
+.feature-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+/* Metric bar */
+.metric-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ========================================
    Legacy class stubs (prevent breakage)
    ======================================== */
 

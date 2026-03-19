@@ -44,7 +44,7 @@ function LandingNav() {
             letterSpacing: "-0.02em",
           }}
         >
-          Impact<span style={{ color: "var(--accent)" }}>Hook</span>
+          <span style={{ color: "var(--accent)" }}>Impact</span>Hook
         </Link>
         <div style={{ display: "flex", gap: 8 }}>
           {[
@@ -98,110 +98,6 @@ function LandingNav() {
   );
 }
 
-/* ── Section wrapper ── */
-function Section({
-  children,
-  style,
-  id,
-}: {
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-  id?: string;
-}) {
-  return (
-    <section
-      id={id}
-      style={{
-        maxWidth: 1120,
-        margin: "0 auto",
-        padding: "0 32px",
-        ...style,
-      }}
-    >
-      {children}
-    </section>
-  );
-}
-
-/* ── Step component for How It Works ── */
-function Step({
-  number,
-  title,
-  description,
-}: {
-  number: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div style={{ flex: 1, minWidth: 240 }}>
-      <div
-        style={{
-          fontFamily: "'Departure Mono', 'SF Mono', monospace",
-          fontSize: 13,
-          fontWeight: 600,
-          color: "var(--accent)",
-          marginBottom: 12,
-          letterSpacing: "0.04em",
-        }}
-      >
-        {number}
-      </div>
-      <h3
-        style={{
-          fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-          fontSize: 20,
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          marginBottom: 8,
-          letterSpacing: "-0.01em",
-        }}
-      >
-        {title}
-      </h3>
-      <p
-        style={{
-          fontSize: 15,
-          lineHeight: 1.6,
-          color: "var(--text-secondary)",
-          margin: 0,
-        }}
-      >
-        {description}
-      </p>
-    </div>
-  );
-}
-
-/* ── Stat component ── */
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <div
-        style={{
-          fontFamily: "'Departure Mono', 'SF Mono', monospace",
-          fontSize: 32,
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          letterSpacing: "-0.02em",
-          lineHeight: 1.1,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: 14,
-          color: "var(--text-dim)",
-          marginTop: 4,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
 export default function LandingPage() {
   return (
     <div
@@ -218,476 +114,441 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════
           SECTION 1: HERO
           ═══════════════════════════════════════════ */}
-      <Section
-        style={{
-          paddingTop: 140,
-          paddingBottom: 120,
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 80,
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Left: text */}
-        <div style={{ flex: "1 1 480px", maxWidth: 560 }}>
-          <div
-            style={{
-              display: "inline-block",
-              padding: "4px 12px",
-              borderRadius: 6,
-              background: "var(--accent-bg)",
-              color: "var(--accent)",
-              fontSize: 13,
-              fontWeight: 600,
-              marginBottom: 24,
-              letterSpacing: "0.02em",
-            }}
-          >
-            Uniswap v4 Hook
-          </div>
-          <h1
-            style={{
-              fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              fontSize: 48,
-              fontWeight: 700,
-              lineHeight: 1.1,
-              letterSpacing: "-0.03em",
-              color: "var(--text-primary)",
-              margin: "0 0 20px 0",
-            }}
-          >
-            Every swap funds
-            <br />
-            verified impact
-          </h1>
-          <p
-            style={{
-              fontSize: 18,
-              lineHeight: 1.6,
-              color: "var(--text-secondary)",
-              margin: "0 0 36px 0",
-              maxWidth: 460,
-            }}
-          >
-            ImpactHook routes a share of trading fees and LP yield to
-            milestone-verified projects. Funding unlocks only when real
-            progress is proven onchain.
-          </p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link
-              href="/dashboard"
+      <div className="section-teal" style={{ position: "relative", overflow: "hidden" }}>
+        {/* Dot pattern overlay */}
+        <div
+          className="pattern-dots"
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.4,
+            pointerEvents: "none",
+          }}
+        />
+        <section
+          style={{
+            position: "relative",
+            maxWidth: 1120,
+            margin: "0 auto",
+            padding: "140px 32px 120px",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 80,
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Left: text */}
+          <div style={{ flex: "1 1 480px", maxWidth: 560 }}>
+            {/* Feature tags */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+              <span className="feature-tag">Uniswap v4 Hook</span>
+              <span className="feature-tag">Deployed on Unichain</span>
+            </div>
+            <h1
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "12px 28px",
-                borderRadius: 6,
-                background: "var(--accent)",
-                color: "#ffffff",
-                fontSize: 15,
-                fontWeight: 600,
-                textDecoration: "none",
-                transition: "opacity 0.15s, transform 0.15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "0.9";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "1";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              Launch App
-            </Link>
-            <Link
-              href="/impact"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "12px 28px",
-                borderRadius: 6,
-                background: "transparent",
+                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                fontSize: 48,
+                fontWeight: 700,
+                lineHeight: 1.1,
+                letterSpacing: "-0.03em",
                 color: "var(--text-primary)",
-                fontSize: 15,
-                fontWeight: 600,
-                textDecoration: "none",
-                border: "1px solid var(--border-subtle)",
-                transition: "border-color 0.15s, background 0.15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--accent)";
-                e.currentTarget.style.background = "var(--accent-bg)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--border-subtle)";
-                e.currentTarget.style.background = "transparent";
+                margin: "0 0 20px 0",
               }}
             >
-              Learn More
-            </Link>
-          </div>
-        </div>
-
-        {/* Right: flow visual + stats */}
-        <div style={{ flex: "1 1 360px", maxWidth: 440, paddingTop: 16 }}>
-          {/* Flow diagram */}
-          <div
-            style={{
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: 8,
-              padding: 28,
-              marginBottom: 20,
-            }}
-          >
-            <div
+              Every swap funds
+              <br />
+              verified impact
+            </h1>
+            <p
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--text-dim)",
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.08em",
+                fontSize: 18,
+                lineHeight: 1.6,
+                color: "var(--text-secondary)",
+                margin: "0 0 36px 0",
+                maxWidth: 460,
+              }}
+            >
+              ImpactHook routes a share of trading fees and LP yield to
+              milestone-verified projects. Funding unlocks only when real
+              progress is proven onchain.
+            </p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <Link
+                href="/dashboard"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "12px 28px",
+                  borderRadius: 6,
+                  background: "var(--accent)",
+                  color: "#ffffff",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  transition: "opacity 0.15s, transform 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                Launch App
+              </Link>
+              <Link
+                href="/impact"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "12px 28px",
+                  borderRadius: 6,
+                  background: "transparent",
+                  color: "var(--text-primary)",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  border: "1px solid var(--border-subtle)",
+                  transition: "border-color 0.15s, background 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "var(--accent)";
+                  e.currentTarget.style.background = "var(--accent-bg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "var(--border-subtle)";
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                Learn More
+              </Link>
+            </div>
+          </div>
+
+          {/* Right: flow visual + stats */}
+          <div style={{ flex: "1 1 360px", maxWidth: 440, paddingTop: 16 }}>
+            {/* Flow diagram */}
+            <div
+              className="card card-glow"
+              style={{
+                padding: 28,
                 marginBottom: 20,
               }}
             >
-              Funding flow
-            </div>
-            {[
-              { step: "Swap", detail: "Traders swap on any ImpactHook pool" },
-              { step: "Route", detail: "Hook captures a small fee automatically" },
-              { step: "Verify", detail: "Milestones proven via EAS attestations" },
-              { step: "Fund", detail: "Project withdraws earned fees" },
-            ].map((item, i) => (
               <div
-                key={i}
                 style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 14,
-                  marginBottom: i < 3 ? 16 : 0,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--text-dim)",
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.08em",
+                  marginBottom: 20,
                 }}
               >
+                Funding flow
+              </div>
+              {[
+                { step: "Swap", detail: "Traders swap on any ImpactHook pool" },
+                { step: "Route", detail: "Hook captures a small fee automatically" },
+                { step: "Verify", detail: "Milestones proven via EAS attestations" },
+                { step: "Fund", detail: "Project withdraws earned fees" },
+              ].map((item, i) => (
                 <div
+                  key={i}
                   style={{
-                    fontFamily: "'Departure Mono', 'SF Mono', monospace",
-                    fontSize: 12,
-                    color: "var(--accent)",
-                    minWidth: 20,
-                    paddingTop: 2,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 14,
+                    marginBottom: i < 3 ? 16 : 0,
                   }}
                 >
-                  {String(i + 1).padStart(2, "0")}
+                  <div className="step-number" style={{ width: 28, height: 28, fontSize: 12 }}>
+                    {i + 1}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                        marginBottom: 2,
+                      }}
+                    >
+                      {item.step}
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.4 }}>
+                      {item.detail}
+                    </div>
+                  </div>
                 </div>
-                <div>
+              ))}
+            </div>
+
+            {/* Stats row */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr",
+                gap: 12,
+              }}
+            >
+              {[
+                { value: "5", label: "Funding channels" },
+                { value: "3", label: "Verification paths" },
+                { value: "Live", label: "On Unichain" },
+              ].map((s, i) => (
+                <div key={i} className="stat-highlight">
                   <div
                     style={{
-                      fontSize: 15,
+                      fontFamily: "'Departure Mono', 'SF Mono', monospace",
+                      fontSize: 24,
                       fontWeight: 600,
-                      color: "var(--text-primary)",
-                      marginBottom: 2,
+                      color: "var(--accent)",
+                      lineHeight: 1,
                     }}
                   >
-                    {item.step}
+                    {s.value}
                   </div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.4 }}>
-                    {item.detail}
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 6 }}>
+                    {s.label}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-
-          {/* Stats row */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 16,
-            }}
-          >
-            {[
-              { value: "155", label: "Tests passing" },
-              { value: "4", label: "Contracts" },
-              { value: "3", label: "Chains" },
-            ].map((s, i) => (
-              <div
-                key={i}
-                style={{
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border-subtle)",
-                  borderRadius: 8,
-                  padding: "16px 14px",
-                  textAlign: "center" as const,
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Departure Mono', 'SF Mono', monospace",
-                    fontSize: 24,
-                    fontWeight: 600,
-                    color: "var(--text-primary)",
-                    lineHeight: 1,
-                  }}
-                >
-                  {s.value}
-                </div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* Divider */}
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ height: 1, background: "var(--border-subtle)" }} />
+        </section>
       </div>
 
       {/* ═══════════════════════════════════════════
           SECTION 2: HOW IT WORKS
           ═══════════════════════════════════════════ */}
-      <Section style={{ paddingTop: 96, paddingBottom: 96 }}>
-        <div style={{ marginBottom: 56 }}>
-          <h2
-            style={{
-              fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              fontSize: 36,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: "var(--text-primary)",
-              margin: "0 0 12px 0",
-            }}
-          >
-            How it works
-          </h2>
-          <p
-            style={{
-              fontSize: 16,
-              color: "var(--text-secondary)",
-              margin: 0,
-              maxWidth: 520,
-              lineHeight: 1.5,
-            }}
-          >
-            Two funding channels - swap fees from traders and yield skim from
-            LPs - both gated by the same onchain milestone verification.
-          </p>
-        </div>
-
-        <div
+      <div className="section-warm">
+        <section
           style={{
-            display: "flex",
-            gap: 48,
-            flexWrap: "wrap",
+            maxWidth: 1120,
+            margin: "0 auto",
+            padding: "96px 32px",
           }}
         >
-          <Step
-            number="01"
-            title="Register a project"
-            description="Define milestones and assign a verifier. The hook deploys with your parameters and begins collecting fees from swaps on that pool."
-          />
-          <Step
-            number="02"
-            title="Trade and fund"
-            description="Traders swap as normal. A small fee (up to 5%) is captured by the hook. LPs can also contribute a share of yield. Both channels accumulate in the hook contract."
-          />
-          <Step
-            number="03"
-            title="Verify and withdraw"
-            description="Milestones are verified onchain via EAS attestations, oracle callbacks, or the Reactive Network. Each verified milestone unlocks the next fee tier and allows withdrawal."
-          />
-        </div>
-      </Section>
-
-      {/* Divider */}
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ height: 1, background: "var(--border-subtle)" }} />
-      </div>
-
-      {/* ═══════════════════════════════════════════
-          SECTION 3: LIVE PROOF / CREDIBILITY
-          ═══════════════════════════════════════════ */}
-      <Section style={{ paddingTop: 96, paddingBottom: 96 }}>
-        <div style={{ marginBottom: 56 }}>
-          <h2
-            style={{
-              fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              fontSize: 36,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: "var(--text-primary)",
-              margin: "0 0 12px 0",
-            }}
-          >
-            Deployed and tested
-          </h2>
-          <p
-            style={{
-              fontSize: 16,
-              color: "var(--text-secondary)",
-              margin: 0,
-              maxWidth: 520,
-              lineHeight: 1.5,
-            }}
-          >
-            Live on Unichain Sepolia with a fully verified demo project.
-            All milestones attested, fees accumulated, withdrawal tested.
-          </p>
-        </div>
-
-        {/* Stats row */}
-        <div
-          style={{
-            display: "flex",
-            gap: 56,
-            flexWrap: "wrap",
-            marginBottom: 48,
-          }}
-        >
-          <Stat value="155" label="Tests passing" />
-          <Stat value="4" label="Contracts deployed" />
-          <Stat value="3" label="Chains (Unichain, Sepolia, Reactive)" />
-          <Stat value="4/4" label="Demo milestones verified" />
-        </div>
-
-        {/* Contracts + Partners */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 20,
-            flexWrap: "wrap",
-          }}
-        >
-          {/* Deployed contracts */}
-          <div
-            style={{
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: 8,
-              padding: 24,
-            }}
-          >
-            <div
+          <div style={{ marginBottom: 56 }}>
+            <h2
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--text-dim)",
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.08em",
-                marginBottom: 16,
+                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                fontSize: 36,
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                color: "var(--text-primary)",
+                margin: "0 0 12px 0",
               }}
             >
-              Deployed contracts
-            </div>
+              How it works
+            </h2>
+            <p
+              style={{
+                fontSize: 16,
+                color: "var(--text-secondary)",
+                margin: 0,
+                maxWidth: 520,
+                lineHeight: 1.5,
+              }}
+            >
+              Two funding channels - swap fees from traders and yield skim from
+              LPs - both gated by the same onchain milestone verification.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: 32,
+            }}
+          >
             {[
-              { name: "ImpactHook", chain: "Unichain Sepolia", addr: "0x2caD...2557" },
-              { name: "MilestoneArbiter", chain: "Unichain Sepolia", addr: "0x4C4e...9468" },
-              { name: "MilestoneOracle", chain: "Ethereum Sepolia", addr: "0x9845...A4Ca" },
-              { name: "MilestoneReactor", chain: "Reactive Lasna", addr: "0x4CB8...8a4" },
-            ].map((c, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "10px 0",
-                  borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none",
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
-                    {c.name}
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{c.chain}</div>
+              {
+                number: "1",
+                title: "Register a project",
+                description:
+                  "Define milestones and assign a verifier. The hook deploys with your parameters and begins collecting fees from swaps on that pool.",
+                barWidth: "100%",
+              },
+              {
+                number: "2",
+                title: "Trade and fund",
+                description:
+                  "Traders swap as normal. A small fee (up to 5%) is captured by the hook. LPs can also contribute a share of yield. Both channels accumulate in the hook contract.",
+                barWidth: "65%",
+              },
+              {
+                number: "3",
+                title: "Verify and withdraw",
+                description:
+                  "Milestones are verified onchain via EAS attestations, oracle callbacks, or the Reactive Network. Each verified milestone unlocks the next fee tier and allows withdrawal.",
+                barWidth: "40%",
+              },
+            ].map((step, i) => (
+              <div key={i} style={{ minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                  <div className="step-number">{step.number}</div>
+                  <h3
+                    style={{
+                      fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                      fontSize: 20,
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      margin: 0,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    {step.title}
+                  </h3>
                 </div>
-                <div
+                <p
                   style={{
-                    fontFamily: "'Departure Mono', 'SF Mono', monospace",
-                    fontSize: 12,
-                    color: "var(--text-dim)",
+                    fontSize: 15,
+                    lineHeight: 1.6,
+                    color: "var(--text-secondary)",
+                    margin: "0 0 16px 0",
                   }}
                 >
-                  {c.addr}
+                  {step.description}
+                </p>
+                <div className="metric-bar">
+                  <div
+                    className="metric-bar-fill"
+                    style={{ width: step.barWidth }}
+                  />
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Built with */}
-          <div
-            style={{
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: 8,
-              padding: 24,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--text-dim)",
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.08em",
-                marginBottom: 16,
-              }}
-            >
-              Built with
-            </div>
-            {[
-              {
-                name: "Uniswap Foundation",
-                detail: "v4 Hooks framework",
-              },
-              {
-                name: "Unichain",
-                detail: "Deployment chain (Sepolia testnet)",
-              },
-              {
-                name: "Reactive Network",
-                detail: "Cross-chain milestone verification (RSC)",
-              },
-              {
-                name: "Ethereum Attestation Service",
-                detail: "Onchain milestone attestations",
-              },
-              {
-                name: "Alkahest (Arkhai)",
-                detail: "Escrow-based funding channel",
-              },
-            ].map((p, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "10px 0",
-                  borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none",
-                }}
-              >
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
-                  {p.name}
-                </div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.4 }}>
-                  {p.detail}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* Divider */}
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ height: 1, background: "var(--border-subtle)" }} />
+        </section>
       </div>
 
       {/* ═══════════════════════════════════════════
-          SECTION 4: FOR WHO (role-based)
+          SECTION 3: ACCOUNTABILITY
           ═══════════════════════════════════════════ */}
-      <Section style={{ paddingTop: 96, paddingBottom: 96 }}>
+      <div className="section-cool">
+        <section
+          style={{
+            maxWidth: 1120,
+            margin: "0 auto",
+            padding: "96px 32px",
+          }}
+        >
+          <div style={{ marginBottom: 56 }}>
+            <h2
+              style={{
+                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                fontSize: 36,
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                color: "var(--text-primary)",
+                margin: "0 0 12px 0",
+              }}
+            >
+              Built-in accountability
+            </h2>
+            <p
+              style={{
+                fontSize: 16,
+                color: "var(--text-secondary)",
+                margin: 0,
+                maxWidth: 560,
+                lineHeight: 1.6,
+              }}
+            >
+              Every dollar is tracked onchain. Projects must prove progress before
+              funding unlocks. Dead projects auto-expire. No intermediaries, no opacity.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 20,
+              marginBottom: 48,
+            }}
+          >
+            {/* Example project */}
+            <div className="card card-accent" style={{ padding: 28 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>
+                    Clean Water - Chiapas Schools
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Climate / WASH</div>
+                </div>
+                <span className="feature-tag">Live</span>
+              </div>
+              {[
+                { name: "Baseline water testing", status: "verified", fee: "0 bps" },
+                { name: "Systems installed in 20 schools", status: "verified", fee: "100 bps" },
+                { name: "3-month water quality verified", status: "verified", fee: "200 bps" },
+                { name: "Community management trained", status: "verified", fee: "300 bps" },
+              ].map((m, i) => (
+                <div key={i} style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "10px 0", borderTop: "1px solid var(--border-subtle)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: 4,
+                      background: m.status === "verified" ? "var(--accent-bg)" : "var(--bg-elevated)",
+                      border: m.status === "verified" ? "1.5px solid var(--accent)" : "1.5px solid var(--border-subtle)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 10, color: "var(--accent)",
+                    }}>
+                      {m.status === "verified" && "\u2713"}
+                    </div>
+                    <span style={{ fontSize: 14, color: "var(--text-primary)" }}>{m.name}</span>
+                  </div>
+                  <span className="font-data" style={{ fontSize: 12, color: "var(--text-dim)" }}>{m.fee}</span>
+                </div>
+              ))}
+              <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: 6, background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Accumulated fees</span>
+                  <span className="font-data" style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)" }}>1.247 ETH</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Why it works */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {[
+                { title: "Milestone-gated", desc: "Fee tiers increase as projects deliver. Zero funding until the first milestone is verified. No results, no money." },
+                { title: "Heartbeat expiration", desc: "Projects must send periodic proof-of-life. If a project goes silent, fees stop automatically. No manual intervention needed." },
+                { title: "Cross-chain verification", desc: "Milestones can be verified from any supported chain via Reactive Network, or through EAS attestations on Unichain." },
+                { title: "Per-project controls", desc: "Individual projects can be paused without affecting others. Progressive decentralization from owner-gated to fully permissionless." },
+              ].map((item, i) => (
+                <div key={i} className="card" style={{ padding: 20 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>
+                    {item.title}
+                  </div>
+                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-secondary)", margin: 0 }}>
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* ═══════════════════════════════════════════
+          SECTION 4: BUILT FOR EVERY PARTICIPANT
+          ═══════════════════════════════════════════ */}
+      <section
+        style={{
+          maxWidth: 1120,
+          margin: "0 auto",
+          padding: "96px 32px",
+        }}
+      >
         <div style={{ marginBottom: 56 }}>
           <h2
             style={{
@@ -723,34 +584,17 @@ export default function LandingPage() {
             alignItems: "start",
           }}
         >
-          {/* Traders - tallest */}
+          {/* Traders */}
           <div
+            className="card card-accent"
             style={{
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: 8,
               padding: 32,
-              transition: "border-color 0.2s",
+              transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.borderColor = "var(--accent-light)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.borderColor = "var(--border-subtle)")
-            }
           >
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--accent)",
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.08em",
-                marginBottom: 16,
-              }}
-            >
+            <span className="feature-tag" style={{ marginBottom: 16, display: "inline-block" }}>
               Traders
-            </div>
+            </span>
             <h3
               style={{
                 fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -789,32 +633,24 @@ export default function LandingPage() {
 
           {/* LPs / Sponsors */}
           <div
+            className="card card-accent-success"
             style={{
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: 8,
               padding: 32,
-              transition: "border-color 0.2s",
+              transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.borderColor = "var(--accent-light)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.borderColor = "var(--border-subtle)")
-            }
           >
-            <div
+            <span
+              className="feature-tag"
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--accent)",
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.08em",
                 marginBottom: 16,
+                display: "inline-block",
+                background: "#ecfdf5",
+                color: "var(--success)",
+                borderColor: "#a7f3d0",
               }}
             >
               LPs / Sponsors
-            </div>
+            </span>
             <h3
               style={{
                 fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -852,32 +688,24 @@ export default function LandingPage() {
 
           {/* Project Owners */}
           <div
+            className="card card-accent-violet"
             style={{
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: 8,
               padding: 32,
-              transition: "border-color 0.2s",
+              transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.borderColor = "var(--accent-light)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.borderColor = "var(--border-subtle)")
-            }
           >
-            <div
+            <span
+              className="feature-tag"
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--accent)",
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.08em",
                 marginBottom: 16,
+                display: "inline-block",
+                background: "#f5f3ff",
+                color: "#7c3aed",
+                borderColor: "#c4b5fd",
               }}
             >
               Project Owners
-            </div>
+            </span>
             <h3
               style={{
                 fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -914,7 +742,7 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
-      </Section>
+      </section>
 
       {/* ═══════════════════════════════════════════
           FOOTER
@@ -924,7 +752,7 @@ export default function LandingPage() {
           maxWidth: 1120,
           margin: "0 auto",
           padding: "48px 32px",
-          borderTop: "1px solid var(--border-subtle)",
+          borderTop: "2px solid var(--accent)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
