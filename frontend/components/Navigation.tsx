@@ -8,6 +8,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/milestones", label: "Milestones" },
   { href: "/withdraw", label: "Withdraw" },
+  { href: "/donate", label: "Donate" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/impact", label: "Impact" },
   { href: "/technical", label: "Technical" },

@@ -171,7 +171,79 @@ export const impactHookAbi = [
     outputs: [],
     stateMutability: "nonpayable",
   },
+  // Donate
+  {
+    type: "function",
+    name: "donate",
+    inputs: [
+      { name: "poolId", type: "bytes32" },
+      { name: "currency", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "payable",
+  },
+  // Impact tracking
+  {
+    type: "function",
+    name: "getContributorStats",
+    inputs: [
+      { name: "contributor", type: "address" },
+      { name: "poolId", type: "bytes32" },
+    ],
+    outputs: [
+      { name: "poolContribution", type: "uint256" },
+      { name: "globalContribution", type: "uint256" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "globalContributions",
+    inputs: [{ name: "", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getLoyaltyDiscount",
+    inputs: [
+      { name: "contributor", type: "address" },
+      { name: "poolId", type: "bytes32" },
+    ],
+    outputs: [{ name: "discountBps", type: "uint16" }],
+    stateMutability: "view",
+  },
+  // Templates
+  {
+    type: "function",
+    name: "templateCount",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getTemplate",
+    inputs: [{ name: "templateId", type: "uint256" }],
+    outputs: [
+      { name: "name", type: "string" },
+      { name: "descriptions", type: "string[]" },
+      { name: "feeBpsValues", type: "uint16[]" },
+    ],
+    stateMutability: "view",
+  },
   // Events
+  {
+    type: "event",
+    name: "Donated",
+    inputs: [
+      { name: "poolId", type: "bytes32", indexed: true },
+      { name: "currency", type: "address", indexed: true },
+      { name: "donor", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+  },
   {
     type: "event",
     name: "ProjectRegistered",

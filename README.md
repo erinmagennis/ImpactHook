@@ -106,6 +106,8 @@ The hook charges a fee **on top of** the standard LP fee, taken from the swapper
 - Maximum fee capped at 500 bps (5%)
 - Before any milestones are verified, the fee is 0
 - Permissionless project registration - anyone can create an impact pool
+- **Loyalty discounts** reward repeat contributors with reduced fees
+- **LP fee skim** option: a configurable percentage of LP fees funds the project, keeping swap pricing competitive for router aggregation
 
 Example progression:
 | Milestone | Status | Fee |
@@ -114,6 +116,55 @@ Example progression:
 | 1: "Phase 1 complete" | Verified | 2% |
 | 2: "Phase 2 complete" | Not yet | - |
 | 3: "Self-sustaining" | Not yet | - |
+
+### Impact Tracking & Loyalty Discounts
+
+Every swap that generates a fee is tracked per address. The hook maintains:
+- **Per-pool contributions**: how much each address has contributed to each project
+- **Global contributions**: cumulative contributions across all pools
+
+Pool owners can configure **loyalty discount tiers** that reward repeat contributors:
+
+| Cumulative Contribution | Discount |
+|------------------------|----------|
+| > 0.1 ETH | 5% off fees |
+| > 1 ETH | 10% off fees |
+| > 10 ETH | 20% off fees |
+
+This creates a retention flywheel: swappers are incentivized to keep trading through the same impact pool to unlock better rates, addressing the [vampire/fork risk](https://twitter.com/saucepoint/status/1744385686621372723) inherent in hook fees.
+
+### Project Templates
+
+Predefined milestone configurations make it easy to create impact pools for common use cases:
+
+```
+hook.createTemplate("Climate", descriptions, feeBpsValues);
+hook.registerProjectFromTemplate(poolKey, recipient, verifier, templateId);
+```
+
+Templates standardize fee progressions and milestone structures for categories like climate, education, health, and open-source infrastructure - making the hook a reusable framework for any impact vertical.
+
+### LP Fee Skim (Dual Funding Model)
+
+Pools can be configured with an LP fee skim - a percentage of LP fees that is routed to the impact project when LPs collect their earnings. This creates a second funding model where **swappers pay no extra fee** and pricing is identical to regular pools, keeping the pool competitive for router aggregation. LPs earn slightly less but opted into the pool knowing the deal.
+
+Both models can be active on the same pool:
+- **Swap fee** (via `afterSwapReturnDelta`): fee on swapper output, configurable per milestone
+- **LP skim** (via `afterAddLiquidity`/`afterRemoveLiquidity` return deltas): percentage of LP fees, configurable per pool (max 50%)
+
+The LP skim makes impact pools viable even in a fully agentic routing environment where aggregators optimize purely on price.
+
+## Quick Start
+
+```shell
+forge test         # 130 tests, all passing
+forge coverage     # 93%+ line coverage on core hook, 100% on supporting contracts
+```
+
+Frontend (live at [impacthook.vercel.app](https://impacthook.vercel.app)):
+```shell
+cd frontend && bun install && bun run dev
+```
 
 ## Usage
 
@@ -129,7 +180,8 @@ forge build
 forge test
 ```
 
-63 tests covering: project registration, swap fee accumulation (both directions), milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
+130 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
+
 
 ### Deploy (Unichain Sepolia)
 

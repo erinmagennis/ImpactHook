@@ -6,7 +6,7 @@ import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "v4-core/src/libraries/Hooks.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
-import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
+import {BalanceDelta, toBalanceDelta, BalanceDeltaLibrary} from "v4-core/src/types/BalanceDelta.sol";
 import {Currency, CurrencyLibrary} from "v4-core/src/types/Currency.sol";
 import {BeforeSwapDelta} from "v4-core/src/types/BeforeSwapDelta.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -49,6 +49,10 @@ contract ImpactHook is IHooks {
     error ImpactHook__PoolIdMismatch();
     error ImpactHook__ZeroDonation();
     error ImpactHook__DonationTransferFailed();
+    error ImpactHook__TemplateAlreadyExists();
+    error ImpactHook__TemplateNotFound();
+    error ImpactHook__InvalidDiscountBps();
+    error ImpactHook__LpSkimBpsTooHigh();
 
     // ──────────────────── Events ────────────────────
 
@@ -70,6 +74,14 @@ contract ImpactHook is IHooks {
     event PausedStateChanged(bool paused);
     /// @notice Emitted when someone donates directly to a project
     event Donated(PoolId indexed poolId, Currency indexed currency, address indexed donor, uint256 amount);
+    /// @notice Emitted when a project template is created
+    event TemplateCreated(uint256 indexed templateId, string name, uint256 milestoneCount);
+    /// @notice Emitted when loyalty discount tiers are configured for a pool
+    event LoyaltyDiscountSet(PoolId indexed poolId, uint256[] thresholds, uint16[] discountBps);
+    /// @notice Emitted when LP fees are skimmed for an impact project
+    event LpFeesSkimmed(PoolId indexed poolId, Currency indexed currency, uint256 amount);
+    /// @notice Emitted when the LP skim rate is set for a project
+    event LpSkimBpsSet(PoolId indexed poolId, uint16 lpSkimBps);
 
     // ──────────────────── Constants ────────────────────
 
@@ -90,6 +102,17 @@ contract ImpactHook is IHooks {
         bool registered;        // slot 0: 1 byte (packed with recipient)
         address verifier;       // slot 1: 20 bytes
         uint96 currentMilestone; // slot 1: 12 bytes (packed with verifier, max 2^96 milestones)
+    }
+
+    struct ProjectTemplate {
+        string name;
+        string[] descriptions;
+        uint16[] feeBpsValues;
+    }
+
+    struct LoyaltyTier {
+        uint256 threshold;  // cumulative contribution threshold
+        uint16 discountBps; // discount applied to the project fee (max 5000 = 50%)
     }
 
     // ──────────────────── Storage ────────────────────
@@ -113,6 +136,17 @@ contract ImpactHook is IHooks {
     mapping(PoolId => Milestone[]) public milestones;
     // Accumulated fees per pool per currency
     mapping(PoolId => mapping(Currency => uint256)) public accumulatedFees;
+    // Cumulative impact contributions per address per pool
+    mapping(address => mapping(PoolId => uint256)) public contributions;
+    // Global cumulative contributions per address (across all pools)
+    mapping(address => uint256) public globalContributions;
+    // Project templates
+    mapping(uint256 => ProjectTemplate) internal _templates;
+    uint256 public templateCount;
+    // Loyalty discount tiers per pool
+    mapping(PoolId => LoyaltyTier[]) public loyaltyTiers;
+    // LP fee skim percentage per pool (bps of LP fees routed to project, max 5000 = 50%)
+    mapping(PoolId => uint16) public lpSkimBps;
 
     // ──────────────────── Modifiers ────────────────────
 
@@ -151,23 +185,23 @@ contract ImpactHook is IHooks {
     // ──────────────────── Hook Permissions ────────────────────
 
     /// @notice Returns the hook permission flags
-    /// @return Permissions struct with beforeInitialize, afterSwap, and afterSwapReturnDelta enabled
+    /// @return Permissions struct with lifecycle hooks enabled
     function getHookPermissions() public pure returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
             beforeInitialize: true,
             afterInitialize: false,
             beforeAddLiquidity: false,
-            afterAddLiquidity: false,
+            afterAddLiquidity: true,
             beforeRemoveLiquidity: false,
-            afterRemoveLiquidity: false,
+            afterRemoveLiquidity: true,
             beforeSwap: false,
             afterSwap: true,
             beforeDonate: false,
             afterDonate: false,
             beforeSwapReturnDelta: false,
             afterSwapReturnDelta: true,
-            afterAddLiquidityReturnDelta: false,
-            afterRemoveLiquidityReturnDelta: false
+            afterAddLiquidityReturnDelta: true,
+            afterRemoveLiquidityReturnDelta: true
         });
     }
 
@@ -236,7 +270,7 @@ contract ImpactHook is IHooks {
     /// @notice Called after each swap. Takes a fee from the swap output based on the
     /// current milestone's fee tier.
     function afterSwap(
-        address,
+        address sender,
         PoolKey calldata key,
         IPoolManager.SwapParams calldata params,
         BalanceDelta delta,
@@ -251,6 +285,12 @@ contract ImpactHook is IHooks {
 
         // Get current fee rate
         uint16 feeBps = _getCurrentFeeBps(poolId);
+        if (feeBps == 0) {
+            return (this.afterSwap.selector, 0);
+        }
+
+        // Apply loyalty discount if configured
+        feeBps = _applyLoyaltyDiscount(poolId, sender, feeBps);
         if (feeBps == 0) {
             return (this.afterSwap.selector, 0);
         }
@@ -289,6 +329,10 @@ contract ImpactHook is IHooks {
 
         // Track accumulated fees
         accumulatedFees[poolId][feeCurrency] += feeAmount;
+
+        // Track impact contributions for the sender
+        contributions[sender][poolId] += feeAmount;
+        globalContributions[sender] += feeAmount;
 
         emit FeesAccumulated(poolId, feeCurrency, feeAmount);
 
@@ -447,6 +491,116 @@ contract ImpactHook is IHooks {
         emit FeesAccumulated(poolId, currency, donationAmount);
     }
 
+    // ──────────────────── Project Templates ────────────────────
+
+    /// @notice Create a reusable project template. Only callable by owner.
+    /// @param name Template name (e.g., "Climate", "Education", "Open Source")
+    /// @param descriptions Milestone descriptions for the template
+    /// @param feeBpsValues Fee bps for each milestone in the template
+    /// @return templateId The ID of the created template
+    function createTemplate(
+        string calldata name,
+        string[] calldata descriptions,
+        uint16[] calldata feeBpsValues
+    ) external onlyOwner returns (uint256 templateId) {
+        if (descriptions.length == 0) revert ImpactHook__NoMilestones();
+        if (descriptions.length != feeBpsValues.length) revert ImpactHook__NoMilestones();
+
+        for (uint256 i = 0; i < feeBpsValues.length; ++i) {
+            if (feeBpsValues[i] > MAX_FEE_BPS) revert ImpactHook__FeeBpsTooHigh();
+        }
+
+        templateId = templateCount++;
+        ProjectTemplate storage t = _templates[templateId];
+        t.name = name;
+        for (uint256 i = 0; i < descriptions.length; ++i) {
+            t.descriptions.push(descriptions[i]);
+            t.feeBpsValues.push(feeBpsValues[i]);
+        }
+
+        emit TemplateCreated(templateId, name, descriptions.length);
+    }
+
+    /// @notice Register a project using a predefined template. Only callable by owner.
+    /// @param key The pool key
+    /// @param recipient Address that receives accumulated fees
+    /// @param verifier Address authorized to verify milestones
+    /// @param templateId The template to use
+    function registerProjectFromTemplate(
+        PoolKey calldata key,
+        address recipient,
+        address verifier,
+        uint256 templateId
+    ) external onlyOwner {
+        if (recipient == address(0)) revert ImpactHook__ZeroAddress();
+        if (verifier == address(0)) revert ImpactHook__ZeroAddress();
+        if (templateId >= templateCount) revert ImpactHook__TemplateNotFound();
+
+        PoolId poolId = key.toId();
+        if (projects[poolId].registered) revert ImpactHook__ProjectAlreadyRegistered();
+
+        ProjectTemplate storage t = _templates[templateId];
+
+        projects[poolId] = Project({
+            recipient: recipient,
+            registered: true,
+            verifier: verifier,
+            currentMilestone: 0
+        });
+
+        for (uint256 i = 0; i < t.descriptions.length; ++i) {
+            milestones[poolId].push(Milestone({
+                description: t.descriptions[i],
+                projectFeeBps: t.feeBpsValues[i],
+                verified: false
+            }));
+        }
+
+        emit ProjectRegistered(poolId, recipient, verifier, t.descriptions.length);
+    }
+
+    // ──────────────────── Loyalty Discounts ────────────────────
+
+    /// @notice Set loyalty discount tiers for a pool. Only callable by owner.
+    /// Swappers who have contributed above certain thresholds get reduced fees.
+    /// @param poolId The pool ID
+    /// @param thresholds Cumulative contribution thresholds (must be ascending)
+    /// @param discountBps Discount in basis points for each tier (max 5000 = 50% off)
+    function setLoyaltyTiers(
+        PoolId poolId,
+        uint256[] calldata thresholds,
+        uint16[] calldata discountBps
+    ) external onlyOwner {
+        if (thresholds.length != discountBps.length) revert ImpactHook__NoMilestones();
+
+        // Clear existing tiers
+        delete loyaltyTiers[poolId];
+
+        for (uint256 i = 0; i < thresholds.length; ++i) {
+            if (discountBps[i] > 5000) revert ImpactHook__InvalidDiscountBps();
+            if (i > 0 && thresholds[i] <= thresholds[i - 1]) revert ImpactHook__InvalidDiscountBps();
+            loyaltyTiers[poolId].push(LoyaltyTier({
+                threshold: thresholds[i],
+                discountBps: discountBps[i]
+            }));
+        }
+
+        emit LoyaltyDiscountSet(poolId, thresholds, discountBps);
+    }
+
+    // ──────────────────── LP Fee Skim ────────────────────
+
+    /// @notice Set the LP fee skim rate for a pool. A percentage of LP fees collected
+    /// will be routed to the impact project. Swappers are unaffected - pricing is identical
+    /// to pools without the hook. LPs earn slightly less but the pool stays competitive for routing.
+    /// @param poolId The pool ID
+    /// @param _lpSkimBps Percentage of LP fees to skim (in bps, max 5000 = 50%)
+    function setLpSkimBps(PoolId poolId, uint16 _lpSkimBps) external onlyOwner {
+        if (_lpSkimBps > 5000) revert ImpactHook__LpSkimBpsTooHigh();
+        lpSkimBps[poolId] = _lpSkimBps;
+        emit LpSkimBpsSet(poolId, _lpSkimBps);
+    }
+
     // ──────────────────── Admin Functions ────────────────────
 
     /// @notice Set the Reactive Network Callback Proxy address. Only callable by owner.
@@ -542,6 +696,59 @@ contract ImpactHook is IHooks {
         );
     }
 
+    /// @notice Get a contributor's impact stats
+    /// @param contributor The address to check
+    /// @param poolId The pool ID
+    /// @return poolContribution Cumulative contribution to this pool
+    /// @return globalContribution Cumulative contribution across all pools
+    function getContributorStats(address contributor, PoolId poolId)
+        external
+        view
+        returns (uint256 poolContribution, uint256 globalContribution)
+    {
+        return (contributions[contributor][poolId], globalContributions[contributor]);
+    }
+
+    /// @notice Get template details
+    /// @param templateId The template ID
+    /// @return name The template name
+    /// @return descriptions Milestone descriptions
+    /// @return feeBpsValues Fee bps for each milestone
+    function getTemplate(uint256 templateId)
+        external
+        view
+        returns (string memory name, string[] memory descriptions, uint16[] memory feeBpsValues)
+    {
+        if (templateId >= templateCount) revert ImpactHook__TemplateNotFound();
+        ProjectTemplate storage t = _templates[templateId];
+        return (t.name, t.descriptions, t.feeBpsValues);
+    }
+
+    /// @notice Get the current loyalty discount for an address on a pool
+    /// @param contributor The address to check
+    /// @param poolId The pool ID
+    /// @return discountBps The discount in basis points (0 if no discount)
+    function getLoyaltyDiscount(address contributor, PoolId poolId)
+        external
+        view
+        returns (uint16 discountBps)
+    {
+        uint256 contributed = contributions[contributor][poolId];
+        LoyaltyTier[] storage tiers = loyaltyTiers[poolId];
+
+        for (uint256 i = tiers.length; i > 0; --i) {
+            if (contributed >= tiers[i - 1].threshold) {
+                return tiers[i - 1].discountBps;
+            }
+        }
+        return 0;
+    }
+
+    /// @notice Get loyalty tier count for a pool
+    function getLoyaltyTierCount(PoolId poolId) external view returns (uint256) {
+        return loyaltyTiers[poolId].length;
+    }
+
     /// @notice Update the recipient address. Only callable by current recipient.
     /// @param key The pool key
     /// @param newRecipient The new recipient address
@@ -594,6 +801,69 @@ contract ImpactHook is IHooks {
         return 0;
     }
 
+    /// @dev Skim a percentage of LP fees for the impact project.
+    /// Returns a BalanceDelta representing the hook's take (positive = hook takes).
+    function _skimLpFees(PoolKey calldata key, BalanceDelta feesAccrued) internal returns (BalanceDelta) {
+        PoolId poolId = key.toId();
+        uint16 skimBps = lpSkimBps[poolId];
+
+        // No skim configured or paused - return zero delta
+        if (skimBps == 0 || paused) {
+            return BalanceDeltaLibrary.ZERO_DELTA;
+        }
+
+        int128 fees0 = feesAccrued.amount0();
+        int128 fees1 = feesAccrued.amount1();
+
+        // Only skim positive (earned) fees
+        int128 skim0 = 0;
+        int128 skim1 = 0;
+
+        if (fees0 > 0) {
+            skim0 = int128(int256(uint256(uint128(fees0)) * skimBps / 10_000));
+            if (skim0 > 0) {
+                POOL_MANAGER.take(key.currency0, address(this), uint256(uint128(skim0)));
+                accumulatedFees[poolId][key.currency0] += uint256(uint128(skim0));
+                emit LpFeesSkimmed(poolId, key.currency0, uint256(uint128(skim0)));
+            }
+        }
+
+        if (fees1 > 0) {
+            skim1 = int128(int256(uint256(uint128(fees1)) * skimBps / 10_000));
+            if (skim1 > 0) {
+                POOL_MANAGER.take(key.currency1, address(this), uint256(uint128(skim1)));
+                accumulatedFees[poolId][key.currency1] += uint256(uint128(skim1));
+                emit LpFeesSkimmed(poolId, key.currency1, uint256(uint128(skim1)));
+            }
+        }
+
+        // Return positive delta = hook took these tokens from the LP's share
+        return toBalanceDelta(skim0, skim1);
+    }
+
+    /// @dev Apply loyalty discount to fee based on sender's cumulative contributions
+    function _applyLoyaltyDiscount(PoolId poolId, address sender, uint16 feeBps) internal view returns (uint16) {
+        LoyaltyTier[] storage tiers = loyaltyTiers[poolId];
+        if (tiers.length == 0) return feeBps;
+
+        uint256 contributed = contributions[sender][poolId];
+        uint16 discountBps = 0;
+
+        // Find the highest tier the sender qualifies for
+        for (uint256 i = tiers.length; i > 0; --i) {
+            if (contributed >= tiers[i - 1].threshold) {
+                discountBps = tiers[i - 1].discountBps;
+                break;
+            }
+        }
+
+        if (discountBps == 0) return feeBps;
+
+        // Apply discount: reduce fee by discountBps (e.g., 1000 = 10% off)
+        uint16 discountedFee = feeBps - uint16((uint256(feeBps) * discountBps) / 10_000);
+        return discountedFee;
+    }
+
     // ──────────────────── Unused Hook Callbacks (required by IHooks) ────────────────────
 
     function afterInitialize(address, PoolKey calldata, uint160, int24)
@@ -614,15 +884,17 @@ contract ImpactHook is IHooks {
         revert();
     }
 
+    /// @notice Called after liquidity is added. Skims a percentage of accrued LP fees
+    /// for the impact project if lpSkimBps is configured.
     function afterAddLiquidity(
         address,
-        PoolKey calldata,
+        PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata,
         BalanceDelta,
-        BalanceDelta,
+        BalanceDelta feesAccrued,
         bytes calldata
-    ) external pure override returns (bytes4, BalanceDelta) {
-        revert();
+    ) external override onlyPoolManager returns (bytes4, BalanceDelta) {
+        return (this.afterAddLiquidity.selector, _skimLpFees(key, feesAccrued));
     }
 
     function beforeRemoveLiquidity(
@@ -634,15 +906,17 @@ contract ImpactHook is IHooks {
         revert();
     }
 
+    /// @notice Called after liquidity is removed. Skims a percentage of accrued LP fees
+    /// for the impact project if lpSkimBps is configured.
     function afterRemoveLiquidity(
         address,
-        PoolKey calldata,
+        PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata,
         BalanceDelta,
-        BalanceDelta,
+        BalanceDelta feesAccrued,
         bytes calldata
-    ) external pure override returns (bytes4, BalanceDelta) {
-        revert();
+    ) external override onlyPoolManager returns (bytes4, BalanceDelta) {
+        return (this.afterRemoveLiquidity.selector, _skimLpFees(key, feesAccrued));
     }
 
     function beforeSwap(address, PoolKey calldata, IPoolManager.SwapParams calldata, bytes calldata)
