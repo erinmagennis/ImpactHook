@@ -22,7 +22,7 @@ contract DeployLivePoolScript is Script {
     using PoolIdLibrary for PoolKey;
 
     address constant POOL_MANAGER = 0x1F98400000000000000000000000000000000004;
-    address constant HOOK = 0x2caDc1E168F99e70a228A154733c6AE129982557;
+    address constant HOOK = 0x8860645503A99c16E55eB10668D4420B9d9aE557;
 
     function run() public {
         vm.startBroadcast();

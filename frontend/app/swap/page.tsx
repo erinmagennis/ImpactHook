@@ -87,7 +87,7 @@ export default function SwapPage() {
             <label style={labelStyle}>POOL ID</label>
             <input
               type="text"
-              placeholder="0x9c6994c178bf047c0dba4ed49b56a302c0bb69b5a8bb54f7e13f8ec2be85bb4a"
+              placeholder="0x6bc91b5e91380a168a3d85fd1ea27b250b10b40390b9da68bb07ebfd4f95f205"
               value={poolIdInput}
               onChange={(e) => setPoolIdInput(e.target.value)}
               style={inputStyle}
