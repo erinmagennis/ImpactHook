@@ -176,7 +176,7 @@ The LP skim makes impact pools viable even in a fully agentic routing environmen
 ## Quick Start
 
 ```shell
-forge test         # 155 tests, all passing
+forge test         # 156 tests, all passing
 forge coverage     # 94%+ line coverage on core hook, 100% on supporting contracts
 ```
 
@@ -199,7 +199,7 @@ forge build
 forge test
 ```
 
-155 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
+156 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
 
 
 ### Deploy (Unichain Sepolia)
