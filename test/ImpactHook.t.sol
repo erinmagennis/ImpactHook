@@ -1640,14 +1640,17 @@ contract ImpactHookTest is Test, Deployers {
         tFees[1] = 150;
         tFees[2] = 300;
 
-        uint256 id = hook.createTemplate("Climate", tDescriptions, tFees);
+        uint256 id = hook.createTemplate("Climate", tDescriptions, tFees, 1000, 500, 30 days, true);
         assertEq(id, 0);
         assertEq(hook.templateCount(), 1);
 
-        (string memory name, string[] memory descs, uint16[] memory fees) = hook.getTemplate(0);
+        (string memory name, string[] memory descs, uint16[] memory fees, uint16 lskim, uint256 hb, bool swapEnabled) = hook.getTemplate(0);
         assertEq(name, "Climate");
         assertEq(descs.length, 3);
         assertEq(fees[1], 150);
+        assertEq(lskim, 1000);
+        assertEq(hb, 30 days);
+        assertTrue(swapEnabled);
     }
 
     function test_createMultipleTemplates() public {
@@ -1667,8 +1670,8 @@ contract ImpactHookTest is Test, Deployers {
         f2[1] = 100;
         f2[2] = 250;
 
-        uint256 id1 = hook.createTemplate("Education", d1, f1);
-        uint256 id2 = hook.createTemplate("Health", d2, f2);
+        uint256 id1 = hook.createTemplate("Education", d1, f1, 500, 0, 14 days, true);
+        uint256 id2 = hook.createTemplate("Health", d2, f2, 1500, 1000, 7 days, false);
 
         assertEq(id1, 0);
         assertEq(id2, 1);
@@ -1683,7 +1686,7 @@ contract ImpactHookTest is Test, Deployers {
 
         vm.prank(alice);
         vm.expectRevert(ImpactHook.ImpactHook__NotOwner.selector);
-        hook.createTemplate("Test", d, f);
+        hook.createTemplate("Test", d, f, 0, 0, 0, true);
     }
 
     function test_revert_createTemplate_emptyMilestones() public {
@@ -1691,7 +1694,7 @@ contract ImpactHookTest is Test, Deployers {
         uint16[] memory f = new uint16[](0);
 
         vm.expectRevert(ImpactHook.ImpactHook__NoMilestones.selector);
-        hook.createTemplate("Empty", d, f);
+        hook.createTemplate("Empty", d, f, 0, 0, 0, true);
     }
 
     function test_revert_createTemplate_feeTooHigh() public {
@@ -1701,7 +1704,7 @@ contract ImpactHookTest is Test, Deployers {
         f[0] = 600; // > MAX_FEE_BPS (500)
 
         vm.expectRevert(ImpactHook.ImpactHook__FeeBpsTooHigh.selector);
-        hook.createTemplate("Bad", d, f);
+        hook.createTemplate("Bad", d, f, 0, 0, 0, true);
     }
 
     function test_registerProjectFromTemplate() public {
@@ -1714,7 +1717,7 @@ contract ImpactHookTest is Test, Deployers {
         f[0] = 0;
         f[1] = 150;
         f[2] = 300;
-        hook.createTemplate("Climate", d, f);
+        hook.createTemplate("Climate", d, f, 1000, 500, 30 days, true);
 
         // Create a new pool key for template-based registration
         PoolKey memory newKey = PoolKey({
@@ -1735,6 +1738,39 @@ contract ImpactHookTest is Test, Deployers {
         assertEq(mc, 3);
         assertEq(fb, 0);
         assertTrue(reg);
+
+        // Verify template pool behavior was applied
+        assertEq(hook.lpSkimBps(newPoolId), 1000, "LP skim should be set from template");
+        assertEq(hook.donateSkimBps(newPoolId), 500, "Donate skim should be set from template");
+    }
+
+    function test_templateSwapFeeDisabled() public {
+        // Create LP-skim-only template (swapFeeEnabled = false)
+        string[] memory d = new string[](2);
+        d[0] = "Start";
+        d[1] = "Done";
+        uint16[] memory f = new uint16[](2);
+        f[0] = 0;
+        f[1] = 200;
+        hook.createTemplate("Emergency", d, f, 2000, 0, 7 days, false);
+
+        PoolKey memory newKey = PoolKey({
+            currency0: currency0,
+            currency1: currency1,
+            fee: 500,
+            tickSpacing: 10,
+            hooks: IHooks(address(hook))
+        });
+        PoolId newPoolId = newKey.toId();
+
+        hook.registerProjectFromTemplate(newKey, recipient, verifier, "Emergency Relief", "Emergency", 0);
+
+        // Fee should be 0 even though template had 200 bps (swap fees disabled)
+        (,,,,uint16 fb,) = hook.getProjectInfo(newPoolId);
+        assertEq(fb, 0, "Swap fee should be 0 when template disables it");
+
+        // But LP skim should be active
+        assertEq(hook.lpSkimBps(newPoolId), 2000, "LP skim should be set from template");
     }
 
     function test_revert_registerFromTemplate_notFound() public {
@@ -1755,7 +1791,7 @@ contract ImpactHookTest is Test, Deployers {
         d[0] = "Test";
         uint16[] memory f = new uint16[](1);
         f[0] = 100;
-        hook.createTemplate("Test", d, f);
+        hook.createTemplate("Test", d, f, 0, 0, 0, true);
 
         // poolKey is already registered in setUp
         vm.expectRevert(ImpactHook.ImpactHook__ProjectAlreadyRegistered.selector);
@@ -1767,7 +1803,7 @@ contract ImpactHookTest is Test, Deployers {
         d[0] = "Test";
         uint16[] memory f = new uint16[](1);
         f[0] = 100;
-        hook.createTemplate("Test", d, f);
+        hook.createTemplate("Test", d, f, 0, 0, 0, true);
 
         PoolKey memory newKey = PoolKey({
             currency0: currency0,

@@ -126,6 +126,10 @@ contract ImpactHook is IHooks {
         string name;
         string[] descriptions;
         uint16[] feeBpsValues;
+        uint16 lpSkimBps;           // default LP skim rate for this project type
+        uint16 donateSkimBps;       // default donate skim rate
+        uint256 heartbeatInterval;  // default heartbeat (e.g. 30 days for climate, 7 days for emergency)
+        bool swapFeeEnabled;        // false = LP-skim-only (maximally router-competitive)
     }
 
     struct LoyaltyTier {
@@ -535,18 +539,29 @@ contract ImpactHook is IHooks {
 
     // ──────────────────── Project Templates ────────────────────
 
-    /// @notice Create a reusable project template. Only callable by owner.
-    /// @param name Template name (e.g., "Climate", "Education", "Open Source")
+    /// @notice Create a reusable project template with pool behavior parameters.
+    /// Templates customize both milestone structure AND pool behavior per asset/project type.
+    /// @param name Template name (e.g., "Climate", "Emergency Relief", "Open Source")
     /// @param descriptions Milestone descriptions for the template
     /// @param feeBpsValues Fee bps for each milestone in the template
+    /// @param _lpSkimBps Default LP skim rate (0 = no LP skim)
+    /// @param _donateSkimBps Default donate skim rate (0 = no donate skim)
+    /// @param _heartbeatInterval Default heartbeat interval in seconds (0 = no expiry)
+    /// @param _swapFeeEnabled Whether swap fees are active (false = LP-skim-only, maximally router-competitive)
     /// @return templateId The ID of the created template
     function createTemplate(
         string calldata name,
         string[] calldata descriptions,
-        uint16[] calldata feeBpsValues
+        uint16[] calldata feeBpsValues,
+        uint16 _lpSkimBps,
+        uint16 _donateSkimBps,
+        uint256 _heartbeatInterval,
+        bool _swapFeeEnabled
     ) external onlyOwner returns (uint256 templateId) {
         if (descriptions.length == 0) revert ImpactHook__NoMilestones();
         if (descriptions.length != feeBpsValues.length) revert ImpactHook__NoMilestones();
+        if (_lpSkimBps > 5000) revert ImpactHook__LpSkimBpsTooHigh();
+        if (_donateSkimBps > 5000) revert ImpactHook__LpSkimBpsTooHigh();
 
         for (uint256 i = 0; i < feeBpsValues.length; ++i) {
             if (feeBpsValues[i] > MAX_FEE_BPS) revert ImpactHook__FeeBpsTooHigh();
@@ -555,6 +570,10 @@ contract ImpactHook is IHooks {
         templateId = templateCount++;
         ProjectTemplate storage t = _templates[templateId];
         t.name = name;
+        t.lpSkimBps = _lpSkimBps;
+        t.donateSkimBps = _donateSkimBps;
+        t.heartbeatInterval = _heartbeatInterval;
+        t.swapFeeEnabled = _swapFeeEnabled;
         for (uint256 i = 0; i < descriptions.length; ++i) {
             t.descriptions.push(descriptions[i]);
             t.feeBpsValues.push(feeBpsValues[i]);
@@ -593,14 +612,19 @@ contract ImpactHook is IHooks {
         project.verifier = verifier;
         project.currentMilestone = 0;
         project.lastHeartbeat = block.timestamp;
-        project.heartbeatInterval = 0;
+        project.heartbeatInterval = t.heartbeatInterval;
         project.name = name;
         project.category = category;
+
+        // Apply template pool behavior
+        lpSkimBps[poolId] = t.lpSkimBps;
+        donateSkimBps[poolId] = t.donateSkimBps;
+        // If swap fee disabled, set all milestone fees to 0 (LP-skim-only mode)
 
         for (uint256 i = 0; i < t.descriptions.length; ++i) {
             milestones[poolId].push(Milestone({
                 description: t.descriptions[i],
-                projectFeeBps: t.feeBpsValues[i],
+                projectFeeBps: t.swapFeeEnabled ? t.feeBpsValues[i] : 0,
                 verified: false
             }));
         }
@@ -848,14 +872,24 @@ contract ImpactHook is IHooks {
     /// @return name The template name
     /// @return descriptions Milestone descriptions
     /// @return feeBpsValues Fee bps for each milestone
+    /// @return _lpSkimBps Default LP skim rate
+    /// @return _heartbeatInterval Default heartbeat
+    /// @return _swapFeeEnabled Whether swap fees are active
     function getTemplate(uint256 templateId)
         external
         view
-        returns (string memory name, string[] memory descriptions, uint16[] memory feeBpsValues)
+        returns (
+            string memory name,
+            string[] memory descriptions,
+            uint16[] memory feeBpsValues,
+            uint16 _lpSkimBps,
+            uint256 _heartbeatInterval,
+            bool _swapFeeEnabled
+        )
     {
         if (templateId >= templateCount) revert ImpactHook__TemplateNotFound();
         ProjectTemplate storage t = _templates[templateId];
-        return (t.name, t.descriptions, t.feeBpsValues);
+        return (t.name, t.descriptions, t.feeBpsValues, t.lpSkimBps, t.heartbeatInterval, t.swapFeeEnabled);
     }
 
     /// @notice Get the current loyalty discount for an address on a pool
