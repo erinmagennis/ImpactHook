@@ -228,13 +228,14 @@ export default function LandingPage() {
           </div>
 
           {/* Right: flow visual + stats */}
-          <div style={{ flex: "1 1 360px", maxWidth: 440, paddingTop: 16 }}>
-            {/* Flow diagram */}
+          <div style={{ flex: "1 1 360px", maxWidth: 480, paddingTop: 16 }}>
+            {/* Visual flow diagram */}
             <div
               className="card card-glow"
               style={{
-                padding: 28,
+                padding: 32,
                 marginBottom: 20,
+                overflow: "hidden",
               }}
             >
               <div
@@ -244,46 +245,85 @@ export default function LandingPage() {
                   color: "var(--text-dim)",
                   textTransform: "uppercase" as const,
                   letterSpacing: "0.08em",
-                  marginBottom: 20,
+                  marginBottom: 24,
                 }}
               >
-                Funding flow
+                How funding flows
               </div>
-              {[
-                { step: "Swap", detail: "Traders swap on any ImpactHook pool" },
-                { step: "Route", detail: "Hook captures a small fee automatically" },
-                { step: "Verify", detail: "Milestones proven via EAS attestations" },
-                { step: "Fund", detail: "Project withdraws earned fees" },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 14,
-                    marginBottom: i < 3 ? 16 : 0,
-                  }}
-                >
-                  <div className="step-number" style={{ width: 28, height: 28, fontSize: 12 }}>
-                    {i + 1}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontSize: 15,
-                        fontWeight: 600,
-                        color: "var(--text-primary)",
-                        marginBottom: 2,
-                      }}
-                    >
-                      {item.step}
-                    </div>
-                    <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.4 }}>
-                      {item.detail}
-                    </div>
+
+              {/* Flow nodes */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                {/* Row 1: Sources */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 4 }}>
+                  <FlowNode label="Traders" sublabel="Swap fees" color="var(--accent)" delay={0} />
+                  <FlowNode label="LPs" sublabel="Yield skim" color="var(--success)" delay={150} />
+                </div>
+
+                {/* Arrow down */}
+                <div style={{ display: "flex", justifyContent: "center", padding: "4px 0" }}>
+                  <div className="animate-fade-in delay-300" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                    <div style={{ width: 2, height: 16, background: "linear-gradient(180deg, var(--accent), var(--accent-border))" }} />
+                    <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "6px solid var(--accent)" }} />
                   </div>
                 </div>
-              ))}
+
+                {/* Row 2: Hook */}
+                <div style={{ marginBottom: 4 }}>
+                  <div
+                    className="animate-fade-up delay-400"
+                    style={{
+                      padding: "14px 20px",
+                      borderRadius: 8,
+                      background: "var(--accent)",
+                      color: "white",
+                      textAlign: "center",
+                      position: "relative",
+                    }}
+                  >
+                    <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-0.01em" }}>ImpactHook</div>
+                    <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2 }}>Milestone-gated fee accumulation</div>
+                  </div>
+                </div>
+
+                {/* Arrow down */}
+                <div style={{ display: "flex", justifyContent: "center", padding: "4px 0" }}>
+                  <div className="animate-fade-in delay-500" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                    <div style={{ width: 2, height: 16, background: "linear-gradient(180deg, var(--accent), var(--accent-border))" }} />
+                    <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "6px solid var(--accent)" }} />
+                  </div>
+                </div>
+
+                {/* Row 3: Verification */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 4 }}>
+                  <FlowNode label="Direct" sublabel="EOA verify" color="var(--accent)" delay={600} small />
+                  <FlowNode label="Cross-chain" sublabel="Reactive" color="#7c3aed" delay={700} small />
+                  <FlowNode label="EAS" sublabel="Attestation" color="var(--success)" delay={800} small />
+                </div>
+
+                {/* Arrow down */}
+                <div style={{ display: "flex", justifyContent: "center", padding: "4px 0" }}>
+                  <div className="animate-fade-in delay-700" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                    <div style={{ width: 2, height: 16, background: "linear-gradient(180deg, var(--success), #a7f3d0)" }} />
+                    <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "6px solid var(--success)" }} />
+                  </div>
+                </div>
+
+                {/* Row 4: Output */}
+                <div className="animate-fade-up delay-800">
+                  <div
+                    style={{
+                      padding: "14px 20px",
+                      borderRadius: 8,
+                      background: "rgba(5, 150, 105, 0.08)",
+                      border: "1px solid rgba(5, 150, 105, 0.2)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--success)" }}>Impact Project Funded</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Withdraw verified milestone earnings</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Stats row */}
@@ -801,6 +841,34 @@ export default function LandingPage() {
           </a>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function FlowNode({ label, sublabel, color, delay, small }: {
+  label: string; sublabel: string; color: string; delay: number; small?: boolean;
+}) {
+  const delayClass = delay <= 100 ? "delay-100" : delay <= 200 ? "delay-200" : delay <= 300 ? "delay-300"
+    : delay <= 400 ? "delay-400" : delay <= 500 ? "delay-500" : delay <= 600 ? "delay-600"
+    : delay <= 700 ? "delay-700" : "delay-800";
+
+  return (
+    <div
+      className={`animate-fade-up ${delayClass}`}
+      style={{
+        padding: small ? "10px 8px" : "12px 16px",
+        borderRadius: 8,
+        background: `${color}0a`,
+        border: `1px solid ${color}22`,
+        textAlign: "center",
+      }}
+    >
+      <div style={{ fontSize: small ? 12 : 14, fontWeight: 600, color: color }}>
+        {label}
+      </div>
+      <div style={{ fontSize: small ? 10 : 11, color: "var(--text-dim)", marginTop: 2 }}>
+        {sublabel}
+      </div>
     </div>
   );
 }
