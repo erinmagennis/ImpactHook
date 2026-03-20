@@ -39,7 +39,7 @@ export default function TechnicalPage() {
           </h1>
           <p className="text-[14px] leading-relaxed max-w-2xl" style={{ color: 'var(--text-secondary)' }}>
             A Uniswap v4 hook creating asset-class specific liquidity via milestone-gated
-            fee routing. Four contracts across three chains.
+            fee routing. Seven hook callbacks, five funding channels, four contracts across three chains.
           </p>
         </div>
 
@@ -138,26 +138,63 @@ MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
           </div>
         </div>
 
-        {/* Code snippet */}
-        <div className="card p-6 animate-fade-up delay-400" style={{ marginBottom: 32, overflowX: 'auto' }}>
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-2 h-2 rounded-full" style={{ background: '#ff5f57' }} />
-            <span className="w-2 h-2 rounded-full" style={{ background: '#ffbd2e' }} />
-            <span className="w-2 h-2 rounded-full" style={{ background: '#28c840' }} />
-            <span className="ml-3 text-[11px] tracking-wider" style={{ color: 'var(--text-dim)' }}>ImpactHook.sol : afterSwap()</span>
-          </div>
-          <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            <code>{`// Fee on TOP of LP fee - LPs earn full yield
-uint16 feeBps = _getCurrentFeeBps(poolId);
-uint256 feeAmount = (uint256(uint128(outputAmount)) * feeBps) / 10_000;
+        {/* Code snippets */}
+        <div className="animate-fade-up delay-400" style={{ marginBottom: 32 }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
+            Hook callbacks
+          </h2>
+          <p className="text-[12px] leading-relaxed mb-4" style={{ color: 'var(--text-dim)' }}>
+            Seven hook callbacks: <span className="font-data" style={{ color: 'var(--accent)' }}>beforeInitialize</span>,{' '}
+            <span className="font-data" style={{ color: 'var(--accent)' }}>afterSwap + afterSwapReturnDelta</span>,{' '}
+            <span className="font-data" style={{ color: 'var(--accent)' }}>afterAddLiquidity + afterAddLiquidityReturnDelta</span>,{' '}
+            <span className="font-data" style={{ color: 'var(--accent)' }}>afterRemoveLiquidity + afterRemoveLiquidityReturnDelta</span>,{' '}
+            <span className="font-data" style={{ color: 'var(--accent)' }}>afterDonate</span>.
+          </p>
 
-// Take fee from pool manager into hook contract
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="card p-6" style={{ overflowX: 'auto' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-2 h-2 rounded-full" style={{ background: '#ff5f57' }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: '#ffbd2e' }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: '#28c840' }} />
+                <span className="ml-3 text-[11px] tracking-wider" style={{ color: 'var(--text-dim)' }}>afterSwap() - Swap Fee</span>
+              </div>
+              <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                <code>{`// Fee on TOP of LP fee - LPs earn full yield
+uint16 feeBps = _getCurrentFeeBps(poolId);
+uint256 feeAmount = (uint256(uint128(outputAmount))
+    * feeBps) / 10_000;
+
+// Take fee from pool manager
 poolManager.take(feeCurrency, address(this), feeAmount);
 accumulatedFees[poolId][feeCurrency] += feeAmount;
 
-// Return delta - reduces swapper's output by fee amount
-return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
-          </pre>
+// Return delta - reduces swapper output
+return (this.afterSwap.selector,
+    int128(int256(feeAmount)));`}</code>
+              </pre>
+            </div>
+            <div className="card p-6" style={{ overflowX: 'auto' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-2 h-2 rounded-full" style={{ background: '#ff5f57' }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: '#ffbd2e' }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: '#28c840' }} />
+                <span className="ml-3 text-[11px] tracking-wider" style={{ color: 'var(--text-dim)' }}>afterAddLiquidity() - LP Skim</span>
+              </div>
+              <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                <code>{`// LP collects fees -> hook skims a %
+function afterAddLiquidity(
+    ..., BalanceDelta feesAccrued, ...
+) {
+    return _skimLpFees(key, feesAccrued);
+}
+
+// Swap pricing stays identical
+// Routers have no reason to skip this pool
+// LPs opt in, swappers don't pay extra`}</code>
+              </pre>
+            </div>
+          </div>
         </div>
 
         {/* Fee model */}
@@ -216,6 +253,168 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
           </div>
         </div>
 
+        {/* LP Fee Skim */}
+        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
+            LP Fee Skim (Dual Funding Model)
+          </h2>
+          <div className="card p-6" style={{ marginBottom: 16 }}>
+            <div className="text-[11px] tracking-[0.12em] uppercase mb-4" style={{ color: 'var(--accent)' }}>
+              Key Innovation
+            </div>
+            <p className="text-[13px] leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Pools can skim a percentage of LP fees for the impact project via{' '}
+              <span className="font-data" style={{ color: 'var(--accent)' }}>afterAddLiquidity</span> and{' '}
+              <span className="font-data" style={{ color: 'var(--accent)' }}>afterRemoveLiquidity</span> return deltas.
+              When LPs collect accrued fees, the hook transparently routes a configurable share to the project.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
+                <div className="text-[11px] tracking-wider uppercase mb-2" style={{ color: 'var(--text-dim)' }}>How it works</div>
+                <ul className="flex flex-col gap-2">
+                  {[
+                    "Swap pricing stays identical to regular pools",
+                    "Routers have no reason to skip or avoid these pools",
+                    "LPs opt in by providing liquidity to the pool",
+                    "Swappers don't pay any extra fees",
+                    "Configurable per pool, max 50% skim rate",
+                  ].map(item => (
+                    <li key={item} className="text-[12px] flex items-start gap-2" style={{ color: 'var(--text-dim)' }}>
+                      <span style={{ color: 'var(--accent)', marginTop: 2 }}><CheckIcon /></span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
+                <div className="text-[11px] tracking-wider uppercase mb-2" style={{ color: 'var(--text-dim)' }}>Why it matters</div>
+                <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                  Traditional impact funding hooks add a swap fee that makes the pool uncompetitive for routers.
+                  LP fee skimming funds impact projects without touching swap pricing at all. The pool looks identical
+                  to any other v4 pool from the router&apos;s perspective, so it gets normal trade flow. Impact funding
+                  becomes invisible to swappers.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Native v4 Donate Skim */}
+        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
+            Native v4 Donate Skim
+          </h2>
+          <div className="card p-5">
+            <p className="text-[13px] leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
+              The <span className="font-data" style={{ color: 'var(--accent)' }}>afterDonate</span> hook intercepts{' '}
+              <span className="font-data" style={{ color: 'var(--accent)' }}>PoolManager.donate()</span> calls.
+              When users tip LPs via the native v4 donate mechanism, a configurable percentage is routed to the impact project.
+            </p>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              {[
+                { label: "Gating", detail: "Same milestone verification" },
+                { label: "Safety", detail: "Heartbeat and pause checks" },
+                { label: "Config", detail: "donateSkimBps per template" },
+              ].map(item => (
+                <div key={item.label} className="p-3" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
+                  <div className="text-[10px] tracking-wider uppercase mb-1" style={{ color: 'var(--text-dim)' }}>{item.label}</div>
+                  <div className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Safety & Accountability */}
+        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
+            Safety and accountability
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="card p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
+                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Heartbeat Expiration</span>
+              </div>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                Projects must send periodic proof-of-life transactions. If the heartbeat interval passes without
+                a signal, fee collection automatically stops until the project proves it is still active.
+              </p>
+            </div>
+            <div className="card p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
+                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Per-Project Pause</span>
+              </div>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                Any individual project can be paused without affecting other projects on the same hook.
+                Paused projects stop accumulating fees immediately.
+              </p>
+            </div>
+            <div className="card p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
+                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Sequential Milestones</span>
+              </div>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                Milestones must be verified in order. A project cannot skip ahead or verify
+                out of sequence. Each milestone can only be verified once.
+              </p>
+            </div>
+            <div className="card p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
+                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Checks-Effects-Interactions</span>
+              </div>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                All state-changing functions follow the checks-effects-interactions pattern.
+                Static analysis with Slither confirms no reentrancy or state ordering issues.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Behavior-Customizable Templates */}
+        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
+            Behavior-customizable templates
+          </h2>
+          <div className="card p-5" style={{ overflowX: 'auto' }}>
+            <p className="text-[12px] leading-relaxed mb-4" style={{ color: 'var(--text-dim)' }}>
+              Templates define <span className="font-data" style={{ color: 'var(--accent)' }}>lpSkimBps</span>,{' '}
+              <span className="font-data" style={{ color: 'var(--accent)' }}>donateSkimBps</span>,{' '}
+              <span className="font-data" style={{ color: 'var(--accent)' }}>heartbeatInterval</span>, and{' '}
+              <span className="font-data" style={{ color: 'var(--accent)' }}>swapFeeEnabled</span> per project type.
+              This lets a single hook deployment serve different impact verticals with appropriate defaults.
+            </p>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Template</th>
+                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>LP Skim</th>
+                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Heartbeat</th>
+                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Swap Fees</th>
+                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { template: "Climate", lpSkim: "10%", heartbeat: "30 days", swapFees: "Enabled", useCase: "Long-term environmental" },
+                  { template: "Emergency Relief", lpSkim: "20%", heartbeat: "7 days", swapFees: "Disabled", useCase: "Crisis response, router-competitive" },
+                  { template: "Open Source", lpSkim: "0%", heartbeat: "None", swapFees: "Enabled", useCase: "Traditional swap-fee dev grants" },
+                ].map((row) => (
+                  <tr key={row.template} style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <td className="py-3 text-[13px] font-data" style={{ color: 'var(--text-primary)' }}>{row.template}</td>
+                    <td className="py-3 text-[12px] font-data" style={{ color: 'var(--accent)' }}>{row.lpSkim}</td>
+                    <td className="py-3 text-[12px]" style={{ color: 'var(--text-secondary)' }}>{row.heartbeat}</td>
+                    <td className="py-3 text-[12px]" style={{ color: row.swapFees === 'Enabled' ? 'var(--success)' : 'var(--text-dim)' }}>{row.swapFees}</td>
+                    <td className="py-3 text-[12px]" style={{ color: 'var(--text-dim)' }}>{row.useCase}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Divider */}
         <div className="divider" style={{ margin: '48px 0' }} />
 
@@ -248,8 +447,8 @@ return (this.afterSwap.selector, int128(int256(feeAmount)));`}</code>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard label="Contracts" value="4" />
             <StatCard label="Chains" value="3" />
-            <StatCard label="Verification Paths" value="3" />
-            <StatCard label="Max Fee" value="500 bps" />
+            <StatCard label="Hook Callbacks" value="7" />
+            <StatCard label="Funding Channels" value="5" />
           </div>
         </div>
 
