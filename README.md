@@ -17,7 +17,7 @@ Most fee-charging hooks make pools less competitive for routing - aggregators sk
 - **3 verification paths**: direct (EOA/multisig), Reactive Network cross-chain, EAS attestations
 - **Heartbeat expiration**: projects must prove they're still alive or fees stop automatically
 - **Loyalty discounts**: repeat contributors earn reduced swap fees
-- **Project templates**: reusable milestone configurations for common impact verticals
+- **Behavior-customizable templates**: templates define LP skim rates, donate skim rates, heartbeat intervals, and swap fee mode per project type
 - **On-chain registry**: project metadata stored on-chain for frontend discovery
 - **Per-project pause**: stop one project without affecting others
 
@@ -152,16 +152,27 @@ Pool owners can configure **loyalty discount tiers** that reward repeat contribu
 
 This creates a retention flywheel: swappers are incentivized to keep trading through the same impact pool to unlock better rates, addressing the [vampire/fork risk](https://twitter.com/saucepoint/status/1744385686621372723) inherent in hook fees.
 
-### Project Templates
+### Behavior-Customizable Templates
 
-Predefined milestone configurations make it easy to create impact pools for common use cases:
+Templates define not just milestones but how the pool behaves per project type:
 
 ```
-hook.createTemplate("Climate", descriptions, feeBpsValues);
-hook.registerProjectFromTemplate(poolKey, recipient, verifier, templateId);
+hook.createTemplate(
+    "Emergency Relief",
+    descriptions, feeBpsValues,
+    2000,   // 20% LP skim
+    0,      // no donate skim
+    7 days, // 7-day heartbeat (must prove alive weekly)
+    false   // swap fees DISABLED (LP-skim-only, maximally router-competitive)
+);
 ```
 
-Templates standardize fee progressions and milestone structures for categories like climate, education, health, and open-source infrastructure - making the hook a reusable framework for any impact vertical.
+Example configurations:
+| Template | LP Skim | Heartbeat | Swap Fees | Use Case |
+|----------|---------|-----------|-----------|----------|
+| Climate | 10% | 30 days | Enabled | Long-term environmental projects |
+| Emergency Relief | 20% | 7 days | Disabled | Fast-moving crisis response, router-competitive |
+| Open Source | 0% | None | Enabled | Traditional swap-fee-funded dev grants |
 
 ### LP Fee Skim (Dual Funding Model)
 
