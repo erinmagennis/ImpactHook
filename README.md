@@ -228,10 +228,10 @@ The deployment script mines a CREATE2 salt to produce a hook address with the co
 
 | Contract | Chain | Address |
 |----------|-------|---------|
-| ImpactHook | Unichain Sepolia | `0x8860645503A99c16E55eB10668D4420B9d9aE557` |
-| MilestoneArbiter | Unichain Sepolia | `0x1983c6eDF04eEAF752a0315b02300b498a6C66f0` |
-| MilestoneOracle | Ethereum Sepolia | `0x9845d22Fbb33f30E241824aCB1813c041291A4Ca` |
-| MilestoneReactor | Reactive Lasna | `0x4CB877dee81E9e68533FFaf8495Ce9bCdc9518a4` |
+| ImpactHook | Unichain Sepolia | `0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557` |
+| MilestoneArbiter | Unichain Sepolia | `0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094` |
+| MilestoneOracle | Ethereum Sepolia | `0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc` |
+| MilestoneReactor | Reactive Lasna | `0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc` |
 
 EAS Schema UID: `0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bfb52`
 
@@ -239,7 +239,7 @@ EAS Schema UID: `0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bf
 
 | Contract | Address |
 |----------|---------|
-| PoolManager | `0x1F98400000000000000000000000000000000004` |
+| PoolManager | `0x00B036B58a818B1BC34d502D3fE730Db729e62AC` |
 | Callback Proxy | `0x9299472A6399Fd1027ebF067571Eb3e3D7837FC4` |
 | EAS | `0x4200000000000000000000000000000000000021` |
 | SchemaRegistry | `0x4200000000000000000000000000000000000020` |

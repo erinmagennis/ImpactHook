@@ -1,6 +1,6 @@
-export const HOOK_ADDRESS = "0x8860645503A99c16E55eB10668D4420B9d9aE557" as const;
-export const ARBITER_ADDRESS = "0x1983c6eDF04eEAF752a0315b02300b498a6C66f0" as const;
-export const ORACLE_ADDRESS = "0x9845d22Fbb33f30E241824aCB1813c041291A4Ca" as const;
+export const HOOK_ADDRESS = "0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557" as const;
+export const ARBITER_ADDRESS = "0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094" as const;
+export const ORACLE_ADDRESS = "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" as const;
 export const EAS_ADDRESS = "0x4200000000000000000000000000000000000021" as const;
 export const SCHEMA_REGISTRY = "0x4200000000000000000000000000000000000020" as const;
 export const MILESTONE_SCHEMA_UID = "0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bfb52" as const;
@@ -115,6 +115,8 @@ export const impactHookAbi = [
       },
       { name: "recipient", type: "address" },
       { name: "verifier", type: "address" },
+      { name: "name", type: "string" },
+      { name: "category", type: "string" },
       { name: "descriptions", type: "string[]" },
       { name: "feeBpsValues", type: "uint16[]" },
     ],

@@ -20,6 +20,8 @@ export default function CreateProjectPage() {
   const [tickSpacing, setTickSpacing] = useState("60");
   const [recipientInput, setRecipientInput] = useState("");
   const [verifierInput, setVerifierInput] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [projectCategory, setProjectCategory] = useState("");
   const [milestones, setMilestones] = useState([
     { description: "", feeBps: "" },
   ]);
@@ -79,6 +81,8 @@ export default function CreateProjectPage() {
         poolKey,
         recipientInput as `0x${string}`,
         verifierInput as `0x${string}`,
+        projectName,
+        projectCategory,
         descriptions,
         feeBpsValues,
       ],
@@ -91,6 +95,8 @@ export default function CreateProjectPage() {
     currency1 &&
     recipientInput &&
     verifierInput &&
+    projectName &&
+    projectCategory &&
     milestones.every((m) => m.description && m.feeBps);
   const isEnabled = isOwner && hasAllFields && !isLoading;
 
@@ -218,6 +224,35 @@ export default function CreateProjectPage() {
               onChange={(e) => setVerifierInput(e.target.value)}
               style={inputStyle}
             />
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+              marginBottom: 20,
+            }}
+          >
+            <div>
+              <label style={labelStyle}>PROJECT NAME</label>
+              <input
+                type="text"
+                placeholder="e.g. Clean Water Initiative"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>CATEGORY</label>
+              <input
+                type="text"
+                placeholder="e.g. Infrastructure"
+                value={projectCategory}
+                onChange={(e) => setProjectCategory(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
           </div>
 
           {/* Milestones */}

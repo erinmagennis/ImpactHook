@@ -12,7 +12,7 @@ import {HookMiner} from "../test/utils/HookMiner.sol";
 /// and deploys MilestoneArbiter pointing to it.
 contract DeployHookScript is Script {
     // Unichain Sepolia PoolManager
-    address constant POOL_MANAGER = 0x1F98400000000000000000000000000000000004;
+    address constant POOL_MANAGER = 0x00B036B58a818B1BC34d502D3fE730Db729e62AC;
 
     // EAS on Unichain Sepolia (OP Stack predeploy)
     address constant EAS = 0x4200000000000000000000000000000000000021;

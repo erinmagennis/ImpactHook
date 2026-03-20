@@ -1,15 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { HOOK_ADDRESS, impactHookAbi } from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
 import { formatEther } from "viem";
 import { Navigation } from "../../components/Navigation";
-
-// Pool ID for demo project (Clean Water - Chiapas Schools)
-// Computed from PoolKey: token0=0x01, token1=0x02, fee=3000, tickSpacing=60, hooks=ImpactHook
-const DEMO_POOL_ID =
-  "0x6bc91b5e91380a168a3d85fd1ea27b250b10b40390b9da68bb07ebfd4f95f205";
 
 function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   const { data: projectInfo } = useReadContract({
@@ -102,7 +98,7 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
               marginBottom: 6,
             }}
           >
-            {showDemo ? "Clean Water - Chiapas Schools" : "Clean Water - Chiapas Schools"}
+            {registered ? "Impact Project" : "No project registered"}
           </div>
           <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             {showDemo ? "0xa3f7c2...1b9e04d8" : `${poolId.slice(0, 10)}...${poolId.slice(-8)}`}
@@ -306,6 +302,11 @@ function StatusRow({ label, value }: { label: string; value?: string }) {
 
 export default function DashboardPage() {
   const { isConnected } = useAccount();
+  const [poolIdInput, setPoolIdInput] = useState("");
+
+  const poolId = poolIdInput.startsWith("0x") && poolIdInput.length === 66
+    ? poolIdInput as `0x${string}`
+    : null;
 
   return (
     <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -330,71 +331,105 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        <div className="card animate-fade-up" style={{ padding: 16, marginBottom: 16 }}>
+          <label style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.12em", display: "block", marginBottom: 6 }}>
+            Pool ID
+          </label>
+          <input
+            type="text"
+            placeholder="0x... (paste pool ID to view project)"
+            value={poolIdInput}
+            onChange={(e) => setPoolIdInput(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 6,
+              border: "1px solid var(--border-subtle)",
+              background: "var(--bg-elevated)",
+              color: "var(--text-primary)",
+              fontSize: 13,
+              outline: "none",
+              fontFamily: "inherit",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           <HookStatus />
-          <PoolCard poolId={DEMO_POOL_ID as `0x${string}`} />
+          {poolId ? (
+            <PoolCard poolId={poolId} />
+          ) : (
+            <div className="card card-glow animate-fade-up delay-200" style={{ padding: 24, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-dim)", fontSize: 13 }}>
+              Enter a Pool ID above to view project state
+            </div>
+          )}
         </div>
 
-        {/* Your Impact - shown for traders/LPs */}
-        <div className="animate-fade-up delay-300" style={{ marginTop: 32 }}>
-          <h2
-            className="font-display"
-            style={{
-              fontSize: 15,
-              color: "var(--text-primary)",
-              marginBottom: 16,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Your Impact
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
-            <ImpactMetric label="Total Contributed" value="2.134 ETH" accent="var(--success)" />
-            <ImpactMetric label="Projects Supported" value="3" accent="var(--accent)" />
-            <ImpactMetric label="People Reached" value="~1,240" accent="#7c3aed" />
-            <ImpactMetric label="Loyalty Tier" value="Silver" accent="var(--warning)" />
-          </div>
+        {/* Your Impact */}
+        {isConnected && poolId ? (
+          <YourImpact poolId={poolId} />
+        ) : (
+          <div className="animate-fade-up delay-300" style={{ marginTop: 32 }}>
+            <h2
+              className="font-display"
+              style={{
+                fontSize: 15,
+                color: "var(--text-primary)",
+                marginBottom: 16,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Your Impact
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
+              <ImpactMetric label="Total Contributed" value="2.134 ETH" accent="var(--success)" />
+              <ImpactMetric label="Projects Supported" value="3" accent="var(--accent)" />
+              <ImpactMetric label="People Reached" value="~1,240" accent="#7c3aed" />
+              <ImpactMetric label="Loyalty Tier" value="Silver" accent="var(--warning)" />
+            </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-            <ProjectImpactCard
-              name="Clean Water - Chiapas"
-              contributed="0.847"
-              impact="420 students with clean water"
-              milestones="4/4"
-              accent="var(--accent)"
-            />
-            <ProjectImpactCard
-              name="Solar Schools - Oaxaca"
-              contributed="0.892"
-              impact="8 schools powered by solar"
-              milestones="2/3"
-              accent="var(--success)"
-            />
-            <ProjectImpactCard
-              name="Reforestation - Yucatan"
-              contributed="0.395"
-              impact="2,400 trees planted"
-              milestones="1/4"
-              accent="#7c3aed"
-            />
-          </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+              <ProjectImpactCard
+                name="Clean Water - Chiapas"
+                contributed="0.847"
+                impact="420 students with clean water"
+                milestones="4/4"
+                accent="var(--accent)"
+              />
+              <ProjectImpactCard
+                name="Solar Schools - Oaxaca"
+                contributed="0.892"
+                impact="8 schools powered by solar"
+                milestones="2/3"
+                accent="var(--success)"
+              />
+              <ProjectImpactCard
+                name="Reforestation - Yucatan"
+                contributed="0.395"
+                impact="2,400 trees planted"
+                milestones="1/4"
+                accent="#7c3aed"
+              />
+            </div>
 
-          <div
-            style={{
-              marginTop: 12,
-              padding: "10px 14px",
-              borderRadius: 8,
-              background: "rgba(124,58,237,0.04)",
-              border: "1px solid rgba(124,58,237,0.08)",
-              fontSize: 11,
-              color: "var(--text-dim)",
-              textAlign: "center",
-            }}
-          >
-            Preview data. Connect wallet and swap through impact pools to see your real contributions.
+            <div
+              style={{
+                marginTop: 12,
+                padding: "10px 14px",
+                borderRadius: 8,
+                background: "rgba(124,58,237,0.04)",
+                border: "1px solid rgba(124,58,237,0.08)",
+                fontSize: 11,
+                color: "var(--text-dim)",
+                textAlign: "center",
+              }}
+            >
+              Preview data. Connect wallet and swap through impact pools to see your real contributions.
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Verification paths */}
         <div style={{ marginTop: 32 }}>
@@ -493,6 +528,68 @@ function ProjectImpactCard({
           {impact}
         </div>
       </div>
+    </div>
+  );
+}
+
+function YourImpact({ poolId }: { poolId: `0x${string}` }) {
+  const { address } = useAccount();
+
+  const { data: stats } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "getContributorStats",
+    args: [address || "0x0000000000000000000000000000000000000000", poolId],
+    chainId: unichainSepolia.id,
+  });
+
+  const { data: discount } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "getLoyaltyDiscount",
+    args: [address || "0x0000000000000000000000000000000000000000", poolId],
+    chainId: unichainSepolia.id,
+  });
+
+  const poolContribution = stats?.[0] ? formatEther(stats[0] as bigint) : "0";
+  const globalContribution = stats?.[1] ? formatEther(stats[1] as bigint) : "0";
+  const discountBps = Number(discount || 0);
+
+  return (
+    <div className="animate-fade-up delay-300" style={{ marginTop: 32 }}>
+      <h2
+        className="font-display"
+        style={{
+          fontSize: 15,
+          color: "var(--text-primary)",
+          marginBottom: 16,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+        }}
+      >
+        Your Impact
+      </h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+        <ImpactMetric label="This Pool" value={`${Number(poolContribution).toFixed(4)} ETH`} accent="var(--accent)" />
+        <ImpactMetric label="All Pools" value={`${Number(globalContribution).toFixed(4)} ETH`} accent="var(--success)" />
+        <ImpactMetric label="Loyalty Discount" value={discountBps > 0 ? `${discountBps / 100}%` : "None"} accent="var(--warning)" />
+      </div>
+      {poolContribution === "0" && globalContribution === "0" && (
+        <div
+          style={{
+            marginTop: 12,
+            padding: "10px 14px",
+            borderRadius: 8,
+            background: "var(--accent-bg)",
+            border: "1px solid rgba(13,148,136,0.08)",
+            fontSize: 11,
+            color: "var(--text-dim)",
+            textAlign: "center",
+          }}
+        >
+          Swap through impact pools to see your contributions here.
+        </div>
+      )}
     </div>
   );
 }

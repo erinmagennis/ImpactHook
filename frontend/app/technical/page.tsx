@@ -50,7 +50,7 @@ export default function TechnicalPage() {
             role="Core Hook"
             description="afterSwap fee routing, LP fee skim, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates"
             chain="Unichain Sepolia"
-            address="0x8860645503A99c16E55eB10668D4420B9d9aE557"
+            address="0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557"
             accent="cyan"
           />
           <ContractCard
@@ -58,7 +58,7 @@ export default function TechnicalPage() {
             role="Escrow Gate"
             description="Alkahest IArbiter - gates escrow release on verified milestone state"
             chain="Unichain Sepolia"
-            address="0x1983c6eDF04eEAF752a0315b02300b498a6C66f0"
+            address="0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094"
             accent="violet"
           />
           <ContractCard
@@ -66,7 +66,7 @@ export default function TechnicalPage() {
             role="Reactive RSC"
             description="Subscribes to origin chain events, emits cross-chain callbacks to ImpactHook"
             chain="Reactive Lasna"
-            address="0x4CB877dee81E9e68533FFaf8495Ce9bCdc9518a4"
+            address="0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc"
             accent="emerald"
           />
           <ContractCard
@@ -74,7 +74,7 @@ export default function TechnicalPage() {
             role="Event Source"
             description="Origin chain contract - emits MilestoneSubmitted events for cross-chain verification"
             chain="Ethereum Sepolia"
-            address="0x9845d22Fbb33f30E241824aCB1813c041291A4Ca"
+            address="0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc"
             accent="amber"
           />
         </div>
@@ -471,10 +471,10 @@ function afterAddLiquidity(
               </thead>
               <tbody>
                 {[
-                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0x8860645503A99c16E55eB10668D4420B9d9aE557" },
-                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0x1983c6eDF04eEAF752a0315b02300b498a6C66f0" },
-                  { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: "0x9845d22Fbb33f30E241824aCB1813c041291A4Ca" },
-                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x4CB877dee81E9e68533FFaf8495Ce9bCdc9518a4" },
+                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557" },
+                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094" },
+                  { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" },
+                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" },
                 ].map((c) => (
                   <tr key={c.name} style={{ borderTop: '1px solid var(--border-subtle)' }}>
                     <td className="py-3 text-[13px]" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
@@ -502,7 +502,7 @@ function afterAddLiquidity(
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              { label: "PoolManager", address: "0x1F98400000000000000000000000000000000004" },
+              { label: "PoolManager", address: "0x00B036B58a818B1BC34d502D3fE730Db729e62AC" },
               { label: "Callback Proxy", address: "0x9299472A6399Fd1027ebF067571Eb3e3D7837FC4" },
               { label: "EAS", address: "0x4200000000000000000000000000000000000021" },
               { label: "SchemaRegistry", address: "0x4200000000000000000000000000000000000020" },
