@@ -137,8 +137,18 @@ export default function ImpactPage() {
                 icon: "->",
               },
               {
+                label: "Heartbeat expiration",
+                desc: "Projects must send periodic proof-of-life or fees stop automatically. Dead projects auto-expire without manual intervention.",
+                icon: "~~",
+              },
+              {
+                label: "Per-project controls",
+                desc: "Individual projects can be paused without affecting others. Progressive decentralization from owner-gated to fully permissionless.",
+                icon: "||",
+              },
+              {
                 label: "Open source, auditable",
-                desc: "All contracts are verified on-chain and the source code is public on GitHub. Anyone can read the logic, run the tests, or fork the project.",
+                desc: "All contracts verified on-chain, source code public on GitHub. 156 tests, 94% line coverage. Audited with Slither and Feynman deep logic analysis.",
                 icon: "<>",
               },
             ].map((item) => (
@@ -211,30 +221,57 @@ export default function ImpactPage() {
 
               <div className="card p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-lg" style={{ color: 'var(--accent)' }}>~</span>
-                  <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Channel 1: Swap Fees</span>
+                  <span className="font-data text-[14px]" style={{ color: 'var(--accent)' }}>1</span>
+                  <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Swap Fees</span>
                 </div>
                 <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                  DeFi-native continuous funding. The hook charges a fee on swap output.
-                  LPs earn full yield. Fees come from swappers who choose impact pools.
+                  A small fee on swap output, configured per milestone. Continuous funding from trading volume.
+                </p>
+              </div>
+
+              <div className="card p-5" style={{ borderLeft: '3px solid var(--accent)' }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="font-data text-[14px]" style={{ color: 'var(--accent)' }}>2</span>
+                  <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>LP Fee Skim</span>
+                </div>
+                <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                  A percentage of LP earnings goes to the project. Swap pricing stays identical to regular pools - routers have no reason to skip it. LPs opt in. This is the key to router-competitive impact funding.
                 </p>
               </div>
 
               <div className="card p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-lg" style={{ color: '#7c3aed' }}>#</span>
-                  <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Channel 2: Grant Escrow</span>
+                  <span className="font-data text-[14px]" style={{ color: 'var(--accent)' }}>3</span>
+                  <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Native v4 Donate Skim</span>
                 </div>
                 <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                  Institutional milestone-gated funding via Alkahest (Zellic-audited).
-                  Both channels share one source of truth for milestone state.
+                  When someone tips LPs via PoolManager.donate(), a share is routed to the project via the afterDonate hook.
                 </p>
               </div>
 
-              <div className="p-4" style={{ background: 'rgba(124, 58, 237, 0.04)', border: '1px solid rgba(124, 58, 237, 0.1)', borderRadius: 8 }}>
+              <div className="card p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="font-data text-[14px]" style={{ color: 'var(--accent)' }}>4</span>
+                  <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Direct Donations</span>
+                </div>
+                <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                  Anyone can donate ERC20 or native ETH directly. Same milestone-gated withdrawal rules apply.
+                </p>
+              </div>
+
+              <div className="card p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="font-data text-[14px]" style={{ color: '#7c3aed' }}>5</span>
+                  <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: 'var(--text-dim)' }}>Institutional Escrow</span>
+                </div>
+                <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+                  Alkahest integration (Zellic-audited) gates grant release on the same milestone state. All five channels share one source of truth.
+                </p>
+              </div>
+
+              <div className="p-4" style={{ background: 'rgba(13, 148, 136, 0.04)', border: '1px solid rgba(13, 148, 136, 0.1)', borderRadius: 8 }}>
                 <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  Multiple funding channels, same on-chain accountability. Whether funds come from
-                  swap fees, LP yield, direct donations, or institutional escrow, milestones must be verified before a single dollar moves.
+                  Five funding channels, one source of truth. All gated by the same milestones, heartbeat expiration, and per-project pause controls. Dead projects auto-expire. No manual intervention needed.
                 </p>
               </div>
             </div>
