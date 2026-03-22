@@ -10,6 +10,7 @@ import {
 } from "wagmi";
 import { parseEther, formatEther, erc20Abi } from "viem";
 import { Navigation } from "../../components/Navigation";
+import { ProjectSelector } from "../../components/ProjectSelector";
 import { HOOK_ADDRESS, impactHookAbi } from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
 
@@ -252,17 +253,7 @@ export default function DonatePage() {
         <div className="card" style={{ padding: 24 }}>
           {/* Pool ID */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>POOL ID</label>
-            <input
-              type="text"
-              placeholder="0x6bc91b5e91380a168a3d85fd1ea27b250b10b40390b9da68bb07ebfd4f95f205"
-              value={poolIdInput}
-              onChange={(e) => {
-                setPoolIdInput(e.target.value);
-                setErrorMsg("");
-              }}
-              style={inputStyle}
-            />
+            <ProjectSelector value={poolIdInput} onChange={setPoolIdInput} label="PROJECT" />
           </div>
 
           {/* Currency address */}
@@ -763,7 +754,7 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
-  borderRadius: 2,
+  borderRadius: 6,
   border: "1px solid var(--border-subtle)",
   background: "var(--bg-elevated)",
   color: "var(--text-primary)",
@@ -776,7 +767,7 @@ const inputStyle: React.CSSProperties = {
 const buttonBaseStyle: React.CSSProperties = {
   width: "100%",
   padding: "12px 20px",
-  borderRadius: 2,
+  borderRadius: 6,
   fontSize: 13,
   fontWeight: 600,
   letterSpacing: "0.12em",

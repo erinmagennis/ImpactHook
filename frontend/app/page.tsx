@@ -196,7 +196,7 @@ export default function LandingPage() {
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                Launch App
+                Create Impact
               </Link>
               <Link
                 href="/impact"

@@ -492,7 +492,7 @@ export default function SwapPage() {
             >
               Swap successful!{" "}
               <a
-                href={`https://unichain-sepolia.blockscout.com/tx/${swapHash}`}
+                href={`https://sepolia.uniscan.xyz/tx/${swapHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "#7c3aed", textDecoration: "underline" }}
