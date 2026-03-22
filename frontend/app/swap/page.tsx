@@ -191,6 +191,9 @@ export default function SwapPage() {
               onChange={(e) => setPoolIdInput(e.target.value)}
               style={inputStyle}
             />
+            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
+              The pool ID from the project creation page or dashboard.
+            </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
@@ -225,6 +228,9 @@ export default function SwapPage() {
               )}
             </div>
           </div>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: -12, marginBottom: 12, lineHeight: 1.4 }}>
+            Must match the token addresses used when the pool was created.
+          </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
             <div>
@@ -245,6 +251,9 @@ export default function SwapPage() {
                 style={inputStyle}
               />
             </div>
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: -12, marginBottom: 12, lineHeight: 1.4 }}>
+            Must match the pool&#39;s fee tier and tick spacing.
           </div>
 
           {/* Direction toggle */}

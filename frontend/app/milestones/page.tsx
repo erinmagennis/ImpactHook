@@ -190,6 +190,9 @@ function MilestoneCard({
             borderTop: '1px solid var(--border-subtle)',
           }}
         >
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4, marginBottom: 8 }}>
+            Direct: verifier calls directly. EAS: create an attestation with evidence, then call verifyMilestoneEAS() separately.
+          </div>
           <div
             style={{
               display: 'flex',
@@ -409,8 +412,11 @@ export default function MilestonesPage() {
               />
             </div>
           </div>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
+            Enter the same token addresses, fee, and tick spacing used when the project was created.
+          </div>
           {hasPoolKey && (
-            <div style={{ fontSize: 12, color: 'var(--text-dim)', wordBreak: 'break-all' }}>
+            <div style={{ fontSize: 12, color: 'var(--text-dim)', wordBreak: 'break-all', marginTop: 12 }}>
               <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 6 }}>Pool ID:</span>
               <span className="font-data" style={{ color: 'var(--text-secondary)' }}>{poolId}</span>
             </div>

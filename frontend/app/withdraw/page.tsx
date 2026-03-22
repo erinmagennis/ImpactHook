@@ -133,6 +133,9 @@ export default function WithdrawPage() {
           <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             Withdraw accumulated swap fees for your impact project
           </p>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
+            Fees accumulate from swaps once milestones are verified. Only the project recipient can withdraw.
+          </div>
         </div>
 
         <div className="card" style={{ padding: 24 }}>
@@ -176,6 +179,9 @@ export default function WithdrawPage() {
                 style={inputStyle}
               />
             </div>
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4, marginBottom: 12 }}>
+            Enter the same token addresses, fee, and tick spacing used when the project was created.
           </div>
 
           {hasPoolKey && (

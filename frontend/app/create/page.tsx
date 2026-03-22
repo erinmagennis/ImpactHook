@@ -190,6 +190,9 @@ export default function CreateProjectPage() {
             owner-gated for safety. Permissionless registration is on the
             roadmap.
           </p>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
+            This is a 2-step process: register the project, then initialize the pool.
+          </div>
         </div>
 
         <div className="card" style={{ padding: 24 }}>
@@ -222,6 +225,9 @@ export default function CreateProjectPage() {
                 onChange={(e) => setCurrency0(e.target.value)}
                 style={inputStyle}
               />
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
+                Token address. Currency0 must be the lower address.
+              </div>
             </div>
             <div>
               <label style={labelStyle}>CURRENCY 1</label>
@@ -255,6 +261,9 @@ export default function CreateProjectPage() {
                   = {(parseInt(fee) / 100 || 0).toFixed(2)}%
                 </div>
               )}
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
+                Uniswap LP fee tier. Common values: 100, 500, 3000, 10000.
+              </div>
             </div>
             <div>
               <label style={labelStyle}>TICK SPACING</label>
@@ -264,6 +273,9 @@ export default function CreateProjectPage() {
                 onChange={(e) => setTickSpacing(e.target.value)}
                 style={inputStyle}
               />
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
+                Must match the fee tier. Common: fee 500 = spacing 10, fee 3000 = spacing 60.
+              </div>
             </div>
           </div>
 
@@ -298,6 +310,12 @@ export default function CreateProjectPage() {
               onChange={(e) => setVerifierInput(e.target.value)}
               style={inputStyle}
             />
+            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 6, lineHeight: 1.5 }}>
+              The verifier address determines the verification path:
+              <strong style={{ color: "var(--text-secondary)" }}> Direct</strong> - use your wallet or a multisig.
+              <strong style={{ color: "var(--text-secondary)" }}> Reactive Network</strong> - use the MilestoneReactor address for cross-chain verification.
+              <strong style={{ color: "var(--text-secondary)" }}> EAS</strong> - use any address that will create attestations.
+            </div>
           </div>
           <div
             style={{
@@ -330,6 +348,9 @@ export default function CreateProjectPage() {
           </div>
 
           {/* Milestones */}
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4, marginBottom: 8 }}>
+            Fees increase as milestones are verified. Set 0 for the first milestone so funding only starts after initial progress.
+          </div>
           <div
             style={{
               display: "flex",
