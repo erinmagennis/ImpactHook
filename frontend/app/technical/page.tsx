@@ -50,7 +50,7 @@ export default function TechnicalPage() {
             role="Core Hook"
             description="afterSwap fee routing, LP fee skim, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates"
             chain="Unichain Sepolia"
-            address="0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557"
+            address="0x3D307ADF09d62D4F7CcF17C6dc329C339d696557"
             accent="cyan"
           />
           <ContractCard
@@ -58,7 +58,7 @@ export default function TechnicalPage() {
             role="Escrow Gate"
             description="Alkahest IArbiter - gates escrow release on verified milestone state"
             chain="Unichain Sepolia"
-            address="0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094"
+            address="0x65B5661743765F135229e4901F214EE9A7b80181"
             accent="violet"
           />
           <ContractCard
@@ -66,7 +66,7 @@ export default function TechnicalPage() {
             role="Reactive RSC"
             description="Subscribes to origin chain events, emits cross-chain callbacks to ImpactHook"
             chain="Reactive Lasna"
-            address="0x1af58d1A851Ab874776329b11838C6C37C81Ce62"
+            address="0x19D5bfa64Ff4992e917FC627B246eBdDf6A7d872"
             accent="emerald"
           />
           <ContractCard
@@ -479,10 +479,10 @@ function afterAddLiquidity(
               </thead>
               <tbody>
                 {[
-                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557" },
-                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094" },
+                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0x3D307ADF09d62D4F7CcF17C6dc329C339d696557" },
+                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0x65B5661743765F135229e4901F214EE9A7b80181" },
                   { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" },
-                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x1af58d1A851Ab874776329b11838C6C37C81Ce62" },
+                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x19D5bfa64Ff4992e917FC627B246eBdDf6A7d872" },
                   { name: "ImpactSwapRouter", chain: "Unichain Sepolia", address: "0x66452162B01442d92fc77d607EE2Cff3e76043c2" },
                 ].map((c) => (
                   <tr key={c.name} style={{ borderTop: '1px solid var(--border-subtle)' }}>

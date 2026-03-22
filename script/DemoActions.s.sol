@@ -17,7 +17,7 @@ import {ImpactHook} from "../src/ImpactHook.sol";
 contract DemoVerify is Script {
     using PoolIdLibrary for PoolKey;
 
-    address constant HOOK = 0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557;
+    address constant HOOK = 0x3D307ADF09d62D4F7CcF17C6dc329C339d696557;
     uint24 constant FEE = 500;
     int24 constant TICK_SPACING = 10;
 
@@ -55,7 +55,7 @@ contract DemoVerify is Script {
 contract DemoSetLpSkim is Script {
     using PoolIdLibrary for PoolKey;
 
-    address constant HOOK = 0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557;
+    address constant HOOK = 0x3D307ADF09d62D4F7CcF17C6dc329C339d696557;
     uint24 constant FEE = 500;
     int24 constant TICK_SPACING = 10;
 
@@ -91,7 +91,7 @@ contract DemoSetLpSkim is Script {
 contract DemoWithdraw is Script {
     using PoolIdLibrary for PoolKey;
 
-    address constant HOOK = 0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557;
+    address constant HOOK = 0x3D307ADF09d62D4F7CcF17C6dc329C339d696557;
     uint24 constant FEE = 500;
     int24 constant TICK_SPACING = 10;
 
@@ -136,7 +136,7 @@ contract DemoWithdraw is Script {
 contract DemoQuery is Script {
     using PoolIdLibrary for PoolKey;
 
-    address constant HOOK = 0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557;
+    address constant HOOK = 0x3D307ADF09d62D4F7CcF17C6dc329C339d696557;
     uint24 constant FEE = 500;
     int24 constant TICK_SPACING = 10;
 

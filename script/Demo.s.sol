@@ -25,7 +25,7 @@ import {ImpactHook} from "../src/ImpactHook.sol";
 ///     forge script script/Demo.s.sol:DemoQuery --rpc-url $UNICHAIN_SEPOLIA_RPC
 
 contract DemoBase is Script {
-    address constant HOOK = 0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557;
+    address constant HOOK = 0x3D307ADF09d62D4F7CcF17C6dc329C339d696557;
 
     // Use two placeholder token addresses to form the PoolKey.
     // These don't need to be real tokens - we just need a unique PoolKey

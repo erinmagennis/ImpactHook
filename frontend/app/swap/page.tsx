@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useAccount,
   useReadContract,
@@ -101,9 +101,9 @@ export default function SwapPage() {
   const { isLoading: swapLoading, isSuccess: swapSuccess } =
     useWaitForTransactionReceipt({ hash: swapHash });
 
-  if (approveSuccess) {
-    refetchAllowance();
-  }
+  useEffect(() => {
+    if (approveSuccess) refetchAllowance();
+  }, [approveSuccess, refetchAllowance]);
 
   const feeBps = Number(currentFeeBps || 0);
   const discount = Number(loyaltyDiscount || 0);

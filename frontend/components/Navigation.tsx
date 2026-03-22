@@ -114,9 +114,9 @@ export function Navigation() {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        borderBottom: "1px solid var(--border-subtle, #e4e4e7)",
+        borderBottom: "1px solid var(--border-subtle)",
         backdropFilter: "blur(16px)",
-        backgroundColor: "rgba(255, 255, 255, 0.92)",
+        backgroundColor: "rgba(10, 10, 15, 0.92)",
       }}
     >
       <div
@@ -137,7 +137,7 @@ export function Navigation() {
             style={{
               fontSize: 18,
               fontWeight: 700,
-              color: "var(--text-primary, #18181b)",
+              color: "var(--text-primary)",
               textDecoration: "none",
               letterSpacing: "-0.02em",
               flexShrink: 0,
@@ -158,12 +158,12 @@ export function Navigation() {
                 padding: "5px 12px",
                 borderRadius: 6,
                 border: role === "none"
-                  ? "1px solid var(--border-subtle, #e4e4e7)"
+                  ? "1px solid var(--border-subtle)"
                   : `1px solid ${color}33`,
                 background: role === "none"
-                  ? "var(--bg-elevated, #f4f4f5)"
+                  ? "var(--bg-elevated)"
                   : `${color}0d`,
-                color: role === "none" ? "var(--text-secondary, #52525b)" : color,
+                color: role === "none" ? "var(--text-secondary)" : color,
                 fontSize: 11,
                 fontWeight: 600,
                 letterSpacing: "0.1em",
@@ -188,7 +188,7 @@ export function Navigation() {
                   left: 0,
                   minWidth: 240,
                   borderRadius: 8,
-                  border: "1px solid var(--border-subtle, #e4e4e7)",
+                  border: "1px solid var(--border-subtle)",
                   background: "var(--bg-card)",
                   boxShadow: "var(--shadow-lg)",
                   overflow: "hidden",
@@ -223,7 +223,7 @@ export function Navigation() {
                         style={{
                           fontSize: 13,
                           fontWeight: 600,
-                          color: isSelected ? rColor : "var(--text-primary, #18181b)",
+                          color: isSelected ? rColor : "var(--text-primary)",
                           marginBottom: 2,
                         }}
                       >
@@ -232,7 +232,7 @@ export function Navigation() {
                       <div
                         style={{
                           fontSize: 11,
-                          color: "var(--text-dim, #a1a1aa)",
+                          color: "var(--text-dim)",
                         }}
                       >
                         {rc.description}
@@ -259,13 +259,13 @@ export function Navigation() {
                     fontWeight: 500,
                     letterSpacing: "0.02em",
                     color: isActive
-                      ? "var(--text-primary, #18181b)"
-                      : "var(--text-secondary, #52525b)",
+                      ? "var(--text-primary)"
+                      : "var(--text-secondary)",
                     backgroundColor: isActive
-                      ? "var(--bg-elevated, #f4f4f5)"
+                      ? "var(--bg-elevated)"
                       : "transparent",
                     border: isActive
-                      ? "1px solid var(--border-subtle, #e4e4e7)"
+                      ? "1px solid var(--border-subtle)"
                       : "1px solid transparent",
                     textDecoration: "none",
                     transition: "all 0.15s",

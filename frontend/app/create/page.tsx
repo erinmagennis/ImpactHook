@@ -10,7 +10,7 @@ import {
 import { Navigation } from "../../components/Navigation";
 import { HOOK_ADDRESS, impactHookAbi } from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
-import { keccak256, encodePacked } from "viem";
+import { keccak256, encodeAbiParameters } from "viem";
 
 const POOL_MANAGER_ADDRESS = "0x00B036B58a818B1BC34d502D3fE730Db729e62AC" as const;
 const SQRT_PRICE_X96_1_1 = BigInt("79228162514264337593543950336");
@@ -146,8 +146,8 @@ export default function CreateProjectPage() {
   const poolId =
     isSuccess && currency0 && currency1
       ? keccak256(
-          encodePacked(
-            ["address", "address", "uint24", "int24", "address"],
+          encodeAbiParameters(
+            [{ type: "address" }, { type: "address" }, { type: "uint24" }, { type: "int24" }, { type: "address" }],
             [
               currency0 as `0x${string}`,
               currency1 as `0x${string}`,
