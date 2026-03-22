@@ -132,7 +132,7 @@ export default function LandingPage() {
             margin: "0 auto",
             padding: "140px 32px 120px",
             display: "flex",
-            alignItems: "flex-start",
+            alignItems: "center",
             gap: 80,
             flexWrap: "wrap",
           }}
@@ -242,7 +242,7 @@ export default function LandingPage() {
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "var(--text-dim)",
+                  color: "var(--text-secondary)",
                   textTransform: "uppercase" as const,
                   letterSpacing: "0.08em",
                   marginBottom: 24,
@@ -320,7 +320,7 @@ export default function LandingPage() {
                     }}
                   >
                     <div style={{ fontSize: 14, fontWeight: 700, color: "var(--success)" }}>Impact Project Funded</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Withdraw verified milestone earnings</div>
+                    <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>Withdraw verified milestone earnings</div>
                   </div>
                 </div>
               </div>
@@ -429,7 +429,7 @@ export default function LandingPage() {
                 barWidth: "40%",
               },
             ].map((step, i) => (
-              <div key={i} style={{ minWidth: 0 }}>
+              <div key={i} className="card" style={{ minWidth: 0, padding: 28 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                   <div className="step-number">{step.number}</div>
                   <h3
@@ -514,7 +514,7 @@ export default function LandingPage() {
                   <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>
                     Clean Water - Chiapas Schools
                   </div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Climate / WASH</div>
+                  <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Climate / WASH</div>
                 </div>
                 <span className="feature-tag">Live</span>
               </div>
@@ -540,7 +540,7 @@ export default function LandingPage() {
                     </div>
                     <span style={{ fontSize: 14, color: "var(--text-primary)" }}>{m.name}</span>
                   </div>
-                  <span className="font-data" style={{ fontSize: 12, color: "var(--text-dim)" }}>{m.fee}</span>
+                  <span className="font-data" style={{ fontSize: 12, color: "var(--text-secondary)" }}>{m.fee}</span>
                 </div>
               ))}
               <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: 6, background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
@@ -794,7 +794,7 @@ export default function LandingPage() {
           gap: 16,
         }}
       >
-        <div style={{ fontSize: 14, color: "var(--text-dim)" }}>
+        <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>
           Built for the UHI8 Hookathon. Deployed on Unichain Sepolia.
         </div>
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
@@ -866,7 +866,7 @@ function FlowNode({ label, sublabel, color, delay, small }: {
       <div style={{ fontSize: small ? 12 : 14, fontWeight: 600, color: color }}>
         {label}
       </div>
-      <div style={{ fontSize: small ? 10 : 11, color: "var(--text-dim)", marginTop: 2 }}>
+      <div style={{ fontSize: small ? 10 : 11, color: "var(--text-secondary)", marginTop: 2 }}>
         {sublabel}
       </div>
     </div>
