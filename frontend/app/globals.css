@@ -74,7 +74,7 @@ body {
    ======================================== */
 
 .card {
-  background: var(--bg-card);
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(26, 27, 36, 0.8) 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-sm);
@@ -83,16 +83,18 @@ body {
 
 .card:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 0 20px rgba(13, 148, 136, 0.03);
   border-color: #3f3f46;
 }
 
 .card-glow {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 0 30px rgba(13, 148, 136, 0.05);
+  border-color: rgba(13, 148, 136, 0.15);
 }
 
 .card-glow:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(13, 148, 136, 0.08);
+  border-color: rgba(13, 148, 136, 0.25);
 }
 
 /* Impact card (for featured sections) */
@@ -127,7 +129,7 @@ body {
 
 .cta-primary:hover {
   background: #0f766e;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.2);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3), 0 0 20px rgba(13, 148, 136, 0.15);
 }
 
 .cta-primary:active {
@@ -240,6 +242,7 @@ textarea::placeholder {
 .milestone-verified {
   background: var(--accent-bg);
   border: 1.5px solid var(--accent);
+  box-shadow: 0 0 8px rgba(13, 148, 136, 0.15);
 }
 
 .milestone-pending {
@@ -250,7 +253,8 @@ textarea::placeholder {
 .milestone-active {
   background: var(--accent-bg);
   border: 1.5px solid var(--accent-light);
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1), 0 0 12px rgba(13, 148, 136, 0.1);
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 
 /* ========================================

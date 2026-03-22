@@ -9,6 +9,7 @@ import {
 } from "wagmi";
 import { formatEther, parseEther, erc20Abi } from "viem";
 import { Navigation } from "../../components/Navigation";
+import { ProjectSelector } from "../../components/ProjectSelector";
 import {
   HOOK_ADDRESS,
   SWAP_ROUTER_ADDRESS,
@@ -181,19 +182,9 @@ export default function SwapPage() {
         </div>
 
         <div className="card" style={{ padding: 24 }}>
-          {/* Pool Key */}
+          {/* Project selector */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>POOL ID</label>
-            <input
-              type="text"
-              placeholder="0x..."
-              value={poolIdInput}
-              onChange={(e) => setPoolIdInput(e.target.value)}
-              style={inputStyle}
-            />
-            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.4 }}>
-              The pool ID from the project creation page or dashboard.
-            </div>
+            <ProjectSelector value={poolIdInput} onChange={setPoolIdInput} label="SELECT PROJECT" />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
@@ -258,9 +249,14 @@ export default function SwapPage() {
 
           {/* Direction toggle */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>DIRECTION</label>
+            <label style={labelStyle}>SWAP DIRECTION</label>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              {(["0to1", "1to0"] as const).map((d) => (
+              {(["0to1", "1to0"] as const).map((d) => {
+                const fromToken = d === "0to1" ? token0Input : token1Input;
+                const toToken = d === "0to1" ? token1Input : token0Input;
+                const fromLabel = fromToken ? `${fromToken.slice(0, 6)}...` : (d === "0to1" ? "Token 0" : "Token 1");
+                const toLabel = toToken ? `${toToken.slice(0, 6)}...` : (d === "0to1" ? "Token 1" : "Token 0");
+                return (
                 <button
                   key={d}
                   onClick={() => setDirection(d)}
@@ -285,9 +281,9 @@ export default function SwapPage() {
                     transition: "all 0.15s",
                   }}
                 >
-                  {d === "0to1" ? "Token0 \u2192 Token1" : "Token1 \u2192 Token0"}
+                  {`${fromLabel} \u2192 ${toLabel}`}
                 </button>
-              ))}
+              );})}
             </div>
           </div>
 
