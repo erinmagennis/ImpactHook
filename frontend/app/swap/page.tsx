@@ -1,15 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useReadContract } from "wagmi";
-import { formatEther } from "viem";
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { formatEther, parseEther, erc20Abi } from "viem";
 import { Navigation } from "../../components/Navigation";
-import { HOOK_ADDRESS, impactHookAbi } from "../../lib/contracts";
+import {
+  HOOK_ADDRESS,
+  SWAP_ROUTER_ADDRESS,
+  impactHookAbi,
+  impactSwapRouterAbi,
+} from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
 
 export default function SwapPage() {
   const { address, isConnected } = useAccount();
   const [poolIdInput, setPoolIdInput] = useState("");
+  const [token0Input, setToken0Input] = useState("");
+  const [token1Input, setToken1Input] = useState("");
+  const [feeInput, setFeeInput] = useState("500");
+  const [tickSpacingInput, setTickSpacingInput] = useState("10");
   const [amountInput, setAmountInput] = useState("");
   const [direction, setDirection] = useState<"0to1" | "1to0">("0to1");
 
@@ -45,6 +59,52 @@ export default function SwapPage() {
     chainId: unichainSepolia.id,
   });
 
+  // Token balances
+  const { data: token0Balance } = useReadContract({
+    address: (token0Input || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [address || "0x0000000000000000000000000000000000000000"],
+    chainId: unichainSepolia.id,
+    query: { enabled: !!token0Input && !!address },
+  });
+
+  const { data: token1Balance } = useReadContract({
+    address: (token1Input || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [address || "0x0000000000000000000000000000000000000000"],
+    chainId: unichainSepolia.id,
+    query: { enabled: !!token1Input && !!address },
+  });
+
+  // Approval state
+  const inputToken = direction === "0to1" ? token0Input : token1Input;
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    address: (inputToken || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: [
+      address || "0x0000000000000000000000000000000000000000",
+      SWAP_ROUTER_ADDRESS,
+    ],
+    chainId: unichainSepolia.id,
+    query: { enabled: !!inputToken && !!address },
+  });
+
+  const { writeContract: writeApprove, data: approveHash } = useWriteContract();
+  const { isLoading: approveLoading, isSuccess: approveSuccess } =
+    useWaitForTransactionReceipt({ hash: approveHash });
+
+  // Swap state
+  const { writeContract: writeSwap, data: swapHash } = useWriteContract();
+  const { isLoading: swapLoading, isSuccess: swapSuccess } =
+    useWaitForTransactionReceipt({ hash: swapHash });
+
+  if (approveSuccess) {
+    refetchAllowance();
+  }
+
   const feeBps = Number(currentFeeBps || 0);
   const discount = Number(loyaltyDiscount || 0);
   const effectiveFeeBps = feeBps - Math.floor((feeBps * discount) / 10000);
@@ -58,6 +118,45 @@ export default function SwapPage() {
   const globalContribution = contributorStats?.[1]
     ? formatEther(contributorStats[1] as bigint)
     : "0";
+
+  const needsApproval = inputToken && amount > 0 && allowance !== undefined
+    && (allowance as bigint) < parseEther(amountInput || "0");
+
+  const canSwap = isConnected && registered && token0Input && token1Input
+    && amount > 0 && !needsApproval && !swapLoading;
+
+  const handleApprove = () => {
+    if (!inputToken) return;
+    writeApprove({
+      address: inputToken as `0x${string}`,
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [SWAP_ROUTER_ADDRESS, parseEther("1000000")],
+      chainId: unichainSepolia.id,
+    });
+  };
+
+  const handleSwap = () => {
+    if (!token0Input || !token1Input) return;
+    writeSwap({
+      address: SWAP_ROUTER_ADDRESS,
+      abi: impactSwapRouterAbi,
+      functionName: "swap",
+      args: [
+        {
+          currency0: token0Input as `0x${string}`,
+          currency1: token1Input as `0x${string}`,
+          fee: parseInt(feeInput),
+          tickSpacing: parseInt(tickSpacingInput),
+          hooks: HOOK_ADDRESS,
+        },
+        direction === "0to1",
+        parseEther(amountInput || "0"),
+        BigInt(0), // minAmountOut = 0 for demo (no slippage protection)
+      ],
+      chainId: unichainSepolia.id,
+    });
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -82,16 +181,70 @@ export default function SwapPage() {
         </div>
 
         <div className="card" style={{ padding: 24 }}>
-          {/* Pool ID */}
+          {/* Pool Key */}
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>POOL ID</label>
             <input
               type="text"
-              placeholder="0x6bc91b5e91380a168a3d85fd1ea27b250b10b40390b9da68bb07ebfd4f95f205"
+              placeholder="0x..."
               value={poolIdInput}
               onChange={(e) => setPoolIdInput(e.target.value)}
               style={inputStyle}
             />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+            <div>
+              <label style={labelStyle}>TOKEN 0</label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={token0Input}
+                onChange={(e) => setToken0Input(e.target.value)}
+                style={inputStyle}
+              />
+              {token0Input && address && token0Balance !== undefined && (
+                <div style={balanceStyle}>
+                  Balance: {parseFloat(formatEther(token0Balance as bigint)).toFixed(2)}
+                </div>
+              )}
+            </div>
+            <div>
+              <label style={labelStyle}>TOKEN 1</label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={token1Input}
+                onChange={(e) => setToken1Input(e.target.value)}
+                style={inputStyle}
+              />
+              {token1Input && address && token1Balance !== undefined && (
+                <div style={balanceStyle}>
+                  Balance: {parseFloat(formatEther(token1Balance as bigint)).toFixed(2)}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+            <div>
+              <label style={labelStyle}>FEE</label>
+              <input
+                type="text"
+                value={feeInput}
+                onChange={(e) => setFeeInput(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>TICK SPACING</label>
+              <input
+                type="text"
+                value={tickSpacingInput}
+                onChange={(e) => setTickSpacingInput(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
           </div>
 
           {/* Direction toggle */}
@@ -158,24 +311,17 @@ export default function SwapPage() {
               >
                 Fee Breakdown
               </div>
-              <div
-                style={{ display: "grid", gap: 8 }}
-              >
+              <div style={{ display: "grid", gap: 8 }}>
                 <div style={feeRowStyle}>
                   <span style={{ color: "var(--text-dim)" }}>Impact fee rate</span>
                   <span className="font-data" style={{ color: "var(--text-secondary)" }}>
-                    {feeBps} bps ({(feeBps / 100).toFixed(2)}%)
+                    {(feeBps / 100).toFixed(2)}%
                   </span>
                 </div>
                 {discount > 0 && (
                   <div style={feeRowStyle}>
-                    <span style={{ color: "var(--text-dim)" }}>
-                      Loyalty discount
-                    </span>
-                    <span
-                      className="font-data"
-                      style={{ color: "var(--success)" }}
-                    >
+                    <span style={{ color: "var(--text-dim)" }}>Loyalty discount</span>
+                    <span className="font-data" style={{ color: "var(--success)" }}>
                       -{discount / 100}%
                     </span>
                   </div>
@@ -183,31 +329,19 @@ export default function SwapPage() {
                 <div style={feeRowStyle}>
                   <span style={{ color: "var(--text-dim)" }}>Effective fee</span>
                   <span className="font-data" style={{ color: "var(--text-secondary)" }}>
-                    {effectiveFeeBps} bps ({(effectiveFeeBps / 100).toFixed(2)}%)
+                    {(effectiveFeeBps / 100).toFixed(2)}%
                   </span>
                 </div>
-                <div
-                  style={{
-                    height: 1,
-                    background: "var(--border-subtle)",
-                    margin: "4px 0",
-                  }}
-                />
+                <div style={{ height: 1, background: "var(--border-subtle)", margin: "4px 0" }} />
                 <div style={feeRowStyle}>
                   <span style={{ color: "var(--text-dim)" }}>Impact contribution</span>
-                  <span
-                    className="font-data"
-                    style={{ color: "var(--success)", fontWeight: 700 }}
-                  >
+                  <span className="font-data" style={{ color: "var(--success)", fontWeight: 700 }}>
                     {estimatedFee.toFixed(6)}
                   </span>
                 </div>
                 <div style={feeRowStyle}>
                   <span style={{ color: "var(--text-dim)" }}>Estimated output</span>
-                  <span
-                    className="font-data"
-                    style={{ color: "var(--text-primary)", fontWeight: 700 }}
-                  >
+                  <span className="font-data" style={{ color: "var(--text-primary)", fontWeight: 700 }}>
                     ~{estimatedOutput.toFixed(6)}
                   </span>
                 </div>
@@ -217,37 +351,24 @@ export default function SwapPage() {
 
           {/* Pool info */}
           {registered && poolIdInput && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 12,
-                marginBottom: 20,
-              }}
-            >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
               <div style={infoBoxStyle}>
                 <div style={infoLabelStyle}>Current Fee</div>
-                <div
-                  className="font-data"
-                  style={{ fontSize: 13, color: "var(--text-secondary)" }}
-                >
-                  {feeBps} bps
+                <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                  {(feeBps / 100).toFixed(2)}%
                 </div>
               </div>
               <div style={infoBoxStyle}>
                 <div style={infoLabelStyle}>Milestones</div>
-                <div
-                  className="font-data"
-                  style={{ fontSize: 13, color: "var(--text-secondary)" }}
-                >
+                <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
                   {currentMilestone?.toString()}/{milestoneCount?.toString()}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Impact stats */}
-          {registered && poolIdInput && isConnected && (
+          {/* Impact stats - dynamic */}
+          {registered && poolIdInput && (
             <div
               style={{
                 padding: 16,
@@ -266,301 +387,138 @@ export default function SwapPage() {
                   marginBottom: 10,
                 }}
               >
-                Your Impact
+                Impact
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                }}
-              >
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
                 <div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 2 }}>
-                    This pool
-                  </div>
-                  <div
-                    className="font-data"
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--success)",
-                    }}
-                  >
-                    {poolContribution}
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 2 }}>This swap</div>
+                  <div className="font-data" style={{ fontSize: 16, fontWeight: 700, color: amount > 0 && estimatedFee > 0 ? "var(--success)" : "var(--text-dim)" }}>
+                    {amount > 0 ? estimatedFee.toFixed(4) : "0"}
                   </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 2 }}>
-                    All pools
-                  </div>
-                  <div
-                    className="font-data"
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--success)",
-                    }}
-                  >
-                    {globalContribution}
-                  </div>
-                </div>
+                {isConnected && (
+                  <>
+                    <div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 2 }}>This pool (total)</div>
+                      <div className="font-data" style={{ fontSize: 16, fontWeight: 700, color: "var(--success)" }}>
+                        {(Number(poolContribution) + estimatedFee).toFixed(4)}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 2 }}>All pools</div>
+                      <div className="font-data" style={{ fontSize: 16, fontWeight: 700, color: "var(--success)" }}>
+                        {(Number(globalContribution) + estimatedFee).toFixed(4)}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
 
+          {/* Approve button (if needed) */}
+          {needsApproval && (
+            <button
+              onClick={handleApprove}
+              disabled={approveLoading}
+              style={{
+                width: "100%",
+                padding: "12px 20px",
+                borderRadius: 6,
+                border: "1px solid var(--warning)",
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                cursor: approveLoading ? "not-allowed" : "pointer",
+                background: "rgba(245,158,11,0.08)",
+                color: "var(--warning)",
+                fontFamily: "inherit",
+                marginBottom: 8,
+              }}
+            >
+              {approveLoading ? "Approving..." : "Approve Token"}
+            </button>
+          )}
+
           {/* Swap button */}
           <button
-            disabled
+            onClick={handleSwap}
+            disabled={!canSwap}
             style={{
               width: "100%",
               padding: "12px 20px",
               borderRadius: 6,
-              border: "1px solid var(--border-subtle)",
+              border: canSwap
+                ? "1px solid var(--accent)"
+                : "1px solid var(--border-subtle)",
               fontSize: 13,
               fontWeight: 600,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              cursor: "not-allowed",
-              background: "var(--bg-elevated)",
-              color: "var(--text-dim)",
+              cursor: canSwap ? "pointer" : "not-allowed",
+              background: canSwap ? "var(--accent)" : "var(--bg-elevated)",
+              color: canSwap ? "#ffffff" : "var(--text-dim)",
               transition: "all 0.2s",
               fontFamily: "inherit",
             }}
           >
             {!isConnected
               ? "Connect wallet"
-              : "Swap (requires deployed router)"}
+              : swapLoading
+              ? "Swapping..."
+              : needsApproval
+              ? "Approve first"
+              : !registered
+              ? "No project registered"
+              : amount <= 0
+              ? "Enter amount"
+              : `Swap ${amountInput}`}
           </button>
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 11,
-              color: "var(--text-dim)",
-              textAlign: "center",
-            }}
-          >
-            Swaps execute through Uniswap v4 PoolManager. Pool initialization
-            and a swap router are required for live swaps.
-          </div>
-        </div>
 
-        {/* Demo preview */}
-        {!poolIdInput && (
-          <div
-            className="animate-fade-up delay-200"
-            style={{ marginTop: 24, position: "relative" }}
-          >
+          {/* Tx status */}
+          {swapSuccess && (
             <div
               style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                padding: "3px 8px",
+                marginTop: 12,
+                padding: "10px 14px",
                 borderRadius: 6,
-                fontSize: 10,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                background: "rgba(124,58,237,0.08)",
-                color: "#7c3aed",
-                border: "1px solid rgba(124,58,237,0.15)",
-                zIndex: 1,
+                background: "rgba(16,185,129,0.06)",
+                border: "1px solid rgba(16,185,129,0.12)",
+                color: "var(--success)",
+                fontSize: 13,
+                textAlign: "center",
               }}
             >
-              Preview
+              Swap successful!{" "}
+              <a
+                href={`https://unichain-sepolia.blockscout.com/tx/${swapHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#7c3aed", textDecoration: "underline" }}
+              >
+                View transaction
+              </a>
             </div>
-            <div className="card" style={{ padding: 24 }}>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-dim)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  marginBottom: 16,
-                }}
-              >
-                Example: Swap 1.0 ETH in Clean Water pool
-              </div>
+          )}
 
-              <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "var(--accent)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.12em",
-                    marginBottom: 12,
-                  }}
-                >
-                  Fee Breakdown
-                </div>
-                <div style={{ display: "grid", gap: 8 }}>
-                  <div style={feeRowStyle}>
-                    <span style={{ color: "var(--text-dim)" }}>Impact fee rate</span>
-                    <span className="font-data" style={{ color: "var(--text-secondary)" }}>
-                      300 bps (3.00%)
-                    </span>
-                  </div>
-                  <div style={feeRowStyle}>
-                    <span style={{ color: "var(--text-dim)" }}>Loyalty discount</span>
-                    <span
-                      className="font-data"
-                      style={{ color: "var(--success)" }}
-                    >
-                      -10% (repeat contributor)
-                    </span>
-                  </div>
-                  <div style={feeRowStyle}>
-                    <span style={{ color: "var(--text-dim)" }}>Effective fee</span>
-                    <span className="font-data" style={{ color: "var(--text-secondary)" }}>
-                      270 bps (2.70%)
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      height: 1,
-                      background: "var(--border-subtle)",
-                      margin: "4px 0",
-                    }}
-                  />
-                  <div style={feeRowStyle}>
-                    <span style={{ color: "var(--text-dim)" }}>
-                      Impact contribution
-                    </span>
-                    <span
-                      className="font-data"
-                      style={{
-                        color: "var(--success)",
-                        fontWeight: 700,
-                      }}
-                    >
-                      0.027000
-                    </span>
-                  </div>
-                  <div style={feeRowStyle}>
-                    <span style={{ color: "var(--text-dim)" }}>Estimated output</span>
-                    <span
-                      className="font-data"
-                      style={{ color: "var(--text-primary)", fontWeight: 700 }}
-                    >
-                      ~0.973000
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: 16,
-                  borderRadius: 8,
-                  background: "var(--accent-bg)",
-                  border: "1px solid rgba(13,148,136,0.08)",
-                  marginBottom: 16,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "var(--accent)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.12em",
-                    marginBottom: 8,
-                  }}
-                >
-                  Your Impact
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 12,
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--text-dim)",
-                        marginBottom: 2,
-                      }}
-                    >
-                      This pool
-                    </div>
-                    <div
-                      className="font-data"
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "var(--success)",
-                      }}
-                    >
-                      0.847
-                    </div>
-                  </div>
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--text-dim)",
-                        marginBottom: 2,
-                      }}
-                    >
-                      All pools
-                    </div>
-                    <div
-                      className="font-data"
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "var(--success)",
-                      }}
-                    >
-                      2.134
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                disabled
-                style={{
-                  width: "100%",
-                  padding: "12px 20px",
-                  borderRadius: 6,
-                  border: "1px solid rgba(124,58,237,0.3)",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  cursor: "not-allowed",
-                  background: "rgba(124,58,237,0.08)",
-                  color: "var(--text-primary)",
-                  fontFamily: "inherit",
-                  opacity: 0.6,
-                }}
-              >
-                Swap 1.0 ETH
-              </button>
-              <div
-                style={{
-                  marginTop: 12,
-                  padding: "10px 14px",
-                  borderRadius: 8,
-                  background: "var(--accent-bg)",
-                  border: "1px solid rgba(13,148,136,0.08)",
-                  fontSize: 12,
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.5,
-                }}
-              >
-                Enter a Pool ID above to see live fee calculations. The impact
-                fee is charged on swap output via afterSwapReturnDelta. LP yield
-                is unaffected.
-              </div>
+          {approveSuccess && !swapSuccess && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: "10px 14px",
+                borderRadius: 6,
+                background: "rgba(16,185,129,0.06)",
+                border: "1px solid rgba(16,185,129,0.12)",
+                color: "var(--success)",
+                fontSize: 12,
+                textAlign: "center",
+              }}
+            >
+              Token approved. Click Swap to proceed.
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
@@ -607,4 +565,11 @@ const infoLabelStyle: React.CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: "0.08em",
   marginBottom: 4,
+};
+
+const balanceStyle: React.CSSProperties = {
+  fontSize: 11,
+  color: "var(--text-dim)",
+  marginTop: 4,
+  fontFamily: "inherit",
 };

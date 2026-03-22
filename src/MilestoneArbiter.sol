@@ -40,7 +40,7 @@ contract MilestoneArbiter is IArbiter {
     }
 
     constructor(address _hook) {
-        hook = ImpactHook(_hook);
+        hook = ImpactHook(payable(_hook));
     }
 
     /// @notice Check if the milestone condition is met for an escrowed obligation.

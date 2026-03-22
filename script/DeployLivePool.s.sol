@@ -78,7 +78,7 @@ contract DeployLivePoolScript is Script {
         fees[2] = 200;
         fees[3] = 300;
 
-        ImpactHook(HOOK).registerProject(key, msg.sender, msg.sender, "Clean Water - Chiapas Schools", "Climate", descriptions, fees);
+        ImpactHook(payable(HOOK)).registerProject(key, msg.sender, msg.sender, "Clean Water - Chiapas Schools", "Climate", descriptions, fees);
 
         console.log("Pool ID:");
         console.logBytes32(PoolId.unwrap(poolId));
@@ -106,13 +106,13 @@ contract DeployLivePoolScript is Script {
         console.log("Liquidity added: 100 ETH equivalent");
 
         // 8. Verify milestones 0-1 so fees activate (leave 2-3 for live demo)
-        ImpactHook(HOOK).verifyMilestone(key, 0);
-        ImpactHook(HOOK).verifyMilestone(key, 1);
+        ImpactHook(payable(HOOK)).verifyMilestone(key, 0);
+        ImpactHook(payable(HOOK)).verifyMilestone(key, 1);
         console.log("Milestones 0-1 verified, fee at 100 bps (1%)");
         console.log("Milestones 2-3 left unverified for live demo");
 
         // 9. Set LP skim at 10% so both funding models are active
-        ImpactHook(HOOK).setLpSkimBps(poolId, 1000);
+        ImpactHook(payable(HOOK)).setLpSkimBps(poolId, 1000);
         console.log("LP skim set at 1000 bps (10% of LP fees)");
 
         console.log("");

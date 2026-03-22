@@ -7,20 +7,47 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { formatEther, formatUnits } from "viem";
+import { formatEther, encodeAbiParameters, keccak256 } from "viem";
 import { Navigation } from "../../components/Navigation";
 import { HOOK_ADDRESS, impactHookAbi } from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
 
 export default function WithdrawPage() {
   const { address, isConnected } = useAccount();
-  const [poolIdInput, setPoolIdInput] = useState("");
-  const [currencyInput, setCurrencyInput] = useState("");
+  const [token0Input, setToken0Input] = useState("");
+  const [token1Input, setToken1Input] = useState("");
+  const [feeInput, setFeeInput] = useState("3000");
+  const [tickSpacingInput, setTickSpacingInput] = useState("60");
 
-  const poolId = (poolIdInput ||
-    "0x0000000000000000000000000000000000000000000000000000000000000000") as `0x${string}`;
-  const currency = (currencyInput ||
-    "0x0000000000000000000000000000000000000000") as `0x${string}`;
+  // Compute pool ID from pool key components
+  const hasPoolKey = token0Input.startsWith("0x") && token1Input.startsWith("0x");
+  const poolKey = {
+    currency0: (token0Input || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    currency1: (token1Input || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    fee: parseInt(feeInput) || 0,
+    tickSpacing: parseInt(tickSpacingInput) || 0,
+    hooks: HOOK_ADDRESS,
+  };
+
+  const poolId = hasPoolKey
+    ? keccak256(
+        encodeAbiParameters(
+          [
+            {
+              type: "tuple",
+              components: [
+                { name: "currency0", type: "address" },
+                { name: "currency1", type: "address" },
+                { name: "fee", type: "uint24" },
+                { name: "tickSpacing", type: "int24" },
+                { name: "hooks", type: "address" },
+              ],
+            },
+          ],
+          [poolKey]
+        )
+      )
+    : ("0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`);
 
   const { data: projectInfo } = useReadContract({
     address: HOOK_ADDRESS,
@@ -32,15 +59,28 @@ export default function WithdrawPage() {
 
   const registered = projectInfo?.[5];
   const recipient = projectInfo?.[0];
+  const currentFeeBps = projectInfo?.[4];
   const isRecipient =
     isConnected && address?.toLowerCase() === recipient?.toLowerCase();
 
-  const { data: fees } = useReadContract({
+  // Read accumulated fees for token0
+  const { data: fees0 } = useReadContract({
     address: HOOK_ADDRESS,
     abi: impactHookAbi,
     functionName: "accumulatedFees",
-    args: [poolId, currency],
+    args: [poolId, poolKey.currency0],
     chainId: unichainSepolia.id,
+    query: { enabled: hasPoolKey },
+  });
+
+  // Read accumulated fees for token1
+  const { data: fees1 } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "accumulatedFees",
+    args: [poolId, poolKey.currency1],
+    chainId: unichainSepolia.id,
+    query: { enabled: hasPoolKey },
   });
 
   const { writeContract, data: txHash } = useWriteContract();
@@ -48,7 +88,7 @@ export default function WithdrawPage() {
     hash: txHash,
   });
 
-  const handleWithdraw = () => {
+  const handleWithdraw = (currency: `0x${string}`) => {
     writeContract({
       address: HOOK_ADDRESS,
       abi: impactHookAbi,
@@ -58,10 +98,21 @@ export default function WithdrawPage() {
     });
   };
 
-  const feeAmount = fees ? formatEther(fees as bigint) : "0";
-  const hasFees = fees && (fees as bigint) > BigInt(0);
+  const feeAmount0 = fees0 ? formatEther(fees0 as bigint) : "0";
+  const feeAmount1 = fees1 ? formatEther(fees1 as bigint) : "0";
+  const hasFees0 = fees0 && (fees0 as bigint) > BigInt(0);
+  const hasFees1 = fees1 && (fees1 as bigint) > BigInt(0);
 
-  const isEnabled = hasFees && isRecipient && !isLoading;
+  const getButtonLabel = (hasFees: boolean, amount: string) => {
+    if (isLoading) return "Withdrawing...";
+    if (!isConnected) return "Connect wallet";
+    if (!registered) return "No project found";
+    if (!isRecipient) return "Only recipient can withdraw";
+    if (!hasFees) return "No fees to withdraw";
+    return `Withdraw ${amount}`;
+  };
+
+  const getButtonEnabled = (hasFees: boolean) => hasFees && isRecipient && !isLoading;
 
   return (
     <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -85,108 +136,199 @@ export default function WithdrawPage() {
         </div>
 
         <div className="card" style={{ padding: 24 }}>
-          {/* Pool ID */}
+          {/* Pool Key inputs */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>POOL ID</label>
+            <label style={labelStyle}>TOKEN 0 (CURRENCY0)</label>
             <input
               type="text"
-              placeholder="0x6bc91b5e91380a168a3d85fd1ea27b250b10b40390b9da68bb07ebfd4f95f205"
-              value={poolIdInput}
-              onChange={(e) => setPoolIdInput(e.target.value)}
+              placeholder="0x..."
+              value={token0Input}
+              onChange={(e) => setToken0Input(e.target.value)}
               style={inputStyle}
             />
           </div>
-
-          {/* Currency address */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}>CURRENCY (TOKEN ADDRESS)</label>
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>TOKEN 1 (CURRENCY1)</label>
             <input
               type="text"
-              placeholder="0x... (use 0x0 for native ETH)"
-              value={currencyInput}
-              onChange={(e) => setCurrencyInput(e.target.value)}
+              placeholder="0x..."
+              value={token1Input}
+              onChange={(e) => setToken1Input(e.target.value)}
               style={inputStyle}
             />
           </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+            <div>
+              <label style={labelStyle}>FEE (BPS)</label>
+              <input
+                type="text"
+                value={feeInput}
+                onChange={(e) => setFeeInput(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>TICK SPACING</label>
+              <input
+                type="text"
+                value={tickSpacingInput}
+                onChange={(e) => setTickSpacingInput(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+          </div>
 
-          {/* Fee display */}
-          {registered && poolIdInput && (
-            <div className="card" style={{ padding: 16, marginBottom: 20 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--text-dim)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.12em",
-                  marginBottom: 8,
-                }}
-              >
-                Accumulated Fees
-              </div>
-              <div
-                className="font-data"
-                style={{
-                  fontSize: 28,
-                  fontWeight: 700,
-                  color: hasFees
-                    ? "var(--success)"
-                    : "var(--text-dim)",
-                }}
-              >
-                {feeAmount}
-              </div>
-              {recipient && (
+          {hasPoolKey && (
+            <div style={{ fontSize: 12, color: 'var(--text-dim)', wordBreak: 'break-all', marginBottom: 16 }}>
+              <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 6 }}>Pool ID:</span>
+              <span className="font-data" style={{ color: 'var(--text-secondary)' }}>{poolId}</span>
+            </div>
+          )}
+
+          {registered && currentFeeBps !== undefined && (
+            <div style={{ marginBottom: 16, fontSize: 12, color: 'var(--text-dim)' }}>
+              <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 6 }}>Current Fee:</span>
+              <span className="font-data" style={{ color: 'var(--accent)' }}>{(Number(currentFeeBps) / 100).toFixed(2)}%</span>
+            </div>
+          )}
+
+          {/* Fee display for both tokens */}
+          {registered && hasPoolKey && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+              <div className="card" style={{ padding: 16 }}>
                 <div
                   style={{
                     fontSize: 11,
                     color: "var(--text-dim)",
-                    marginTop: 8,
-                    letterSpacing: "0.12em",
                     textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    marginBottom: 8,
                   }}
                 >
-                  Recipient: {recipient.slice(0, 8)}...{recipient.slice(-6)}
+                  Token 0 Fees
                 </div>
-              )}
+                <div
+                  className="font-data"
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: hasFees0 ? "var(--success)" : "var(--text-dim)",
+                    marginBottom: 12,
+                  }}
+                >
+                  {feeAmount0}
+                </div>
+                <button
+                  onClick={() => handleWithdraw(poolKey.currency0)}
+                  disabled={!getButtonEnabled(!!hasFees0)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    border: getButtonEnabled(!!hasFees0)
+                      ? "1px solid var(--accent)"
+                      : "1px solid var(--border-subtle)",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    cursor: getButtonEnabled(!!hasFees0) ? "pointer" : "not-allowed",
+                    background: getButtonEnabled(!!hasFees0) ? "var(--accent)" : "var(--bg-elevated)",
+                    color: getButtonEnabled(!!hasFees0) ? "#ffffff" : "var(--text-dim)",
+                    transition: "all 0.2s",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {getButtonLabel(!!hasFees0, feeAmount0)}
+                </button>
+              </div>
+              <div className="card" style={{ padding: 16 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "var(--text-dim)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    marginBottom: 8,
+                  }}
+                >
+                  Token 1 Fees
+                </div>
+                <div
+                  className="font-data"
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: hasFees1 ? "var(--success)" : "var(--text-dim)",
+                    marginBottom: 12,
+                  }}
+                >
+                  {feeAmount1}
+                </div>
+                <button
+                  onClick={() => handleWithdraw(poolKey.currency1)}
+                  disabled={!getButtonEnabled(!!hasFees1)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    border: getButtonEnabled(!!hasFees1)
+                      ? "1px solid var(--accent)"
+                      : "1px solid var(--border-subtle)",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    cursor: getButtonEnabled(!!hasFees1) ? "pointer" : "not-allowed",
+                    background: getButtonEnabled(!!hasFees1) ? "var(--accent)" : "var(--bg-elevated)",
+                    color: getButtonEnabled(!!hasFees1) ? "#ffffff" : "var(--text-dim)",
+                    transition: "all 0.2s",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {getButtonLabel(!!hasFees1, feeAmount1)}
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Withdraw button */}
-          <button
-            onClick={handleWithdraw}
-            disabled={!hasFees || !isRecipient || isLoading}
-            style={{
-              width: "100%",
-              padding: "12px 20px",
-              borderRadius: 6,
-              border: isEnabled
-                ? "1px solid var(--accent)"
-                : "1px solid var(--border-subtle)",
-              fontSize: 13,
-              fontWeight: 600,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              cursor: isEnabled ? "pointer" : "not-allowed",
-              background: isEnabled
-                ? "var(--accent)"
-                : "var(--bg-elevated)",
-              color: isEnabled ? "#ffffff" : "var(--text-dim)",
-              transition: "all 0.2s",
-              fontFamily: "inherit",
-            }}
-          >
-            {isLoading
-              ? "Withdrawing..."
-              : !isConnected
-                ? "Connect wallet"
-                : !registered
-                  ? "No project found"
-                  : !isRecipient
-                    ? "Only recipient can withdraw"
-                    : !hasFees
-                      ? "No fees to withdraw"
-                      : `Withdraw ${feeAmount}`}
-          </button>
+          {registered && hasPoolKey && recipient && (
+            <div
+              style={{
+                fontSize: 11,
+                color: "var(--text-dim)",
+                marginBottom: 16,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
+              Recipient: {recipient.slice(0, 8)}...{recipient.slice(-6)}
+            </div>
+          )}
+
+          {/* Fallback button when no pool key entered */}
+          {!hasPoolKey && (
+            <button
+              disabled
+              style={{
+                width: "100%",
+                padding: "12px 20px",
+                borderRadius: 6,
+                border: "1px solid var(--border-subtle)",
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                cursor: "not-allowed",
+                background: "var(--bg-elevated)",
+                color: "var(--text-dim)",
+                transition: "all 0.2s",
+                fontFamily: "inherit",
+              }}
+            >
+              Enter pool key to view fees
+            </button>
+          )}
 
           {isSuccess && (
             <div
@@ -214,8 +356,8 @@ export default function WithdrawPage() {
           )}
         </div>
 
-        {/* Demo preview when no pool entered */}
-        {!poolIdInput && (
+        {/* Demo preview when no pool key entered */}
+        {!hasPoolKey && (
           <div className="animate-fade-up delay-200" style={{ marginTop: 24, position: "relative" }}>
             <div
               style={{
@@ -242,11 +384,11 @@ export default function WithdrawPage() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
                 <div style={{ padding: 16, borderRadius: 8, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (ETH)</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (Token 0)</div>
                   <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--success)" }}>0.284</div>
                 </div>
                 <div style={{ padding: 16, borderRadius: 8, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (USDC)</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Accumulated (Token 1)</div>
                   <div className="font-data" style={{ fontSize: 24, fontWeight: 700, color: "var(--success)" }}>412.50</div>
                 </div>
               </div>
@@ -257,7 +399,7 @@ export default function WithdrawPage() {
                 </div>
                 <div style={{ flex: 1, padding: 12, borderRadius: 8, background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Current Fee</div>
-                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>200 bps</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>3%</div>
                 </div>
               </div>
               <button
@@ -278,7 +420,7 @@ export default function WithdrawPage() {
                   opacity: 0.6,
                 }}
               >
-                Withdraw 0.284 ETH
+                Withdraw 0.284
               </button>
               <div
                 style={{
@@ -292,7 +434,7 @@ export default function WithdrawPage() {
                   lineHeight: 1.5,
                 }}
               >
-                Enter a Pool ID and currency above to view real accumulated fees and withdraw.
+                Enter your pool key above to view accumulated fees for both tokens and withdraw.
               </div>
             </div>
           </div>

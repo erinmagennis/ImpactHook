@@ -39,7 +39,7 @@ contract DemoSwapScript is Script {
         PoolId poolId = key.toId();
 
         // Show state before swap
-        uint256 feesBefore = ImpactHook(HOOK).accumulatedFees(poolId, Currency.wrap(token1));
+        uint256 feesBefore = ImpactHook(payable(HOOK)).accumulatedFees(poolId, Currency.wrap(token1));
         console.log("Fees before swap:", feesBefore);
 
         vm.startBroadcast();
@@ -62,7 +62,7 @@ contract DemoSwapScript is Script {
         vm.stopBroadcast();
 
         // Show state after swap
-        uint256 feesAfter = ImpactHook(HOOK).accumulatedFees(poolId, Currency.wrap(token1));
+        uint256 feesAfter = ImpactHook(payable(HOOK)).accumulatedFees(poolId, Currency.wrap(token1));
         console.log("Fees after swap:", feesAfter);
         console.log("Fee collected this swap:", feesAfter - feesBefore);
     }

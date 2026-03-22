@@ -39,7 +39,7 @@ export default function TechnicalPage() {
           </h1>
           <p className="text-[14px] leading-relaxed max-w-2xl" style={{ color: 'var(--text-secondary)' }}>
             A Uniswap v4 hook creating asset-class specific liquidity via milestone-gated
-            fee routing. Seven hook callbacks, five funding channels, four contracts across three chains.
+            fee routing. Seven hook callbacks, five funding channels, five contracts across three chains.
           </p>
         </div>
 
@@ -66,7 +66,7 @@ export default function TechnicalPage() {
             role="Reactive RSC"
             description="Subscribes to origin chain events, emits cross-chain callbacks to ImpactHook"
             chain="Reactive Lasna"
-            address="0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc"
+            address="0x1af58d1A851Ab874776329b11838C6C37C81Ce62"
             accent="emerald"
           />
           <ContractCard
@@ -76,6 +76,14 @@ export default function TechnicalPage() {
             chain="Ethereum Sepolia"
             address="0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc"
             accent="amber"
+          />
+          <ContractCard
+            name="ImpactSwapRouter.sol"
+            role="Swap Router"
+            description="Simple swap interface with slippage protection. Handles afterSwapReturnDelta internally."
+            chain="Unichain Sepolia"
+            address="0x66452162B01442d92fc77d607EE2Cff3e76043c2"
+            accent="cyan"
           />
         </div>
 
@@ -209,7 +217,7 @@ function afterAddLiquidity(
                 standard LP fee via <span className="font-data" style={{ color: 'var(--accent)' }}>afterSwapReturnDelta</span>.
                 LP yield is completely unaffected. Fee rate is determined by the current verified
                 milestone&apos;s <span className="font-data" style={{ color: 'var(--accent)' }}>projectFeeBps</span>.
-                Maximum capped at 500 bps (5%).
+                Maximum capped at 5%.
               </p>
             </div>
             <div className="card p-5">
@@ -241,7 +249,7 @@ function afterAddLiquidity(
                             {m.name}
                           </span>
                           <span className="font-data text-[12px]" style={{ color: m.verified ? 'var(--text-secondary)' : 'var(--text-dim)' }}>
-                            {m.feeBps} bps
+                            {m.feeBps / 100}%
                           </span>
                         </div>
                       </div>
@@ -445,7 +453,7 @@ function afterAddLiquidity(
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Contracts" value="4" />
+            <StatCard label="Contracts" value="5" />
             <StatCard label="Chains" value="3" />
             <StatCard label="Hook Callbacks" value="7" />
             <StatCard label="Funding Channels" value="5" />
@@ -474,7 +482,8 @@ function afterAddLiquidity(
                   { name: "ImpactHook", chain: "Unichain Sepolia", address: "0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557" },
                   { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094" },
                   { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" },
-                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" },
+                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x1af58d1A851Ab874776329b11838C6C37C81Ce62" },
+                  { name: "ImpactSwapRouter", chain: "Unichain Sepolia", address: "0x66452162B01442d92fc77d607EE2Cff3e76043c2" },
                 ].map((c) => (
                   <tr key={c.name} style={{ borderTop: '1px solid var(--border-subtle)' }}>
                     <td className="py-3 text-[13px]" style={{ color: 'var(--text-primary)' }}>{c.name}</td>

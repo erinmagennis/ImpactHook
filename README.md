@@ -77,6 +77,7 @@ Each pool has a `Project` config with:
 | `MilestoneArbiter.sol` | Alkahest IArbiter - gates escrow release on milestone verification |
 | `MilestoneReactor.sol` | Reactive Network RSC - subscribes to origin chain events, emits cross-chain callbacks |
 | `MilestoneOracle.sol` | Origin chain event emitter - milestone submissions trigger the cross-chain flow |
+| `ImpactSwapRouter.sol` | Simple swap router for impact pools. Users approve once, then swap with slippage protection. Handles afterSwapReturnDelta (hook fees) internally. |
 
 ### Multiple Funding Channels, One Source of Truth
 
@@ -231,7 +232,8 @@ The deployment script mines a CREATE2 salt to produce a hook address with the co
 | ImpactHook | Unichain Sepolia | `0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557` |
 | MilestoneArbiter | Unichain Sepolia | `0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094` |
 | MilestoneOracle | Ethereum Sepolia | `0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc` |
-| MilestoneReactor | Reactive Lasna | `0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc` |
+| MilestoneReactor | Reactive Lasna | `0x1af58d1A851Ab874776329b11838C6C37C81Ce62` |
+| ImpactSwapRouter | Unichain Sepolia | `0x66452162B01442d92fc77d607EE2Cff3e76043c2` |
 
 EAS Schema UID: `0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bfb52`
 

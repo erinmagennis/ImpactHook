@@ -7,7 +7,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { encodePacked, encodeAbiParameters, keccak256 } from "viem";
+import { encodeAbiParameters, keccak256 } from "viem";
 import { Navigation } from "../../components/Navigation";
 import {
   HOOK_ADDRESS,
@@ -18,21 +18,20 @@ import {
 } from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
 
-// Placeholder - in production this comes from pool registration
-const DEMO_POOL_KEY = {
-  currency0: "0x0000000000000000000000000000000000000000" as const,
-  currency1: "0x0000000000000000000000000000000000000000" as const,
-  fee: 3000,
-  tickSpacing: 60,
-  hooks: HOOK_ADDRESS,
-};
-
 function MilestoneCard({
   poolId,
+  poolKey,
   index,
   isVerifier,
 }: {
   poolId: `0x${string}`;
+  poolKey: {
+    currency0: `0x${string}`;
+    currency1: `0x${string}`;
+    fee: number;
+    tickSpacing: number;
+    hooks: `0x${string}`;
+  };
   index: number;
   isVerifier: boolean;
 }) {
@@ -65,7 +64,7 @@ function MilestoneCard({
       address: HOOK_ADDRESS,
       abi: impactHookAbi,
       functionName: "verifyMilestone",
-      args: [DEMO_POOL_KEY, BigInt(index)],
+      args: [poolKey, BigInt(index)],
       chainId: unichainSepolia.id,
     });
   };
@@ -160,7 +159,7 @@ function MilestoneCard({
               color: 'var(--text-dim)',
             }}
           >
-            Fee tier: {feeBps} bps
+            Fee tier: {(Number(feeBps) / 100).toFixed(2)}%
           </span>
         </div>
         <div
@@ -296,9 +295,40 @@ function MilestoneCard({
 
 export default function MilestonesPage() {
   const { address, isConnected } = useAccount();
-  const [poolIdInput, setPoolIdInput] = useState("");
-  const poolId = (poolIdInput ||
-    "0x0000000000000000000000000000000000000000000000000000000000000000") as `0x${string}`;
+  const [token0Input, setToken0Input] = useState("");
+  const [token1Input, setToken1Input] = useState("");
+  const [feeInput, setFeeInput] = useState("3000");
+  const [tickSpacingInput, setTickSpacingInput] = useState("60");
+
+  // Compute pool ID from pool key components
+  const hasPoolKey = token0Input.startsWith("0x") && token1Input.startsWith("0x");
+  const poolKey = {
+    currency0: (token0Input || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    currency1: (token1Input || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    fee: parseInt(feeInput) || 0,
+    tickSpacing: parseInt(tickSpacingInput) || 0,
+    hooks: HOOK_ADDRESS,
+  };
+
+  const poolId = hasPoolKey
+    ? keccak256(
+        encodeAbiParameters(
+          [
+            {
+              type: "tuple",
+              components: [
+                { name: "currency0", type: "address" },
+                { name: "currency1", type: "address" },
+                { name: "fee", type: "uint24" },
+                { name: "tickSpacing", type: "int24" },
+                { name: "hooks", type: "address" },
+              ],
+            },
+          ],
+          [poolKey]
+        )
+      )
+    : ("0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`);
 
   const { data: projectInfo } = useReadContract({
     address: HOOK_ADDRESS,
@@ -310,6 +340,7 @@ export default function MilestonesPage() {
 
   const registered = projectInfo?.[5];
   const verifier = projectInfo?.[1];
+  const currentFeeBps = projectInfo?.[4];
   const milestoneCount = Number(projectInfo?.[3] || 0);
   const isVerifier =
     isConnected && address?.toLowerCase() === verifier?.toLowerCase();
@@ -336,36 +367,60 @@ export default function MilestonesPage() {
           </p>
         </div>
 
-        {/* Pool ID input */}
-        <div className="animate-fade-up delay-100" style={{ marginBottom: 24 }}>
-          <label
-            style={{
-              fontSize: 11,
-              color: 'var(--text-dim)',
-              display: 'block',
-              marginBottom: 6,
-              textTransform: 'uppercase',
-              letterSpacing: '0.12em',
-            }}
-          >
-            Pool ID
-          </label>
-          <input
-            type="text"
-            placeholder="0x6bc91b5e91380a168a3d85fd1ea27b250b10b40390b9da68bb07ebfd4f95f205"
-            value={poolIdInput}
-            onChange={(e) => setPoolIdInput(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              borderRadius: 6,
-              border: '1px solid var(--border-subtle)',
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-primary)',
-              fontSize: 13,
-              outline: 'none',
-            }}
-          />
+        {/* Pool Key inputs */}
+        <div className="animate-fade-up delay-100 card" style={{ padding: 24, marginBottom: 24 }}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>TOKEN 0 (CURRENCY0)</label>
+            <input
+              type="text"
+              placeholder="0x..."
+              value={token0Input}
+              onChange={(e) => setToken0Input(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>TOKEN 1 (CURRENCY1)</label>
+            <input
+              type="text"
+              placeholder="0x..."
+              value={token1Input}
+              onChange={(e) => setToken1Input(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+            <div>
+              <label style={labelStyle}>FEE (BPS)</label>
+              <input
+                type="text"
+                value={feeInput}
+                onChange={(e) => setFeeInput(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>TICK SPACING</label>
+              <input
+                type="text"
+                value={tickSpacingInput}
+                onChange={(e) => setTickSpacingInput(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          {hasPoolKey && (
+            <div style={{ fontSize: 12, color: 'var(--text-dim)', wordBreak: 'break-all' }}>
+              <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 6 }}>Pool ID:</span>
+              <span className="font-data" style={{ color: 'var(--text-secondary)' }}>{poolId}</span>
+            </div>
+          )}
+          {registered && currentFeeBps !== undefined && (
+            <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-dim)' }}>
+              <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 6 }}>Current Fee:</span>
+              <span className="font-data" style={{ color: 'var(--accent)' }}>{(Number(currentFeeBps) / 100).toFixed(2)}%</span>
+            </div>
+          )}
         </div>
 
         {registered ? (
@@ -389,6 +444,7 @@ export default function MilestonesPage() {
               <MilestoneCard
                 key={i}
                 poolId={poolId}
+                poolKey={poolKey}
                 index={i}
                 isVerifier={isVerifier}
               />
@@ -451,7 +507,7 @@ export default function MilestonesPage() {
                         </span>
                       </div>
                       <span className="font-data" style={{ fontSize: 13, color: 'var(--text-dim)' }}>
-                        Fee tier: {m.fee} bps
+                        Fee tier: {(m.fee / 100).toFixed(2)}%
                       </span>
                     </div>
                     <div
@@ -481,7 +537,7 @@ export default function MilestonesPage() {
                 lineHeight: 1.5,
               }}
             >
-              Enter a Pool ID above to view real milestone data, or connect your wallet to verify milestones.
+              Enter your pool key above to view real milestone data, or connect your wallet to verify milestones.
             </div>
           </div>
         )}
@@ -489,3 +545,25 @@ export default function MilestonesPage() {
     </div>
   );
 }
+
+const labelStyle: React.CSSProperties = {
+  fontSize: 11,
+  color: "var(--text-dim)",
+  display: "block",
+  marginBottom: 6,
+  textTransform: "uppercase",
+  letterSpacing: "0.12em",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "10px 12px",
+  borderRadius: 6,
+  border: "1px solid var(--border-subtle)",
+  background: "var(--bg-elevated)",
+  color: "var(--text-primary)",
+  fontSize: 13,
+  outline: "none",
+  fontFamily: "inherit",
+  boxSizing: "border-box",
+};

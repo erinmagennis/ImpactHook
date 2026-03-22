@@ -4,6 +4,8 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { unichainSepolia } from "../lib/chains";
 
 type Role = "none" | "trader" | "project" | "sponsor" | "learn";
 
@@ -76,6 +78,10 @@ export function Navigation() {
   const [role, setRole] = useState<Role>("none");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+  const isWrongChain = isConnected && chainId !== unichainSepolia.id;
 
   useEffect(() => {
     const saved = localStorage.getItem("impacthook-role") as Role | null;
@@ -102,6 +108,7 @@ export function Navigation() {
   const color = roleColors[role];
 
   return (
+    <>
     <nav
       style={{
         position: "sticky",
@@ -182,8 +189,8 @@ export function Navigation() {
                   minWidth: 240,
                   borderRadius: 8,
                   border: "1px solid var(--border-subtle, #e4e4e7)",
-                  background: "#ffffff",
-                  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04)",
+                  background: "var(--bg-card)",
+                  boxShadow: "var(--shadow-lg)",
                   overflow: "hidden",
                 }}
               >
@@ -281,5 +288,42 @@ export function Navigation() {
         </div>
       </div>
     </nav>
+    {isWrongChain && (
+      <div
+        style={{
+          width: "100%",
+          padding: "10px 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          background: "rgba(245, 158, 11, 0.1)",
+          borderBottom: "1px solid rgba(245, 158, 11, 0.25)",
+          fontSize: 13,
+          color: "var(--warning, #f59e0b)",
+          fontFamily: "inherit",
+        }}
+      >
+        <span>You are connected to the wrong network.</span>
+        <button
+          onClick={() => switchChain({ chainId: unichainSepolia.id })}
+          style={{
+            padding: "5px 14px",
+            borderRadius: 4,
+            border: "1px solid var(--warning, #f59e0b)",
+            background: "var(--warning, #f59e0b)",
+            color: "#000",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+            fontFamily: "inherit",
+            letterSpacing: "0.04em",
+          }}
+        >
+          Switch to Unichain Sepolia
+        </button>
+      </div>
+    )}
+    </>
   );
 }

@@ -25,7 +25,7 @@ contract PostDeployScript is Script {
 
         vm.startBroadcast();
 
-        ImpactHook hook = ImpactHook(hookAddress);
+        ImpactHook hook = ImpactHook(payable(hookAddress));
         hook.setCallbackProxy(CALLBACK_PROXY);
 
         console.log("Callback proxy set successfully");

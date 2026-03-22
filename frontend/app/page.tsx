@@ -25,7 +25,7 @@ function LandingNav() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 32px",
-        background: scrolled ? "rgba(252,251,249,0.92)" : "transparent",
+        background: scrolled ? "rgba(10,10,15,0.92)" : "transparent",
         backdropFilter: scrolled ? "blur(12px)" : "none",
         WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
         borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent",
@@ -519,10 +519,10 @@ export default function LandingPage() {
                 <span className="feature-tag">Live</span>
               </div>
               {[
-                { name: "Baseline water testing", status: "verified", fee: "0 bps" },
-                { name: "Systems installed in 20 schools", status: "verified", fee: "100 bps" },
-                { name: "3-month water quality verified", status: "verified", fee: "200 bps" },
-                { name: "Community management trained", status: "verified", fee: "300 bps" },
+                { name: "Baseline water testing", status: "verified", fee: "0%" },
+                { name: "Systems installed in 20 schools", status: "verified", fee: "1%" },
+                { name: "3-month water quality verified", status: "verified", fee: "2%" },
+                { name: "Community management trained", status: "verified", fee: "3%" },
               ].map((m, i) => (
                 <div key={i} style={{
                   display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -678,7 +678,7 @@ export default function LandingPage() {
               style={{
                 marginBottom: 16,
                 display: "inline-block",
-                background: "#ecfdf5",
+                background: "rgba(16, 185, 129, 0.08)",
                 color: "var(--success)",
                 borderColor: "#a7f3d0",
               }}
@@ -733,7 +733,7 @@ export default function LandingPage() {
               style={{
                 marginBottom: 16,
                 display: "inline-block",
-                background: "#f5f3ff",
+                background: "rgba(124, 58, 237, 0.08)",
                 color: "#7c3aed",
                 borderColor: "#c4b5fd",
               }}

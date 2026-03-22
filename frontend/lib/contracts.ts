@@ -1,6 +1,32 @@
 export const HOOK_ADDRESS = "0x5a9a2ec5e6550be0C6A7cF5fFC476ea332986557" as const;
 export const ARBITER_ADDRESS = "0xee7e12CAE0B17fEAd89FC8387df9Fe6d0A73A094" as const;
 export const ORACLE_ADDRESS = "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" as const;
+export const SWAP_ROUTER_ADDRESS = "0x66452162B01442d92fc77d607EE2Cff3e76043c2" as const;
+
+export const impactSwapRouterAbi = [
+  {
+    type: "function",
+    name: "swap",
+    inputs: [
+      {
+        name: "key",
+        type: "tuple",
+        components: [
+          { name: "currency0", type: "address" },
+          { name: "currency1", type: "address" },
+          { name: "fee", type: "uint24" },
+          { name: "tickSpacing", type: "int24" },
+          { name: "hooks", type: "address" },
+        ],
+      },
+      { name: "zeroForOne", type: "bool" },
+      { name: "amountIn", type: "uint256" },
+      { name: "minAmountOut", type: "uint256" },
+    ],
+    outputs: [{ name: "amountOut", type: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+] as const;
 export const EAS_ADDRESS = "0x4200000000000000000000000000000000000021" as const;
 export const SCHEMA_REGISTRY = "0x4200000000000000000000000000000000000020" as const;
 export const MILESTONE_SCHEMA_UID = "0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bfb52" as const;
@@ -214,6 +240,52 @@ export const impactHookAbi = [
       { name: "poolId", type: "bytes32" },
     ],
     outputs: [{ name: "discountBps", type: "uint16" }],
+    stateMutability: "view",
+  },
+  // Pool discovery
+  {
+    type: "function",
+    name: "getRegisteredPoolCount",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getRegisteredPool",
+    inputs: [{ name: "index", type: "uint256" }],
+    outputs: [{ name: "", type: "bytes32" }],
+    stateMutability: "view",
+  },
+  // Contribution tracking
+  {
+    type: "function",
+    name: "contributions",
+    inputs: [
+      { name: "", type: "address" },
+      { name: "", type: "bytes32" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  // Project pause status
+  {
+    type: "function",
+    name: "projectPaused",
+    inputs: [{ name: "", type: "bytes32" }],
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
+  },
+  // Project metadata
+  {
+    type: "function",
+    name: "getProjectMetadata",
+    inputs: [{ name: "poolId", type: "bytes32" }],
+    outputs: [
+      { name: "name", type: "string" },
+      { name: "category", type: "string" },
+      { name: "imageUrl", type: "string" },
+    ],
     stateMutability: "view",
   },
   // Templates

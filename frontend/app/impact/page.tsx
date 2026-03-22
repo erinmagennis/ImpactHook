@@ -31,7 +31,7 @@ function MilestoneProof({ index, name, status, proof, date, feeBps }: {
           <span className="text-[12px]" style={{ color: status === 'locked' ? 'var(--text-dim)' : 'var(--text-primary)' }}>{name}</span>
         </div>
         <span className="font-data text-[10px]" style={{ color: c.text }}>
-          {feeBps} bps
+          {feeBps / 100}%
         </span>
       </div>
       {(proof || date) && (

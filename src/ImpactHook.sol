@@ -145,6 +145,8 @@ contract ImpactHook is IHooks {
     address public pendingOwner;
     /// @notice Reactive Network Callback Proxy for this chain
     address public callbackProxy;
+    /// @notice ACL for addresses allowed to request payment (callback proxy)
+    mapping(address => bool) public authorizedPayers;
     /// @notice Whether fee collection is paused
     bool public paused;
     /// @notice EAS schema UID for milestone attestations
@@ -715,10 +717,35 @@ contract ImpactHook is IHooks {
     // ──────────────────── Admin Functions ────────────────────
 
     /// @notice Set the Reactive Network Callback Proxy address. Only callable by owner.
+    /// Also authorizes the proxy as a payer for Reactive Network gas reimbursement.
     /// @param _callbackProxy The new callback proxy address
     function setCallbackProxy(address _callbackProxy) external onlyOwner {
+        // Remove old proxy from payer ACL
+        if (callbackProxy != address(0)) {
+            authorizedPayers[callbackProxy] = false;
+        }
         emit CallbackProxyUpdated(callbackProxy, _callbackProxy);
         callbackProxy = _callbackProxy;
+        // Add new proxy to payer ACL
+        if (_callbackProxy != address(0)) {
+            authorizedPayers[_callbackProxy] = true;
+        }
+    }
+
+    // ──────────────────── Reactive Network Payment Interface ────────────────────
+
+    /// @notice Accept ETH for Reactive Network callback gas funding
+    receive() external payable {}
+
+    /// @notice Called by the callback proxy to recoup gas costs for delivered callbacks.
+    /// @param amount Amount owed for callback execution
+    function pay(uint256 amount) external {
+        require(authorizedPayers[msg.sender], "ImpactHook: unauthorized payer");
+        require(address(this).balance >= amount, "ImpactHook: insufficient funds");
+        if (amount > 0) {
+            (bool success,) = payable(msg.sender).call{value: amount}(new bytes(0));
+            require(success, "ImpactHook: payment failed");
+        }
     }
 
     /// @notice Set the EAS milestone schema UID. Only callable by owner.

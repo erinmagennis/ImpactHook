@@ -37,7 +37,7 @@ contract DemoVerify is Script {
         PoolId poolId = key.toId();
 
         vm.startBroadcast();
-        ImpactHook(HOOK).verifyMilestone(key, milestone);
+        ImpactHook(payable(HOOK)).verifyMilestone(key, milestone);
         vm.stopBroadcast();
 
         console.log("Milestone verified:", milestone);
@@ -75,7 +75,7 @@ contract DemoSetLpSkim is Script {
         PoolId poolId = key.toId();
 
         vm.startBroadcast();
-        ImpactHook(HOOK).setLpSkimBps(poolId, skimBps);
+        ImpactHook(payable(HOOK)).setLpSkimBps(poolId, skimBps);
         vm.stopBroadcast();
 
         console.log("LP skim set to bps:", skimBps);
@@ -109,18 +109,18 @@ contract DemoWithdraw is Script {
 
         PoolId poolId = key.toId();
 
-        uint256 fees0 = ImpactHook(HOOK).accumulatedFees(poolId, Currency.wrap(token0));
-        uint256 fees1 = ImpactHook(HOOK).accumulatedFees(poolId, Currency.wrap(token1));
+        uint256 fees0 = ImpactHook(payable(HOOK)).accumulatedFees(poolId, Currency.wrap(token0));
+        uint256 fees1 = ImpactHook(payable(HOOK)).accumulatedFees(poolId, Currency.wrap(token1));
         console.log("Accumulated fees token0:", fees0);
         console.log("Accumulated fees token1:", fees1);
 
         vm.startBroadcast();
         if (fees1 > 0) {
-            ImpactHook(HOOK).withdraw(poolId, Currency.wrap(token1));
+            ImpactHook(payable(HOOK)).withdraw(poolId, Currency.wrap(token1));
             console.log("Withdrawn token1 fees:", fees1);
         }
         if (fees0 > 0) {
-            ImpactHook(HOOK).withdraw(poolId, Currency.wrap(token0));
+            ImpactHook(payable(HOOK)).withdraw(poolId, Currency.wrap(token0));
             console.log("Withdrawn token0 fees:", fees0);
         }
         vm.stopBroadcast();
@@ -155,7 +155,7 @@ contract DemoQuery is Script {
         PoolId poolId = key.toId();
 
         (address recipient, address verifier, uint256 currentMilestone, uint256 milestoneCount, uint16 currentFeeBps, bool registered)
-            = ImpactHook(HOOK).getProjectInfo(poolId);
+            = ImpactHook(payable(HOOK)).getProjectInfo(poolId);
 
         console.log("=== PROJECT STATE ===");
         console.log("Pool ID:");
@@ -167,8 +167,8 @@ contract DemoQuery is Script {
         console.log("Total milestones:", milestoneCount);
         console.log("Current fee (bps):", currentFeeBps);
 
-        uint256 fees0 = ImpactHook(HOOK).accumulatedFees(poolId, Currency.wrap(token0));
-        uint256 fees1 = ImpactHook(HOOK).accumulatedFees(poolId, Currency.wrap(token1));
+        uint256 fees0 = ImpactHook(payable(HOOK)).accumulatedFees(poolId, Currency.wrap(token0));
+        uint256 fees1 = ImpactHook(payable(HOOK)).accumulatedFees(poolId, Currency.wrap(token1));
         console.log("Accumulated fees token0:", fees0);
         console.log("Accumulated fees token1:", fees1);
     }

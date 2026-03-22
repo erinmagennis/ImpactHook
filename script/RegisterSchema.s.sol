@@ -36,7 +36,7 @@ contract RegisterSchemaScript is Script {
         console.logBytes32(schemaUID);
 
         // Set schema on hook
-        ImpactHook(hookAddress).setMilestoneSchema(schemaUID);
+        ImpactHook(payable(hookAddress)).setMilestoneSchema(schemaUID);
 
         console.log("Schema set on ImpactHook");
 

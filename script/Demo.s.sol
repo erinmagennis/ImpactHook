@@ -80,7 +80,7 @@ contract DemoRegister is DemoBase {
         console.log("  Project: Clean Water - Chiapas Schools");
 
         vm.startBroadcast();
-        ImpactHook(HOOK).registerProject(key, deployer, deployer, "Clean Water - Chiapas Schools", "Climate", descriptions, fees);
+        ImpactHook(payable(HOOK)).registerProject(key, deployer, deployer, "Clean Water - Chiapas Schools", "Climate", descriptions, fees);
         vm.stopBroadcast();
 
         console.log("Project registered successfully!");
@@ -98,7 +98,7 @@ contract DemoVerify0 is DemoBase {
         console.log("Verifying milestone 0: Baseline water testing complete");
 
         vm.startBroadcast();
-        ImpactHook(HOOK).verifyMilestone(key, 0);
+        ImpactHook(payable(HOOK)).verifyMilestone(key, 0);
         vm.stopBroadcast();
 
         console.log("Milestone 0 verified! Fee tier now: 0 bps");
@@ -116,7 +116,7 @@ contract DemoVerify1 is DemoBase {
         console.log("Verifying milestone 1: Purification systems installed in 20 schools");
 
         vm.startBroadcast();
-        ImpactHook(HOOK).verifyMilestone(key, 1);
+        ImpactHook(payable(HOOK)).verifyMilestone(key, 1);
         vm.stopBroadcast();
 
         console.log("Milestone 1 verified! Fee tier now: 100 bps (1%)");
@@ -134,7 +134,7 @@ contract DemoVerify2 is DemoBase {
         console.log("Verifying milestone 2: 3-month water quality verified");
 
         vm.startBroadcast();
-        ImpactHook(HOOK).verifyMilestone(key, 2);
+        ImpactHook(payable(HOOK)).verifyMilestone(key, 2);
         vm.stopBroadcast();
 
         console.log("Milestone 2 verified! Fee tier now: 200 bps (2%)");
@@ -152,7 +152,7 @@ contract DemoVerify3 is DemoBase {
         console.log("Verifying milestone 3: Community management trained");
 
         vm.startBroadcast();
-        ImpactHook(HOOK).verifyMilestone(key, 3);
+        ImpactHook(payable(HOOK)).verifyMilestone(key, 3);
         vm.stopBroadcast();
 
         console.log("Milestone 3 verified! Fee tier now: 300 bps (3%). All milestones complete!");
@@ -175,7 +175,7 @@ contract DemoQuery is DemoBase {
             uint256 milestoneCount,
             uint16 currentFeeBps,
             bool registered
-        ) = ImpactHook(HOOK).getProjectInfo(poolId);
+        ) = ImpactHook(payable(HOOK)).getProjectInfo(poolId);
 
         console.log("Registered:", registered);
         console.log("Recipient:", recipient);
@@ -185,7 +185,7 @@ contract DemoQuery is DemoBase {
         console.log("Current fee (bps):", currentFeeBps);
 
         for (uint256 i = 0; i < milestoneCount; i++) {
-            bool verified = ImpactHook(HOOK).isMilestoneVerified(poolId, i);
+            bool verified = ImpactHook(payable(HOOK)).isMilestoneVerified(poolId, i);
             console.log("  Milestone", i, "verified:", verified);
         }
     }

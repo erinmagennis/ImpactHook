@@ -1,38 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/style.css');
 @import "tailwindcss";
-
-@font-face {
-  font-family: 'Departure Mono';
-  src: url('https://cdn.jsdelivr.net/gh/rougier/departure-mono@master/fonts/DepartureMono-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
 
 /* ========================================
    Design tokens
    ======================================== */
 
 :root {
-  --bg-primary: #fafaf9;
-  --bg-card: #ffffff;
-  --bg-elevated: #f4f4f5;
-  --bg-surface: #e4e4e7;
+  --bg-primary: #0a0a0f;
+  --bg-card: #12131a;
+  --bg-elevated: #1a1b24;
+  --bg-surface: #22232e;
   --accent: #0d9488;
   --accent-light: #14b8a6;
-  --accent-bg: #f0fdfa;
-  --accent-border: #99f6e4;
-  --text-primary: #18181b;
-  --text-secondary: #52525b;
-  --text-dim: #a1a1aa;
-  --border-subtle: #e4e4e7;
+  --accent-bg: rgba(13, 148, 136, 0.08);
+  --accent-border: rgba(13, 148, 136, 0.2);
+  --text-primary: #e4e4e7;
+  --text-secondary: #a1a1aa;
+  --text-dim: #52525b;
+  --border-subtle: #27272a;
   --border-active: #0d9488;
-  --success: #059669;
-  --warning: #d97706;
-  --error: #dc2626;
-  --shadow-sm: 0 1px 2px rgba(120, 113, 108, 0.06);
-  --shadow-md: 0 2px 8px rgba(120, 113, 108, 0.08), 0 1px 2px rgba(120, 113, 108, 0.04);
-  --shadow-lg: 0 8px 24px rgba(120, 113, 108, 0.10), 0 2px 8px rgba(120, 113, 108, 0.06);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
   --radius-card: 8px;
   --radius-btn: 6px;
   --radius-sm: 4px;
@@ -53,7 +46,7 @@ html {
 }
 
 body {
-  background: linear-gradient(180deg, #f0fdfa 0%, var(--bg-primary) 400px);
+  background: linear-gradient(180deg, #0d0d14 0%, var(--bg-primary) 400px);
   color: var(--text-primary);
   font-family: 'Geist Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -72,7 +65,7 @@ body {
 }
 
 .font-data {
-  font-family: 'Departure Mono', 'SF Mono', 'Fira Code', monospace;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
 }
 
@@ -91,7 +84,7 @@ body {
 .card:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
-  border-color: #d4d4d8;
+  border-color: #3f3f46;
 }
 
 .card-glow {
@@ -175,7 +168,7 @@ input[type="url"],
 input[type="search"],
 textarea,
 select {
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-btn);
   color: var(--text-primary);
@@ -385,7 +378,7 @@ textarea::placeholder {
    ======================================== */
 
 ::selection {
-  background: rgba(13, 148, 136, 0.15);
+  background: rgba(13, 148, 136, 0.25);
   color: var(--text-primary);
 }
 
@@ -402,7 +395,7 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: #3f3f46;
   border-radius: 3px;
 }
 
@@ -415,15 +408,15 @@ textarea::placeholder {
    ======================================== */
 
 .section-teal {
-  background: linear-gradient(180deg, var(--accent-bg) 0%, var(--bg-primary) 100%);
+  background: linear-gradient(180deg, rgba(13, 148, 136, 0.06) 0%, var(--bg-primary) 100%);
 }
 
 .section-warm {
-  background: linear-gradient(180deg, #fef3c7 0%, var(--bg-primary) 100%);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.06) 0%, var(--bg-primary) 100%);
 }
 
 .section-cool {
-  background: linear-gradient(180deg, #ede9fe 0%, var(--bg-primary) 100%);
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.06) 0%, var(--bg-primary) 100%);
 }
 
 /* Accent left border cards */
@@ -524,6 +517,7 @@ textarea::placeholder {
   position: relative;
   background: var(--bg-primary);
 }
+
 
 .impact-gradient::before,
 .impact-gradient::after {

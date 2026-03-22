@@ -55,7 +55,7 @@ contract ImpactHookTest is Test, Deployers {
 
         // Deploy hook at the flagged address
         deployCodeTo("ImpactHook.sol", abi.encode(manager, address(this), easAddress), hookAddress);
-        hook = ImpactHook(hookAddress);
+        hook = ImpactHook(payable(hookAddress));
 
         // Set callback proxy for Reactive Network tests
         hook.setCallbackProxy(callbackProxy);
