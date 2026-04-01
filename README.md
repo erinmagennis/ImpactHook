@@ -122,6 +122,30 @@ Authorization: the Reactive Network overwrites the first callback argument with 
 | **Storacha (Filecoin/IPFS)** | Milestone evidence (reports, images, data) uploaded to decentralized storage via Storacha. CIDs embedded in EAS attestations and Hypercert metadata. | `frontend/app/api/upload/route.ts`, `frontend/components/EvidenceUpload.tsx` |
 | **EAS** | Custom attestation schema for independent third-party milestone verification on Unichain | `frontend/app/milestones/page.tsx`, `src/ImpactHook.sol` |
 
+## Autonomous Verification Agent
+
+An AI agent that autonomously monitors, evaluates, and verifies impact project milestones. The agent:
+
+1. **Watches** `EvidenceAttached` events on ImpactHook (Unichain Sepolia)
+2. **Fetches** evidence from Storacha/IPFS gateways
+3. **Analyzes** evidence against milestone criteria using Claude (vision for images, text for documents)
+4. **Stores** verification reports on Filecoin Pin (Calibration testnet) - permanent audit trail
+5. **Persists** agent memory on Storacha across sessions
+6. **Submits** `verifyMilestone()` onchain when confidence >= 70% (or defers to human review)
+7. **Triggers** Alkahest escrow release via MilestoneArbiter when milestones are verified
+
+```
+Evidence uploaded → Agent detects event → Claude analyzes → Report on Filecoin → verifyMilestone() → Escrow releases
+```
+
+The agent runs as a standalone Bun service. See [`agent/README.md`](agent/README.md) for setup and usage.
+
+```bash
+cd agent && bun install
+bun agent.ts --dry-run   # analyze without submitting txs
+bun agent.ts             # live mode with onchain verification
+```
+
 ## Fee Model
 
 The hook charges a fee **on top of** the standard LP fee, taken from the swapper's output:

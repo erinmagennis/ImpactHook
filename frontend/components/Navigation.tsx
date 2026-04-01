@@ -109,221 +109,106 @@ export function Navigation() {
 
   return (
     <>
-    <nav
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
-        borderBottom: "1px solid var(--border-subtle)",
-        backdropFilter: "blur(16px)",
-        backgroundColor: "rgba(10, 10, 15, 0.92)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "0 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: 64,
-          gap: 16,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: 0 }}>
-          <Link
-            href="/"
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              textDecoration: "none",
-              letterSpacing: "-0.02em",
-              flexShrink: 0,
-              fontFamily: "inherit",
-            }}
-          >
-            <span style={{ color: "var(--accent, #0d9488)" }}>Impact</span>Hook
-          </Link>
+      <nav className="nav-bar">
+        <div className="nav-inner">
+          <div className="nav-left">
+            <Link href="/" className="nav-logo">
+              <span style={{ color: "var(--accent)" }}>Impact</span>Hook
+            </Link>
 
-          {/* Role selector */}
-          <div ref={dropdownRef} style={{ position: "relative", flexShrink: 0 }}>
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "5px 12px",
-                borderRadius: 6,
-                border: role === "none"
-                  ? "1px solid var(--border-subtle)"
-                  : `1px solid ${color}33`,
-                background: role === "none"
-                  ? "var(--bg-elevated)"
-                  : `${color}0d`,
-                color: role === "none" ? "var(--text-secondary)" : color,
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                transition: "all 0.15s",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {currentRole.label}
-              <span style={{ fontSize: 9, opacity: 0.6 }}>
-                {dropdownOpen ? "\u25B2" : "\u25BC"}
-              </span>
-            </button>
-
-            {dropdownOpen && (
-              <div
+            {/* Role selector */}
+            <div ref={dropdownRef} style={{ position: "relative", flexShrink: 0 }}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="nav-role-trigger"
                 style={{
-                  position: "absolute",
-                  top: "calc(100% + 6px)",
-                  left: 0,
-                  minWidth: 240,
-                  borderRadius: 8,
-                  border: "1px solid var(--border-subtle)",
-                  background: "var(--bg-card)",
-                  boxShadow: "var(--shadow-lg)",
-                  overflow: "hidden",
+                  borderColor: role === "none" ? "var(--border-subtle)" : `${color}33`,
+                  background: role === "none" ? "var(--bg-elevated)" : `${color}0d`,
+                  color: role === "none" ? "var(--text-secondary)" : color,
                 }}
               >
-                {roleOrder.map((r) => {
-                  const rc = roleConfig[r];
-                  const isSelected = r === role;
-                  const rColor = roleColors[r];
-                  return (
-                    <button
-                      key={r}
-                      onClick={() => selectRole(r)}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: "none",
-                        borderLeft: isSelected
-                          ? `2px solid ${rColor}`
-                          : "2px solid transparent",
-                        background: isSelected
-                          ? `${rColor}08`
-                          : "transparent",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        fontFamily: "inherit",
-                        transition: "all 0.1s",
-                      }}
-                    >
-                      <div
+                {currentRole.label}
+                <span style={{ fontSize: 9, opacity: 0.6 }}>
+                  {dropdownOpen ? "\u25B2" : "\u25BC"}
+                </span>
+              </button>
+
+              {dropdownOpen && (
+                <div className="nav-role-dropdown">
+                  {roleOrder.map((r) => {
+                    const rc = roleConfig[r];
+                    const isSelected = r === role;
+                    const rColor = roleColors[r];
+                    return (
+                      <button
+                        key={r}
+                        onClick={() => selectRole(r)}
+                        className="nav-role-option"
                         style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: isSelected ? rColor : "var(--text-primary)",
-                          marginBottom: 2,
+                          borderLeft: isSelected
+                            ? `2px solid ${rColor}`
+                            : "2px solid transparent",
+                          background: isSelected ? `${rColor}08` : "transparent",
                         }}
                       >
-                        {rc.label}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: "var(--text-dim)",
-                        }}
-                      >
-                        {rc.description}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: isSelected ? rColor : "var(--text-primary)",
+                            marginBottom: 2,
+                          }}
+                        >
+                          {rc.label}
+                        </div>
+                        <div className="text-caption">
+                          {rc.description}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Nav links */}
+            <div className="nav-links">
+              {currentRole.nav.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`nav-link ${isActive ? "nav-link-active" : ""}`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Nav links for current role */}
-          <div style={{ display: "flex", gap: 4, overflow: "hidden" }}>
-            {currentRole.nav.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    fontSize: 13,
-                    fontWeight: 500,
-                    letterSpacing: "0.02em",
-                    color: isActive
-                      ? "var(--text-primary)"
-                      : "var(--text-secondary)",
-                    backgroundColor: isActive
-                      ? "var(--bg-elevated)"
-                      : "transparent",
-                    border: isActive
-                      ? "1px solid var(--border-subtle)"
-                      : "1px solid transparent",
-                    textDecoration: "none",
-                    transition: "all 0.15s",
-                    whiteSpace: "nowrap",
-                    fontFamily: "inherit",
-                  }}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+          <div style={{ flexShrink: 0 }}>
+            <ConnectButton
+              chainStatus="icon"
+              accountStatus="address"
+              showBalance={false}
+            />
           </div>
         </div>
-        <div style={{ flexShrink: 0 }}>
-          <ConnectButton
-            chainStatus="icon"
-            accountStatus="address"
-            showBalance={false}
-          />
+      </nav>
+
+      {isWrongChain && (
+        <div className="chain-warning">
+          <span>You are connected to the wrong network.</span>
+          <button
+            onClick={() => switchChain({ chainId: unichainSepolia.id })}
+            className="chain-warning-btn"
+          >
+            Switch to Unichain Sepolia
+          </button>
         </div>
-      </div>
-    </nav>
-    {isWrongChain && (
-      <div
-        style={{
-          width: "100%",
-          padding: "10px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 12,
-          background: "rgba(245, 158, 11, 0.1)",
-          borderBottom: "1px solid rgba(245, 158, 11, 0.25)",
-          fontSize: 13,
-          color: "var(--warning, #f59e0b)",
-          fontFamily: "inherit",
-        }}
-      >
-        <span>You are connected to the wrong network.</span>
-        <button
-          onClick={() => switchChain({ chainId: unichainSepolia.id })}
-          style={{
-            padding: "5px 14px",
-            borderRadius: 4,
-            border: "1px solid var(--warning, #f59e0b)",
-            background: "var(--warning, #f59e0b)",
-            color: "#000",
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: "inherit",
-            letterSpacing: "0.04em",
-          }}
-        >
-          Switch to Unichain Sepolia
-        </button>
-      </div>
-    )}
+      )}
     </>
   );
 }

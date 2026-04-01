@@ -68,12 +68,21 @@ bun agent.ts
 
 Only monitors pools where this agent is the assigned verifier. Automatically submits `verifyMilestone()` when evidence is approved with confidence >= 70%.
 
+### Dashboard
+
+```bash
+bun dashboard.ts
+```
+
+Opens a web dashboard at `http://localhost:3456` showing agent status, recent verifications with links to Filecoin reports, and live execution logs. Run alongside the agent.
+
 ### Demo flow
 
 1. Register a project with the agent's wallet as verifier (via frontend or forge script)
 2. Upload milestone evidence via the frontend's evidence upload
 3. Run the agent: `bun agent.ts --dry-run`
-4. Watch the agent detect the evidence, fetch it, analyze it, and produce a report
+4. Open the dashboard: `bun dashboard.ts` (in a separate terminal)
+5. Watch the agent detect the evidence, fetch it, analyze it, and produce a report
 
 ## File Structure
 
@@ -81,6 +90,8 @@ Only monitors pools where this agent is the assigned verifier. Automatically sub
 agent/
   agent.ts              Main entry point (event loop, orchestration)
   agent.json            Capability manifest (EF Agent track)
+  dashboard.ts          Dashboard server (Bun.serve)
+  dashboard.html        Dashboard UI
   package.json          Dependencies
   .env.example          Environment variable template
   lib/
@@ -90,6 +101,25 @@ agent/
     memory.ts           Storacha-backed persistent agent state
     reporter.ts         Filecoin Pin verification report storage
     logger.ts           Structured execution logs (Filecoin or local fallback)
+    registry.ts         AgentRegistry client (Filecoin Calibration)
+  contracts/
+    AgentRegistry.sol   Onchain agent registry (Filecoin Calibration)
+```
+
+## AgentRegistry (Filecoin Calibration)
+
+An onchain registry where agents register identity, store metadata/state CIDs on Filecoin, and build verifiable reputation from verification history.
+
+- `registerAgent(name, metadataCid)` - Register with agent.json CID
+- `updateState(stateCid)` - Update latest memory CID after each verification
+- `recordVerification(poolId, milestoneIndex, approved, reportCid)` - Log each verification with its Filecoin report CID
+
+Set `AGENT_REGISTRY_ADDRESS` in `.env` after deploying to Filecoin Calibration:
+
+```bash
+forge create agent/contracts/AgentRegistry.sol:AgentRegistry \
+  --rpc-url https://api.calibration.node.glif.io/rpc/v1 \
+  --private-key $FILECOIN_PRIVATE_KEY
 ```
 
 ## How Analysis Works

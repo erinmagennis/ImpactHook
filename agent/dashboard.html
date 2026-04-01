@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ImpactHook Agent Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0b0e14;
+      --bg-card: #141821;
+      --bg-elevated: #1c2130;
+      --text: #e2e8f0;
+      --text-dim: #64748b;
+      --text-secondary: #94a3b8;
+      --accent: #0d9488;
+      --blue: #3b82f6;
+      --success: #059669;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border: rgba(255,255,255,0.06);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+    .header { margin-bottom: 32px; }
+    .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .header p { font-size: 13px; color: var(--text-dim); }
+    .status-row {
+      display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .stat-card {
+      flex: 1; min-width: 140px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px;
+    }
+    .stat-card .value { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+    .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 20px; margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 14px; font-weight: 600; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 6px; font-size: 10px;
+      font-weight: 600; letter-spacing: 0.06em;
+    }
+    .badge-active { background: rgba(5,150,105,0.1); color: var(--success); border: 1px solid rgba(5,150,105,0.2); }
+    .badge-idle { background: rgba(100,116,139,0.1); color: var(--text-dim); border: 1px solid rgba(100,116,139,0.2); }
+    .badge-agent { background: rgba(59,130,246,0.1); color: var(--blue); border: 1px solid rgba(59,130,246,0.2); }
+    .verification {
+      padding: 12px; border-radius: 6px; background: var(--bg-elevated);
+      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .verification .left { display: flex; flex-direction: column; gap: 4px; }
+    .verification .project { font-size: 13px; color: var(--text); }
+    .verification .meta { font-size: 11px; color: var(--text-dim); }
+    .verification .right { text-align: right; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .dot-approved { background: var(--success); }
+    .dot-rejected { background: var(--danger); }
+    .dot-deferred { background: var(--warning); }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .empty { font-size: 13px; color: var(--text-dim); padding: 20px; text-align: center; }
+    .storage-row { display: flex; gap: 8px; margin-top: 12px; }
+    .storage-tag {
+      font-size: 10px; padding: 4px 8px; border-radius: 4px;
+      background: var(--bg-elevated); color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .log-entry {
+      font-size: 11px; padding: 6px 0; border-bottom: 1px solid var(--border);
+      display: flex; gap: 12px;
+    }
+    .log-entry .time { color: var(--text-dim); flex-shrink: 0; width: 70px; }
+    .log-entry .action { color: var(--accent); flex-shrink: 0; width: 140px; }
+    .log-entry .detail { color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ImpactHook Agent</h1>
+    <p>Autonomous milestone verification agent</p>
+  </div>
+
+  <div class="status-row">
+    <div class="stat-card">
+      <div class="value" id="status" style="color: var(--text-dim)">--</div>
+      <div class="label">Status</div>
+    </div>
+    <div class="stat-card">
+      <div class="value mono" id="totalVerifications" style="color: var(--accent)">0</div>
+      <div class="label">Verifications</div>
+    </div>
+    <div class="stat-card">
+      <div class="value mono" id="approvalRate" style="color: var(--success)">0%</div>
+      <div class="label">Approval Rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="value mono" id="evidenceAnalyzed" style="color: var(--blue)">0</div>
+      <div class="label">Evidence Analyzed</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>
+      <span class="dot dot-approved"></span>
+      Agent Info
+    </h2>
+    <div style="display: grid; grid-template-columns: 100px 1fr; gap: 8px; font-size: 12px;">
+      <span style="color: var(--text-dim)">Wallet</span>
+      <span class="mono" id="agentWallet" style="color: var(--text-secondary)">--</span>
+      <span style="color: var(--text-dim)">Mode</span>
+      <span id="agentMode" style="color: var(--text-secondary)">--</span>
+      <span style="color: var(--text-dim)">Pools</span>
+      <span id="assignedPools" style="color: var(--text-secondary)">--</span>
+      <span style="color: var(--text-dim)">Registry</span>
+      <span id="registryStatus" style="color: var(--text-secondary)">--</span>
+    </div>
+    <div class="storage-row">
+      <span class="storage-tag">Memory: Storacha</span>
+      <span class="storage-tag">Reports: Filecoin Calibration</span>
+      <span class="storage-tag">Logs: Filecoin Calibration</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Recent Verifications</h2>
+    <div id="verifications">
+      <div class="empty">No verifications yet. Upload evidence to a monitored project to trigger analysis.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Execution Log</h2>
+    <div id="logs" class="mono" style="max-height: 300px; overflow-y: auto;">
+      <div class="empty">Waiting for agent data...</div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/status');
+        if (!res.ok) return;
+        const data = await res.json();
+        render(data);
+      } catch {}
+    }
+
+    function render(data) {
+      // Stats
+      document.getElementById('status').textContent = data.running ? 'Active' : 'Idle';
+      document.getElementById('status').style.color = data.running ? 'var(--success)' : 'var(--text-dim)';
+      document.getElementById('totalVerifications').textContent = data.stats?.totalVerifications || 0;
+      document.getElementById('approvalRate').textContent = (data.stats?.approvalRate || 0) + '%';
+      document.getElementById('evidenceAnalyzed').textContent = data.stats?.totalEvidenceAnalyzed || 0;
+
+      // Agent info
+      document.getElementById('agentWallet').textContent = data.wallet || '--';
+      document.getElementById('agentMode').textContent = data.mode || '--';
+      document.getElementById('assignedPools').textContent = data.assignedPools || '0';
+      document.getElementById('registryStatus').textContent = data.registry || 'Not configured';
+
+      // Verifications
+      const vDiv = document.getElementById('verifications');
+      if (data.verifications && data.verifications.length > 0) {
+        vDiv.innerHTML = data.verifications.slice(-10).reverse().map(v => `
+          <div class="verification">
+            <div class="left">
+              <div class="project">
+                <span class="dot dot-${v.result?.approved ? 'approved' : 'rejected'}" style="margin-right: 6px"></span>
+                Pool ${v.poolId?.slice(0, 14)}... / Milestone #${v.milestoneIndex}
+              </div>
+              <div class="meta">
+                ${v.result?.confidence || 0}% confidence &middot; ${new Date(v.timestamp).toLocaleString()}
+              </div>
+            </div>
+            <div class="right">
+              ${v.reportCid ? `<a href="https://ipfs.io/ipfs/${v.reportCid}" target="_blank" style="font-size: 11px;">Report</a>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Logs
+      const lDiv = document.getElementById('logs');
+      if (data.logs && data.logs.length > 0) {
+        lDiv.innerHTML = data.logs.slice(-30).reverse().map(l => `
+          <div class="log-entry">
+            <span class="time">${new Date(l.timestamp).toLocaleTimeString()}</span>
+            <span class="action">${l.action}</span>
+            <span class="detail">${JSON.stringify(l.details || {}).slice(0, 80)}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 5000);
+  </script>
+</body>
+</html>

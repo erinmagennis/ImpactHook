@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "bun agent.ts",
-    "dry-run": "bun agent.ts --dry-run"
+    "dry-run": "bun agent.ts --dry-run",
+    "dashboard": "bun dashboard.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

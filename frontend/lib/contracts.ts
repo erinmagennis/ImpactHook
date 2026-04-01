@@ -1,7 +1,12 @@
+// ── Deployed contract addresses (single source of truth) ──
+// Update these when redeploying. All pages import from here.
 export const HOOK_ADDRESS = "0xC8A18E4A64224D2785D505c77923ed8c1d4F2557" as const;
 export const ARBITER_ADDRESS = "0xF51197176Fc8B8D4F780Dc67E431a90E85Fc52Fb" as const;
 export const ORACLE_ADDRESS = "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" as const;
+export const REACTOR_ADDRESS = "0x19D5bfa64Ff4992e917FC627B246eBdDf6A7d872" as const;
 export const SWAP_ROUTER_ADDRESS = "0x66452162B01442d92fc77d607EE2Cff3e76043c2" as const;
+export const POOL_MANAGER_ADDRESS = "0x00B036B58a818B1BC34d502D3fE730Db729e62AC" as const;
+export const CALLBACK_PROXY_ADDRESS = "0x9299472A6399Fd1027ebF067571Eb3e3D7837FC4" as const;
 
 export const impactSwapRouterAbi = [
   {
@@ -185,6 +190,67 @@ export const impactHookAbi = [
         ],
       },
       { name: "attestationUID", type: "bytes32" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  // Heartbeat (proof-of-life for active projects)
+  {
+    type: "function",
+    name: "heartbeat",
+    inputs: [{ name: "poolId", type: "bytes32" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  // Project management (user-callable)
+  {
+    type: "function",
+    name: "updateProjectMetadata",
+    inputs: [
+      { name: "poolId", type: "bytes32" },
+      { name: "name", type: "string" },
+      { name: "category", type: "string" },
+      { name: "imageUrl", type: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateRecipient",
+    inputs: [
+      {
+        name: "key",
+        type: "tuple",
+        components: [
+          { name: "currency0", type: "address" },
+          { name: "currency1", type: "address" },
+          { name: "fee", type: "uint24" },
+          { name: "tickSpacing", type: "int24" },
+          { name: "hooks", type: "address" },
+        ],
+      },
+      { name: "newRecipient", type: "address" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateVerifier",
+    inputs: [
+      {
+        name: "key",
+        type: "tuple",
+        components: [
+          { name: "currency0", type: "address" },
+          { name: "currency1", type: "address" },
+          { name: "fee", type: "uint24" },
+          { name: "tickSpacing", type: "int24" },
+          { name: "hooks", type: "address" },
+        ],
+      },
+      { name: "newVerifier", type: "address" },
     ],
     outputs: [],
     stateMutability: "nonpayable",

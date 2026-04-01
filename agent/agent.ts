@@ -10,6 +10,7 @@ import { analyzeEvidence, type VerificationResult } from "./lib/analyzer.js";
 import { AgentLogger } from "./lib/logger.js";
 import { AgentMemory } from "./lib/memory.js";
 import { storeReport, type VerificationReport } from "./lib/reporter.js";
+import { AgentRegistryClient } from "./lib/registry.js";
 
 // --- Configuration ---
 const DRY_RUN = process.argv.includes("--dry-run");
@@ -20,6 +21,7 @@ const POLL_INTERVAL = 10_000; // 10s between poll cycles
 const processedEvents = new Set<string>();
 let logger: AgentLogger;
 let memory: AgentMemory;
+let registry: AgentRegistryClient;
 
 // --- Main ---
 async function main() {
@@ -46,6 +48,28 @@ async function main() {
   } catch {
     console.log("No existing memory found, starting fresh");
     logger.log("memory_fresh", {});
+  }
+
+  // Register with AgentRegistry on Filecoin Calibration
+  registry = new AgentRegistryClient();
+  if (registry.isEnabled()) {
+    try {
+      const regTx = await registry.register(
+        "ImpactAccountabilityAgent",
+        "" // metadataCid - set after agent.json is uploaded to Filecoin
+      );
+      if (regTx) {
+        console.log(`Registered on AgentRegistry: ${regTx}`);
+        logger.log("registry_registered", { txHash: regTx });
+      } else {
+        console.log("Already registered on AgentRegistry");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.log(`AgentRegistry registration skipped: ${msg}`);
+    }
+  } else {
+    console.log("AgentRegistry not configured (set AGENT_REGISTRY_ADDRESS)");
   }
 
   // Discover registered projects
@@ -106,6 +130,15 @@ async function main() {
     assignedPools: agentPools.length,
     wallet: account.address,
   });
+
+  // Set dashboard metadata and write initial state
+  setAgentMeta({
+    wallet: account.address,
+    mode: DRY_RUN ? "dry-run" : "live",
+    assignedPools: agentPools.length,
+    registryEnabled: registry.isEnabled(),
+  });
+  await writeDashboardState();
 
   // Start event polling loop
   let lastBlock = await publicClient.getBlockNumber();
@@ -425,17 +458,67 @@ async function processEvidence(
   });
 
   try {
-    await memory.save();
+    const memoryCid = await memory.save();
     console.log("Memory saved to Storacha");
     logger.log("memory_updated", {
       totalVerifications: memory.data.stats.totalVerifications,
     });
+
+    // 7. Record verification on AgentRegistry (Filecoin Calibration)
+    if (registry.isEnabled() && reportCid) {
+      try {
+        const regTx = await registry.recordVerification(
+          poolId,
+          Number(milestoneIndex),
+          result.approved,
+          reportCid
+        );
+        if (regTx) console.log(`Recorded on AgentRegistry: ${regTx}`);
+
+        // Update state CID on registry
+        if (memoryCid) {
+          await registry.updateState(memoryCid);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.log(`Registry update skipped: ${msg}`);
+      }
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.log(`Memory save skipped: ${msg}`);
   }
 
   console.log("\n--- Processing Complete ---\n");
+
+  // Update dashboard state
+  await writeDashboardState();
+}
+
+// --- Dashboard state sync ---
+const DASHBOARD_STATE_FILE = ".agent-dashboard-state.json";
+let agentMeta = { wallet: "", mode: "", assignedPools: 0, registryEnabled: false };
+
+function setAgentMeta(meta: typeof agentMeta) {
+  agentMeta = meta;
+}
+
+async function writeDashboardState() {
+  try {
+    await Bun.write(
+      DASHBOARD_STATE_FILE,
+      JSON.stringify({
+        running: true,
+        wallet: agentMeta.wallet,
+        mode: agentMeta.mode,
+        assignedPools: agentMeta.assignedPools,
+        registry: agentMeta.registryEnabled ? "Connected" : "Not configured",
+        stats: memory.data.stats,
+        verifications: memory.data.verifications.slice(-20),
+        logs: logger.getLog().entries.slice(-50),
+      })
+    );
+  } catch {}
 }
 
 // --- Graceful shutdown ---

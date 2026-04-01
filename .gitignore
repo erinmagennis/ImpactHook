@@ -10,6 +10,12 @@ broadcast/
 .env
 .env.local
 .env.*.local
+agent/.env
+
+# Agent runtime state
+agent/.agent-state
+agent/.agent-dashboard-state.json
+agent/agent_log_*.json
 
 # OS files
 .DS_Store

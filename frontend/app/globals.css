@@ -524,18 +524,98 @@ textarea::placeholder {
   font-size: 13px;
   color: var(--success);
   margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(5, 150, 105, 0.06);
+  border: 1px solid rgba(5, 150, 105, 0.12);
+  text-align: center;
 }
 
 .status-error {
   font-size: 13px;
   color: var(--error);
   margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  text-align: center;
 }
 
 .status-pending {
   font-size: 13px;
   color: var(--warning);
   margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  text-align: center;
+}
+
+/* Neutral badge (for "Pending" states without a color) */
+.badge-neutral {
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Inline action buttons (verify, attest, mint - not full-width) */
+.btn-action-teal {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  background: rgba(13, 148, 136, 0.06);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.btn-action-teal:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn-action-violet {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(124, 58, 237, 0.06);
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.btn-action-violet:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn-action-orange {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: rgba(249, 115, 22, 0.06);
+  color: #f97316;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.btn-action-orange:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* ========================================

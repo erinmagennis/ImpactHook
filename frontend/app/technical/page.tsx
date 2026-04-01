@@ -1,6 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { Navigation } from "../../components/Navigation";
+import {
+  HOOK_ADDRESS,
+  ARBITER_ADDRESS,
+  ORACLE_ADDRESS,
+  REACTOR_ADDRESS,
+  SWAP_ROUTER_ADDRESS,
+  POOL_MANAGER_ADDRESS,
+  CALLBACK_PROXY_ADDRESS,
+  EAS_ADDRESS,
+  SCHEMA_REGISTRY,
+  MILESTONE_SCHEMA_UID,
+} from "../../lib/contracts";
 
 function CheckIcon() {
   return (
@@ -22,85 +35,44 @@ export default function TechnicalPage() {
   const progress = (MILESTONES.filter(m => m.verified).length / MILESTONES.length) * 100;
 
   return (
-    <div style={{ minHeight: "100vh", background: "transparent" }}>
+    <div style={{ minHeight: "100vh" }}>
       <Navigation />
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
+      <main className="container-article" style={{ paddingTop: 48, paddingBottom: 80 }}>
 
         {/* Header */}
         <div className="animate-fade-up" style={{ marginBottom: 48 }}>
-          <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: 'var(--accent)' }}>
-            Technical Deep Dive
-          </span>
-          <h1
-            className="font-display text-[clamp(1.8rem,5vw,2.8rem)] mt-3 mb-4"
-            style={{ color: 'var(--text-primary)', lineHeight: 1.1 }}
-          >
+          <div className="text-superhead">Technical Deep Dive</div>
+          <h1 className="heading-xl mt-3 mb-4" style={{ fontSize: "clamp(1.8rem, 5vw, 2.8rem)" }}>
             Architecture
           </h1>
-          <p className="text-[14px] leading-relaxed max-w-2xl" style={{ color: 'var(--text-secondary)' }}>
-            A Uniswap v4 hook creating asset-class specific liquidity via milestone-gated
-            fee routing. Seven hook callbacks, five funding channels, five contracts across three chains.
+          <p className="text-body" style={{ maxWidth: 640, lineHeight: 1.7 }}>
+            A Uniswap v4 hook that creates impact-differentiated liquidity via milestone-gated
+            fee routing. Seven hook callbacks, five funding channels, five contracts across three chains,
+            and an autonomous AI verification agent.
           </p>
         </div>
 
         {/* Contracts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-up delay-100" style={{ marginBottom: 32 }}>
-          <ContractCard
-            name="ImpactHook.sol"
-            role="Core Hook"
-            description="afterSwap fee routing, LP fee skim, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates"
-            chain="Unichain Sepolia"
-            address="0xC8A18E4A64224D2785D505c77923ed8c1d4F2557"
-            accent="cyan"
-          />
-          <ContractCard
-            name="MilestoneArbiter.sol"
-            role="Escrow Gate"
-            description="Alkahest IArbiter - gates escrow release on verified milestone state"
-            chain="Unichain Sepolia"
-            address="0xF51197176Fc8B8D4F780Dc67E431a90E85Fc52Fb"
-            accent="violet"
-          />
-          <ContractCard
-            name="MilestoneReactor.sol"
-            role="Reactive RSC"
-            description="Subscribes to origin chain events, emits cross-chain callbacks to ImpactHook"
-            chain="Reactive Lasna"
-            address="0x19D5bfa64Ff4992e917FC627B246eBdDf6A7d872"
-            accent="emerald"
-          />
-          <ContractCard
-            name="MilestoneOracle.sol"
-            role="Event Source"
-            description="Origin chain contract - emits MilestoneSubmitted events for cross-chain verification"
-            chain="Ethereum Sepolia"
-            address="0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc"
-            accent="amber"
-          />
-          <ContractCard
-            name="ImpactSwapRouter.sol"
-            role="Swap Router"
-            description="Simple swap interface with slippage protection. Handles afterSwapReturnDelta internally."
-            chain="Unichain Sepolia"
-            address="0x66452162B01442d92fc77d607EE2Cff3e76043c2"
-            accent="cyan"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-up delay-100" style={{ marginBottom: 48 }}>
+          <ContractCard name="ImpactHook.sol" role="Core Hook" description="afterSwap fee routing, LP fee skim via afterAddLiquidity, donate skim via afterDonate, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates" chain="Unichain Sepolia" address={HOOK_ADDRESS} accent="cyan" />
+          <ContractCard name="MilestoneArbiter.sol" role="Alkahest Escrow Gate" description="Implements IArbiter from the Zellic-audited Alkahest escrow protocol. Gates grant release on verified milestone state from ImpactHook." chain="Unichain Sepolia" address={ARBITER_ADDRESS} accent="violet" />
+          <ContractCard name="MilestoneReactor.sol" role="Reactive Network RSC" description="Subscribes to MilestoneSubmitted events on origin chain. Emits cross-chain callbacks to ImpactHook on Unichain. No bridges needed." chain="Reactive Lasna" address={REACTOR_ADDRESS} accent="emerald" />
+          <ContractCard name="MilestoneOracle.sol" role="Origin Chain Event Source" description="Deployed on any supported origin chain. Emits MilestoneSubmitted events that Reactive Network relays to Unichain." chain="Ethereum Sepolia" address={ORACLE_ADDRESS} accent="amber" />
+          <ContractCard name="ImpactSwapRouter.sol" role="Custom Swap Router" description="Clean swap(key, zeroForOne, amountIn, minAmountOut) interface with slippage protection. Handles afterSwapReturnDelta internally so callers don't need to." chain="Unichain Sepolia" address={SWAP_ROUTER_ADDRESS} accent="cyan" />
         </div>
 
         {/* Cross-chain flow */}
-        <div className="card p-6 animate-fade-up delay-200" style={{ marginBottom: 32, overflowX: 'auto' }}>
-          <div className="text-[11px] tracking-[0.12em] uppercase mb-4" style={{ color: 'var(--text-dim)' }}>
-            Cross-Chain Milestone Verification
-          </div>
-          <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)', whiteSpace: 'pre' }}>
+        <div className="card p-6 animate-fade-up delay-200" style={{ marginBottom: 48, overflowX: 'auto' }}>
+          <div className="text-label" style={{ marginBottom: 16 }}>Cross-Chain Milestone Verification via Reactive Network</div>
+          <pre className="font-data" style={{ fontSize: 12, lineHeight: 1.8, color: 'var(--text-secondary)', whiteSpace: 'pre' }}>
 {`Origin Chain              Reactive Network           Destination Chain
-(any supported)           (ReactVM)                  (Unichain)
+(any supported)           (ReactVM)                  (Unichain Sepolia)
 
 MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
   emits event              subscribes &               verifyMilestoneReactive()
   MilestoneSubmitted       emits Callback             updates milestone state`}
           </pre>
-          <p className="text-[12px] mt-4 leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+          <p className="text-caption mt-4" style={{ lineHeight: 1.6 }}>
             Authorization: Reactive Network overwrites the first callback argument with the ReactVM ID.
             The hook checks <span className="font-data" style={{ color: 'var(--accent)' }}>msg.sender == callbackProxy</span> and{' '}
             <span className="font-data" style={{ color: 'var(--accent)' }}>rvmId == project.verifier</span>.
@@ -108,51 +80,48 @@ MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
         </div>
 
         {/* Verification paths */}
-        <div className="animate-fade-up delay-300" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Three verification paths
-          </h2>
+        <div className="animate-fade-up delay-300" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Three verification paths</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Direct</span>
+                <span className="status-dot" style={{ background: 'var(--accent)' }} />
+                <span className="heading-sm" style={{ fontSize: 13 }}>Direct</span>
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Verifier calls <span className="font-data" style={{ color: 'var(--accent)' }}>verifyMilestone()</span> directly.
-                Simple, gas-efficient. Works for EOAs, multisigs, DAOs.
+              <p className="text-caption" style={{ lineHeight: 1.6 }}>
+                Verifier calls <span className="font-data" style={{ color: 'var(--accent)' }}>verifyMilestone()</span> directly on Unichain.
+                Simple, gas-efficient. Works for EOAs, multisigs, DAOs, and AI agents.
               </p>
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: '#7c3aed' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Reactive Cross-Chain</span>
+                <span className="status-dot" style={{ background: '#7c3aed' }} />
+                <span className="heading-sm" style={{ fontSize: 13 }}>Reactive Cross-Chain</span>
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Oracle on origin chain emits event. Reactor RSC on Reactive Network
-                subscribes and triggers callback on Unichain.
+              <p className="text-caption" style={{ lineHeight: 1.6 }}>
+                MilestoneOracle on origin chain emits event. MilestoneReactor on Reactive Network
+                subscribes and triggers <span className="font-data" style={{ color: '#7c3aed' }}>verifyMilestoneReactive()</span> on Unichain. No bridges.
               </p>
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--success)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>EAS Attestation</span>
+                <span className="status-dot" style={{ background: 'var(--success)' }} />
+                <span className="heading-sm" style={{ fontSize: 13 }}>EAS Attestation</span>
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Verifier creates EAS attestation with evidence. Anyone can
-                call <span className="font-data" style={{ color: 'var(--success)' }}>verifyMilestoneEAS()</span> permissionlessly.
+              <p className="text-caption" style={{ lineHeight: 1.6 }}>
+                Verifier creates an Ethereum Attestation Service attestation with evidence. Anyone can then
+                call <span className="font-data" style={{ color: 'var(--success)' }}>verifyMilestoneEAS()</span> permissionlessly. Credibly neutral.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Code snippets */}
-        <div className="animate-fade-up delay-400" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Hook callbacks
-          </h2>
-          <p className="text-[12px] leading-relaxed mb-4" style={{ color: 'var(--text-dim)' }}>
-            Seven hook callbacks: <span className="font-data" style={{ color: 'var(--accent)' }}>beforeInitialize</span>,{' '}
+        {/* Hook callbacks */}
+        <div className="animate-fade-up delay-400" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Hook callbacks</h2>
+          <p className="text-caption mb-4" style={{ lineHeight: 1.6 }}>
+            Seven Uniswap v4 hook callbacks:{' '}
+            <span className="font-data" style={{ color: 'var(--accent)' }}>beforeInitialize</span>,{' '}
             <span className="font-data" style={{ color: 'var(--accent)' }}>afterSwap + afterSwapReturnDelta</span>,{' '}
             <span className="font-data" style={{ color: 'var(--accent)' }}>afterAddLiquidity + afterAddLiquidityReturnDelta</span>,{' '}
             <span className="font-data" style={{ color: 'var(--accent)' }}>afterRemoveLiquidity + afterRemoveLiquidityReturnDelta</span>,{' '}
@@ -160,15 +129,15 @@ MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="card p-6" style={{ overflowX: 'auto' }}>
+            <div className="code-block" style={{ padding: 24 }}>
               <div className="flex items-center gap-2 mb-4">
                 <span className="w-2 h-2 rounded-full" style={{ background: '#ff5f57' }} />
                 <span className="w-2 h-2 rounded-full" style={{ background: '#ffbd2e' }} />
                 <span className="w-2 h-2 rounded-full" style={{ background: '#28c840' }} />
-                <span className="ml-3 text-[11px] tracking-wider" style={{ color: 'var(--text-dim)' }}>afterSwap() - Swap Fee</span>
+                <span className="ml-3 text-caption">afterSwap() — Swap Fee Capture</span>
               </div>
-              <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                <code>{`// Fee on TOP of LP fee - LPs earn full yield
+              <pre style={{ fontSize: 12, lineHeight: 1.6, margin: 0 }}>
+{`// Fee on TOP of LP fee — LPs earn full yield
 uint16 feeBps = _getCurrentFeeBps(poolId);
 uint256 feeAmount = (uint256(uint128(outputAmount))
     * feeBps) / 10_000;
@@ -177,20 +146,20 @@ uint256 feeAmount = (uint256(uint128(outputAmount))
 poolManager.take(feeCurrency, address(this), feeAmount);
 accumulatedFees[poolId][feeCurrency] += feeAmount;
 
-// Return delta - reduces swapper output
+// Return delta — reduces swapper output
 return (this.afterSwap.selector,
-    int128(int256(feeAmount)));`}</code>
+    int128(int256(feeAmount)));`}
               </pre>
             </div>
-            <div className="card p-6" style={{ overflowX: 'auto' }}>
+            <div className="code-block" style={{ padding: 24 }}>
               <div className="flex items-center gap-2 mb-4">
                 <span className="w-2 h-2 rounded-full" style={{ background: '#ff5f57' }} />
                 <span className="w-2 h-2 rounded-full" style={{ background: '#ffbd2e' }} />
                 <span className="w-2 h-2 rounded-full" style={{ background: '#28c840' }} />
-                <span className="ml-3 text-[11px] tracking-wider" style={{ color: 'var(--text-dim)' }}>afterAddLiquidity() - LP Skim</span>
+                <span className="ml-3 text-caption">afterAddLiquidity() — LP Fee Skim</span>
               </div>
-              <pre className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                <code>{`// LP collects fees -> hook skims a %
+              <pre style={{ fontSize: 12, lineHeight: 1.6, margin: 0 }}>
+{`// LP collects fees -> hook skims a %
 function afterAddLiquidity(
     ..., BalanceDelta feesAccrued, ...
 ) {
@@ -199,43 +168,36 @@ function afterAddLiquidity(
 
 // Swap pricing stays identical
 // Routers have no reason to skip this pool
-// LPs opt in, swappers don't pay extra`}</code>
+// LPs opt in, swappers don't pay extra`}
               </pre>
             </div>
           </div>
         </div>
 
         {/* Fee model */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Fee model
-          </h2>
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Fee model</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="card p-5">
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-small" style={{ lineHeight: 1.7, margin: 0 }}>
                 The hook charges a fee <strong style={{ color: 'var(--text-primary)' }}>on top of</strong> the
-                standard LP fee via <span className="font-data" style={{ color: 'var(--accent)' }}>afterSwapReturnDelta</span>.
+                standard Uniswap v4 LP fee via <span className="font-data" style={{ color: 'var(--accent)' }}>afterSwapReturnDelta</span>.
                 LP yield is completely unaffected. Fee rate is determined by the current verified
                 milestone&apos;s <span className="font-data" style={{ color: 'var(--accent)' }}>projectFeeBps</span>.
-                Maximum capped at 5%.
+                Maximum capped at 5% (500 BPS).
               </p>
             </div>
             <div className="card p-5">
-              <div className="text-[11px] tracking-[0.12em] uppercase mb-4" style={{ color: 'var(--text-dim)' }}>
-                Example progression
-              </div>
+              <div className="text-label mb-4">Example progression</div>
               <div className="relative">
                 <div className="absolute left-[11px] top-[12px] bottom-[12px] w-px"
-                  style={{
-                    background: `linear-gradient(180deg, var(--accent) 0%, var(--accent) ${progress}%, var(--border-subtle) ${progress}%)`
-                  }} />
+                  style={{ background: `linear-gradient(180deg, var(--accent) 0%, var(--accent) ${progress}%, var(--border-subtle) ${progress}%)` }} />
                 <div className="flex flex-col gap-4">
                   {MILESTONES.map((m, i) => {
                     const isActive = i === currentMilestoneIdx;
-                    const nodeClass = m.verified ? 'milestone-verified' : isActive ? 'milestone-active' : 'milestone-pending';
                     return (
                       <div key={m.index} className="flex items-center gap-4">
-                        <div className={`milestone-node ${nodeClass}`} style={{ width: 22, height: 22 }}>
+                        <div className={`milestone-node ${m.verified ? 'milestone-verified' : isActive ? 'milestone-verified' : 'milestone-pending'}`} style={{ width: 22, height: 22 }}>
                           {m.verified ? (
                             <span style={{ color: 'var(--accent)' }}><CheckIcon /></span>
                           ) : isActive ? (
@@ -245,12 +207,8 @@ function afterAddLiquidity(
                           )}
                         </div>
                         <div className="flex-1 flex items-center justify-between">
-                          <span className="text-[12px]" style={{ color: m.verified ? 'var(--text-primary)' : 'var(--text-dim)' }}>
-                            {m.name}
-                          </span>
-                          <span className="font-data text-[12px]" style={{ color: m.verified ? 'var(--text-secondary)' : 'var(--text-dim)' }}>
-                            {m.feeBps / 100}%
-                          </span>
+                          <span style={{ fontSize: 12, color: m.verified ? 'var(--text-primary)' : 'var(--text-dim)' }}>{m.name}</span>
+                          <span className="font-data" style={{ fontSize: 12, color: m.verified ? 'var(--text-secondary)' : 'var(--text-dim)' }}>{m.feeBps / 100}%</span>
                         </div>
                       </div>
                     );
@@ -262,23 +220,19 @@ function afterAddLiquidity(
         </div>
 
         {/* LP Fee Skim */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            LP Fee Skim (Dual Funding Model)
-          </h2>
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">LP Fee Skim (Dual Funding Model)</h2>
           <div className="card p-6" style={{ marginBottom: 16 }}>
-            <div className="text-[11px] tracking-[0.12em] uppercase mb-4" style={{ color: 'var(--accent)' }}>
-              Key Innovation
-            </div>
-            <p className="text-[13px] leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
+            <span className="badge badge-accent mb-4" style={{ display: "inline-flex" }}>Key Innovation</span>
+            <p className="text-small" style={{ lineHeight: 1.7, marginBottom: 16 }}>
               Pools can skim a percentage of LP fees for the impact project via{' '}
               <span className="font-data" style={{ color: 'var(--accent)' }}>afterAddLiquidity</span> and{' '}
               <span className="font-data" style={{ color: 'var(--accent)' }}>afterRemoveLiquidity</span> return deltas.
               When LPs collect accrued fees, the hook transparently routes a configurable share to the project.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
-                <div className="text-[11px] tracking-wider uppercase mb-2" style={{ color: 'var(--text-dim)' }}>How it works</div>
+              <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: "var(--radius-sm)" }}>
+                <div className="text-label mb-2">How it works</div>
                 <ul className="flex flex-col gap-2">
                   {[
                     "Swap pricing stays identical to regular pools",
@@ -287,19 +241,18 @@ function afterAddLiquidity(
                     "Swappers don't pay any extra fees",
                     "Configurable per pool, max 50% skim rate",
                   ].map(item => (
-                    <li key={item} className="text-[12px] flex items-start gap-2" style={{ color: 'var(--text-dim)' }}>
+                    <li key={item} className="text-caption flex items-start gap-2">
                       <span style={{ color: 'var(--accent)', marginTop: 2 }}><CheckIcon /></span> {item}
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
-                <div className="text-[11px] tracking-wider uppercase mb-2" style={{ color: 'var(--text-dim)' }}>Why it matters</div>
-                <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
+              <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: "var(--radius-sm)" }}>
+                <div className="text-label mb-2">Why it matters</div>
+                <p className="text-caption" style={{ lineHeight: 1.6 }}>
                   Traditional impact funding hooks add a swap fee that makes the pool uncompetitive for routers.
                   LP fee skimming funds impact projects without touching swap pricing at all. The pool looks identical
-                  to any other v4 pool from the router&apos;s perspective, so it gets normal trade flow. Impact funding
-                  becomes invisible to swappers.
+                  to any other v4 pool from the router&apos;s perspective, so it gets normal trade flow.
                 </p>
               </div>
             </div>
@@ -307,25 +260,23 @@ function afterAddLiquidity(
         </div>
 
         {/* Native v4 Donate Skim */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Native v4 Donate Skim
-          </h2>
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Native v4 Donate Skim</h2>
           <div className="card p-5">
-            <p className="text-[13px] leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-small" style={{ lineHeight: 1.7, marginBottom: 16 }}>
               The <span className="font-data" style={{ color: 'var(--accent)' }}>afterDonate</span> hook intercepts{' '}
               <span className="font-data" style={{ color: 'var(--accent)' }}>PoolManager.donate()</span> calls.
               When users tip LPs via the native v4 donate mechanism, a configurable percentage is routed to the impact project.
             </p>
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-3 gap-4">
               {[
                 { label: "Gating", detail: "Same milestone verification" },
                 { label: "Safety", detail: "Heartbeat and pause checks" },
                 { label: "Config", detail: "donateSkimBps per template" },
               ].map(item => (
-                <div key={item.label} className="p-3" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
-                  <div className="text-[10px] tracking-wider uppercase mb-1" style={{ color: 'var(--text-dim)' }}>{item.label}</div>
-                  <div className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
+                <div key={item.label} className="p-3" style={{ background: 'var(--bg-elevated)', borderRadius: "var(--radius-sm)" }}>
+                  <div className="text-label" style={{ marginBottom: 4 }}>{item.label}</div>
+                  <div className="text-caption" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                 </div>
               ))}
             </div>
@@ -333,75 +284,43 @@ function afterAddLiquidity(
         </div>
 
         {/* Safety & Accountability */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Safety and accountability
-          </h2>
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Safety and accountability</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Heartbeat Expiration</span>
+            {[
+              { title: "Heartbeat Expiration", desc: "Projects must send periodic proof-of-life transactions. If the heartbeat interval passes without a signal, fee collection stops automatically until the project proves it is still active." },
+              { title: "Per-Project Pause", desc: "Any individual project can be paused without affecting other projects on the same hook. Paused projects stop accumulating fees immediately." },
+              { title: "Sequential Milestones", desc: "Milestones must be verified in order. A project cannot skip ahead or verify out of sequence. Each milestone can only be verified once." },
+              { title: "Checks-Effects-Interactions", desc: "All state-changing functions follow the checks-effects-interactions pattern. Static analysis with Slither confirms no reentrancy or state ordering issues." },
+            ].map(item => (
+              <div key={item.title} className="card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="status-dot" style={{ background: 'var(--accent)' }} />
+                  <span className="heading-sm" style={{ fontSize: 13 }}>{item.title}</span>
+                </div>
+                <p className="text-caption" style={{ lineHeight: 1.6 }}>{item.desc}</p>
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Projects must send periodic proof-of-life transactions. If the heartbeat interval passes without
-                a signal, fee collection automatically stops until the project proves it is still active.
-              </p>
-            </div>
-            <div className="card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Per-Project Pause</span>
-              </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Any individual project can be paused without affecting other projects on the same hook.
-                Paused projects stop accumulating fees immediately.
-              </p>
-            </div>
-            <div className="card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Sequential Milestones</span>
-              </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                Milestones must be verified in order. A project cannot skip ahead or verify
-                out of sequence. Each milestone can only be verified once.
-              </p>
-            </div>
-            <div className="card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
-                <span className="font-display text-[13px]" style={{ color: 'var(--text-primary)' }}>Checks-Effects-Interactions</span>
-              </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-dim)' }}>
-                All state-changing functions follow the checks-effects-interactions pattern.
-                Static analysis with Slither confirms no reentrancy or state ordering issues.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Behavior-Customizable Templates */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Behavior-customizable templates
-          </h2>
+        {/* Templates */}
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Behavior-customizable templates</h2>
           <div className="card p-5" style={{ overflowX: 'auto' }}>
-            <p className="text-[12px] leading-relaxed mb-4" style={{ color: 'var(--text-dim)' }}>
+            <p className="text-caption mb-4" style={{ lineHeight: 1.6 }}>
               Templates define <span className="font-data" style={{ color: 'var(--accent)' }}>lpSkimBps</span>,{' '}
               <span className="font-data" style={{ color: 'var(--accent)' }}>donateSkimBps</span>,{' '}
               <span className="font-data" style={{ color: 'var(--accent)' }}>heartbeatInterval</span>, and{' '}
               <span className="font-data" style={{ color: 'var(--accent)' }}>swapFeeEnabled</span> per project type.
-              This lets a single hook deployment serve different impact verticals with appropriate defaults.
+              One hook deployment serves different impact verticals with appropriate defaults.
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Template</th>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>LP Skim</th>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Heartbeat</th>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Swap Fees</th>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Use Case</th>
+                  {["Template", "LP Skim", "Heartbeat", "Swap Fees", "Use Case"].map(h => (
+                    <th key={h} className="text-left text-caption pb-3" style={{ fontWeight: 500 }}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -411,11 +330,11 @@ function afterAddLiquidity(
                   { template: "Open Source", lpSkim: "0%", heartbeat: "None", swapFees: "Enabled", useCase: "Traditional swap-fee dev grants" },
                 ].map((row) => (
                   <tr key={row.template} style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                    <td className="py-3 text-[13px] font-data" style={{ color: 'var(--text-primary)' }}>{row.template}</td>
-                    <td className="py-3 text-[12px] font-data" style={{ color: 'var(--accent)' }}>{row.lpSkim}</td>
-                    <td className="py-3 text-[12px]" style={{ color: 'var(--text-secondary)' }}>{row.heartbeat}</td>
-                    <td className="py-3 text-[12px]" style={{ color: row.swapFees === 'Enabled' ? 'var(--success)' : 'var(--text-dim)' }}>{row.swapFees}</td>
-                    <td className="py-3 text-[12px]" style={{ color: 'var(--text-dim)' }}>{row.useCase}</td>
+                    <td className="py-3 font-data" style={{ fontSize: 13, color: 'var(--text-primary)' }}>{row.template}</td>
+                    <td className="py-3 font-data" style={{ fontSize: 12, color: 'var(--accent)' }}>{row.lpSkim}</td>
+                    <td className="py-3" style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{row.heartbeat}</td>
+                    <td className="py-3" style={{ fontSize: 12, color: row.swapFees === 'Enabled' ? 'var(--success)' : 'var(--text-dim)' }}>{row.swapFees}</td>
+                    <td className="py-3 text-caption">{row.useCase}</td>
                   </tr>
                 ))}
               </tbody>
@@ -424,29 +343,26 @@ function afterAddLiquidity(
         </div>
 
         {/* Evidence & Impact Records */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Evidence storage and impact records
-          </h2>
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Evidence storage and impact records</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-5">
-              <div className="text-[13px] font-semibold mb-2" style={{ color: '#3b82f6' }}>Storacha / Filecoin Pin</div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              <div className="heading-sm mb-2" style={{ fontSize: 13, color: '#3b82f6' }}>Storacha / Filecoin Pin</div>
+              <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 Milestone evidence (reports, images, data) uploaded to Filecoin/IPFS via Storacha or Filecoin Pin.
-                CIDs stored onchain via <span className="font-data" style={{ color: 'var(--accent)' }}>setMilestoneEvidence()</span> for
-                permanent, queryable records.
+                CIDs stored onchain via <span className="font-data" style={{ color: 'var(--accent)' }}>setMilestoneEvidence()</span>.
               </p>
             </div>
             <div className="card p-5">
-              <div className="text-[13px] font-semibold mb-2" style={{ color: '#f97316' }}>Hypercerts</div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                Verified milestones mint Hypercerts on Ethereum, creating composable impact records.
-                Metadata auto-populated from onchain state: project name, milestone description, contributors, and evidence CIDs.
+              <div className="heading-sm mb-2" style={{ fontSize: 13, color: '#f97316' }}>Hypercerts</div>
+              <p className="text-caption" style={{ lineHeight: 1.6 }}>
+                Verified milestones mint Hypercerts on Ethereum, creating composable, tradeable impact certificates.
+                Metadata auto-populated from onchain state: project name, milestone, contributors, evidence CIDs.
               </p>
             </div>
             <div className="card p-5">
-              <div className="text-[13px] font-semibold mb-2" style={{ color: 'var(--accent)' }}>Triple persistence</div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              <div className="heading-sm mb-2" style={{ fontSize: 13, color: 'var(--accent)' }}>Triple persistence</div>
+              <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 Evidence persists in three places: ImpactHook contract (Unichain), Hypercert metadata (Ethereum),
                 and EAS attestation data (Unichain). Each independently verifiable.
               </p>
@@ -454,24 +370,60 @@ function afterAddLiquidity(
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="divider" style={{ margin: '48px 0' }} />
+        {/* AI Agent */}
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Autonomous verification agent</h2>
+          <div className="card p-6 mb-4" style={{ borderLeft: '2px solid #3b82f6' }}>
+            <span className="badge badge-accent mb-4" style={{ display: "inline-flex", background: "rgba(59,130,246,0.08)", color: "#3b82f6", borderColor: "rgba(59,130,246,0.2)" }}>AI-Powered Milestone Verification</span>
+            <p className="text-small" style={{ lineHeight: 1.7, marginBottom: 16 }}>
+              A standalone Bun service that monitors <span className="font-data" style={{ color: 'var(--accent)' }}>EvidenceAttached</span> events,
+              retrieves evidence from Storacha/IPFS, analyzes it with Claude, and submits{' '}
+              <span className="font-data" style={{ color: 'var(--accent)' }}>verifyMilestone()</span> when confidence exceeds the threshold.
+              Reports stored permanently on Filecoin. Agent memory persists on Storacha across sessions.
+            </p>
+            <pre className="font-data" style={{ fontSize: 12, lineHeight: 1.8, color: 'var(--text-secondary)', whiteSpace: 'pre', overflowX: 'auto' }}>
+{`Evidence uploaded        Agent detects          Claude analyzes        Report stored
+to Storacha/IPFS    -->  EvidenceAttached   -->  evidence vs         -->  on Filecoin Pin
+                         event onchain          milestone criteria      (Calibration)
+                                                      |
+                                          confidence >= 70%?
+                                           yes /        \\ no
+                                              /          \\
+                              verifyMilestone()    store report,
+                              submitted onchain    defer to human`}
+            </pre>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { title: "Storacha Memory", desc: "Agent state, past verifications, and project knowledge persist on Storacha. On restart, the agent loads its memory from the latest CID and resumes where it left off." },
+              { title: "Filecoin Reports", desc: "Every verification produces a structured JSON report stored on Filecoin via Synapse SDK. Reports include per-criterion analysis, confidence scores, and reasoning." },
+              { title: "Alkahest Integration", desc: "When the agent verifies a milestone, MilestoneArbiter.checkObligation() returns true, automatically releasing gated escrow funds. Fully autonomous funding cycle." },
+              { title: "Guardrails", desc: "Confidence threshold gating (only auto-verifies above 70%), dry-run mode for analysis without onchain transactions, structured execution logs, budget-aware operation." },
+            ].map(item => (
+              <div key={item.title} className="card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="status-dot" style={{ background: '#3b82f6' }} />
+                  <span className="heading-sm" style={{ fontSize: 13 }}>{item.title}</span>
+                </div>
+                <p className="text-caption" style={{ lineHeight: 1.6 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="divider" />
 
         {/* Test coverage */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: 'var(--success)' }}>
-            Quality
-          </span>
-          <h2 className="font-display text-[clamp(1.4rem,4vw,2rem)] mt-3 mb-6" style={{ color: 'var(--text-primary)' }}>
-            Test coverage
-          </h2>
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <div className="text-superhead" style={{ color: 'var(--success)' }}>Quality</div>
+          <h2 className="heading-md mt-3 mb-6">Test coverage</h2>
 
-          <div className="card p-6" style={{ marginBottom: 16 }}>
+          <div className="card p-6 mb-4">
             <div className="flex items-center gap-4 mb-6">
-              <div className="font-data text-3xl" style={{ color: 'var(--success)' }}>174</div>
+              <div className="stat-value" style={{ color: 'var(--success)' }}>174</div>
               <div>
-                <div className="text-[13px]" style={{ color: 'var(--text-primary)' }}>tests passing</div>
-                <div className="text-[11px]" style={{ color: 'var(--text-dim)' }}>0 failed, 0 skipped</div>
+                <div style={{ fontSize: 13, color: 'var(--text-primary)' }}>tests passing</div>
+                <div className="text-caption">0 failed, 0 skipped</div>
               </div>
             </div>
 
@@ -491,35 +443,32 @@ function afterAddLiquidity(
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="divider" style={{ margin: '48px 0' }} />
+        <div className="divider" />
 
-        {/* Deployed addresses */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
-            Deployed contracts
-          </h2>
+        {/* Deployed contracts table */}
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <h2 className="heading-md mb-4">Deployed contracts</h2>
           <div className="card p-5" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Contract</th>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Chain</th>
-                  <th className="text-left text-[10px] tracking-[0.12em] uppercase pb-3" style={{ color: 'var(--text-dim)' }}>Address</th>
+                  {["Contract", "Chain", "Address"].map(h => (
+                    <th key={h} className="text-left text-caption pb-3" style={{ fontWeight: 500 }}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0xC8A18E4A64224D2785D505c77923ed8c1d4F2557" },
-                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0xF51197176Fc8B8D4F780Dc67E431a90E85Fc52Fb" },
-                  { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" },
-                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x19D5bfa64Ff4992e917FC627B246eBdDf6A7d872" },
-                  { name: "ImpactSwapRouter", chain: "Unichain Sepolia", address: "0x66452162B01442d92fc77d607EE2Cff3e76043c2" },
+                  { name: "ImpactHook", chain: "Unichain Sepolia", address: HOOK_ADDRESS },
+                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: ARBITER_ADDRESS },
+                  { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: ORACLE_ADDRESS },
+                  { name: "MilestoneReactor", chain: "Reactive Lasna", address: REACTOR_ADDRESS },
+                  { name: "ImpactSwapRouter", chain: "Unichain Sepolia", address: SWAP_ROUTER_ADDRESS },
                 ].map((c) => (
                   <tr key={c.name} style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                    <td className="py-3 text-[13px]" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
-                    <td className="py-3 text-[12px]" style={{ color: 'var(--text-dim)' }}>{c.chain}</td>
-                    <td className="py-3 font-data text-[11px]" style={{ color: 'var(--accent)' }}>{c.address}</td>
+                    <td className="py-3" style={{ fontSize: 13, color: 'var(--text-primary)' }}>{c.name}</td>
+                    <td className="py-3 text-caption">{c.chain}</td>
+                    <td className="py-3 font-data" style={{ fontSize: 11, color: 'var(--accent)' }}>{c.address}</td>
                   </tr>
                 ))}
               </tbody>
@@ -527,9 +476,9 @@ function afterAddLiquidity(
           </div>
           <div className="card p-4 mt-4">
             <div className="flex items-center justify-between">
-              <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>EAS Schema UID</span>
-              <span className="font-data text-[10px]" style={{ color: 'var(--accent)' }}>
-                0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bfb52
+              <span className="text-caption">EAS Schema UID</span>
+              <span className="font-data" style={{ fontSize: 10, color: 'var(--accent)' }}>
+                {MILESTONE_SCHEMA_UID}
               </span>
             </div>
           </div>
@@ -537,19 +486,17 @@ function afterAddLiquidity(
 
         {/* Key addresses */}
         <div className="card p-5 animate-fade-up" style={{ marginBottom: 48 }}>
-          <div className="text-[11px] tracking-[0.12em] uppercase mb-3" style={{ color: 'var(--text-dim)' }}>
-            Key Addresses (Unichain Sepolia)
-          </div>
+          <div className="text-label mb-3">Key Addresses (Unichain Sepolia)</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              { label: "PoolManager", address: "0x00B036B58a818B1BC34d502D3fE730Db729e62AC" },
-              { label: "Callback Proxy", address: "0x9299472A6399Fd1027ebF067571Eb3e3D7837FC4" },
-              { label: "EAS", address: "0x4200000000000000000000000000000000000021" },
-              { label: "SchemaRegistry", address: "0x4200000000000000000000000000000000000020" },
+              { label: "PoolManager", address: POOL_MANAGER_ADDRESS },
+              { label: "Callback Proxy", address: CALLBACK_PROXY_ADDRESS },
+              { label: "EAS", address: EAS_ADDRESS },
+              { label: "SchemaRegistry", address: SCHEMA_REGISTRY },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{item.label}</span>
-                <span className="font-data text-[10px]" style={{ color: 'var(--text-secondary)' }}>{item.address}</span>
+                <span className="text-caption">{item.label}</span>
+                <span className="font-data" style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{item.address}</span>
               </div>
             ))}
           </div>
@@ -557,15 +504,12 @@ function afterAddLiquidity(
 
         {/* CTA */}
         <div className="flex justify-center gap-4 animate-fade-up">
-          <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer"
-             className="cta-primary inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide" style={{ borderRadius: 6, textDecoration: 'none' }}>
+          <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" className="btn-primary">
             View on GitHub
           </a>
-          <a href="/dashboard"
-             className="inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide"
-             style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 6, textDecoration: 'none' }}>
+          <Link href="/dashboard" className="btn-secondary">
             Launch App
-          </a>
+          </Link>
         </div>
       </main>
     </div>
@@ -576,39 +520,30 @@ function ContractCard({ name, role, description, chain, address, accent }: {
   name: string; role: string; description: string; chain: string; address: string;
   accent: 'cyan' | 'violet' | 'emerald' | 'amber';
 }) {
-  const accentColors = {
-    cyan: 'var(--accent)',
-    violet: '#7c3aed',
-    emerald: 'var(--success)',
-    amber: '#d97706',
-  };
-
+  const accentColors = { cyan: 'var(--accent)', violet: '#7c3aed', emerald: 'var(--success)', amber: '#d97706' };
   return (
-    <div className="card p-5">
+    <div className="card p-5" style={{ borderLeft: `2px solid ${accentColors[accent]}` }}>
       <div className="flex items-center justify-between mb-2">
-        <span className="font-data text-[13px]" style={{ color: accentColors[accent] }}>{name}</span>
-        <span className="text-[10px] tracking-[0.12em] uppercase px-2 py-0.5"
-              style={{ color: 'var(--text-dim)', border: '1px solid var(--border-subtle)', borderRadius: 6 }}>
-          {chain}
-        </span>
+        <span className="font-data" style={{ fontSize: 13, color: accentColors[accent] }}>{name}</span>
+        <span className="badge badge-neutral" style={{ fontSize: 10, padding: "2px 8px" }}>{chain}</span>
       </div>
-      <div className="text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: 'var(--text-dim)' }}>{role}</div>
-      <p className="text-[12px] leading-relaxed mb-3" style={{ color: 'var(--text-dim)' }}>{description}</p>
-      <div className="font-data text-[10px]" style={{ color: 'var(--text-secondary)' }}>{address}</div>
+      <div className="text-label mb-2">{role}</div>
+      <p className="text-caption mb-3" style={{ lineHeight: 1.6 }}>{description}</p>
+      <div className="font-data" style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{address}</div>
     </div>
   );
 }
 
 function TestGroup({ name, count, items }: { name: string; count: number; items: string[] }) {
   return (
-    <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: 8 }}>
+    <div className="p-4" style={{ background: 'var(--bg-elevated)', borderRadius: "var(--radius-sm)" }}>
       <div className="flex items-center gap-2 mb-3">
-        <span className="font-data text-[15px]" style={{ color: 'var(--success)' }}>{count}</span>
-        <span className="text-[11px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>{name}</span>
+        <span className="font-data" style={{ fontSize: 15, color: 'var(--success)' }}>{count}</span>
+        <span className="text-caption">{name}</span>
       </div>
       <ul className="flex flex-col gap-1">
         {items.map(item => (
-          <li key={item} className="text-[11px] flex items-center gap-2" style={{ color: 'var(--text-dim)' }}>
+          <li key={item} className="text-caption flex items-center gap-2">
             <span style={{ color: 'var(--success)' }}>+</span> {item}
           </li>
         ))}
@@ -620,8 +555,8 @@ function TestGroup({ name, count, items }: { name: string; count: number; items:
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-4 text-center">
-      <div className="font-data text-[18px] mb-1" style={{ color: 'var(--text-primary)' }}>{value}</div>
-      <div className="text-[10px] tracking-wider uppercase" style={{ color: 'var(--text-dim)' }}>{label}</div>
+      <div className="font-data" style={{ fontSize: 18, color: 'var(--text-primary)', marginBottom: 4 }}>{value}</div>
+      <div className="text-caption">{label}</div>
     </div>
   );
 }

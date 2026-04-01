@@ -34,7 +34,6 @@ export default function DonatePage() {
     currencyInput === "0x0000000000000000000000000000000000000000" ||
     currencyInput.toLowerCase() === "0x0";
 
-  // Read project info
   const { data: projectInfo } = useReadContract({
     address: HOOK_ADDRESS,
     abi: impactHookAbi,
@@ -49,7 +48,6 @@ export default function DonatePage() {
   const milestoneCount = projectInfo?.[3];
   const currentMilestone = projectInfo?.[2];
 
-  // Read contributor stats
   const { data: contributorStats } = useReadContract({
     address: HOOK_ADDRESS,
     abi: impactHookAbi,
@@ -58,7 +56,6 @@ export default function DonatePage() {
     chainId: unichainSepolia.id,
   });
 
-  // Read ERC20 allowance (only for non-native tokens)
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: currency as `0x${string}`,
     abi: erc20Abi,
@@ -68,12 +65,9 @@ export default function DonatePage() {
       HOOK_ADDRESS,
     ],
     chainId: unichainSepolia.id,
-    query: {
-      enabled: !isNativeETH && !!address,
-    },
+    query: { enabled: !isNativeETH && !!address },
   });
 
-  // Read ERC20 balance (non-native tokens)
   const { data: erc20Balance } = useReadContract({
     address: currency as `0x${string}`,
     abi: erc20Abi,
@@ -83,42 +77,30 @@ export default function DonatePage() {
     query: { enabled: !isNativeETH && !!address && !!currencyInput },
   });
 
-  // Read native ETH balance
   const { data: ethBalance } = useBalance({
     address: address,
     chainId: unichainSepolia.id,
     query: { enabled: isNativeETH && !!address },
   });
 
-  // Approve transaction
   const {
     writeContract: writeApprove,
     data: approveTxHash,
     error: approveError,
     reset: resetApprove,
   } = useWriteContract();
-  const {
-    isLoading: isApproving,
-    isSuccess: approveSuccess,
-  } = useWaitForTransactionReceipt({
-    hash: approveTxHash,
-  });
+  const { isLoading: isApproving, isSuccess: approveSuccess } =
+    useWaitForTransactionReceipt({ hash: approveTxHash });
 
-  // Donate transaction
   const {
     writeContract: writeDonate,
     data: donateTxHash,
     error: donateError,
     reset: resetDonate,
   } = useWriteContract();
-  const {
-    isLoading: isDonating,
-    isSuccess: donateSuccess,
-  } = useWaitForTransactionReceipt({
-    hash: donateTxHash,
-  });
+  const { isLoading: isDonating, isSuccess: donateSuccess } =
+    useWaitForTransactionReceipt({ hash: donateTxHash });
 
-  // After approve succeeds, refetch allowance and proceed to donate
   useEffect(() => {
     if (approveSuccess && step === "approving") {
       refetchAllowance();
@@ -126,14 +108,12 @@ export default function DonatePage() {
     }
   }, [approveSuccess, step, refetchAllowance]);
 
-  // After donate succeeds, reset step
   useEffect(() => {
     if (donateSuccess && step === "donating") {
       setStep("input");
     }
   }, [donateSuccess, step]);
 
-  // Track errors
   useEffect(() => {
     if (approveError) {
       setErrorMsg(approveError.message?.split("\n")[0] || "Approval failed");
@@ -148,7 +128,6 @@ export default function DonatePage() {
     }
   }, [donateError]);
 
-  // Parse amount safely
   const getParsedAmount = (): bigint | null => {
     try {
       if (!amountInput || parseFloat(amountInput) <= 0) return null;
@@ -158,7 +137,6 @@ export default function DonatePage() {
     }
   };
 
-  // Check if ERC20 needs approval
   const needsApproval = (): boolean => {
     if (isNativeETH) return false;
     const parsed = getParsedAmount();
@@ -173,7 +151,6 @@ export default function DonatePage() {
     setErrorMsg("");
     resetApprove();
     setStep("approving");
-
     writeApprove({
       address: currency as `0x${string}`,
       abi: erc20Abi,
@@ -195,11 +172,7 @@ export default function DonatePage() {
         address: HOOK_ADDRESS,
         abi: impactHookAbi,
         functionName: "donate",
-        args: [
-          poolId,
-          "0x0000000000000000000000000000000000000000",
-          BigInt(0),
-        ],
+        args: [poolId, "0x0000000000000000000000000000000000000000", BigInt(0)],
         value: parsed,
         chainId: unichainSepolia.id,
       });
@@ -229,58 +202,42 @@ export default function DonatePage() {
     currentFeeBps !== undefined ? (Number(currentFeeBps) / 100).toFixed(2) : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "transparent" }}>
+    <div style={{ minHeight: "100vh" }}>
       <Navigation />
-      <main style={{ maxWidth: 520, margin: "0 auto", padding: "40px 24px" }}>
+      <main className="container-narrow" style={{ paddingTop: 40, paddingBottom: 48 }}>
         <div style={{ marginBottom: 32 }}>
-          <h1
-            className="font-display"
-            style={{
-              fontSize: 28,
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              marginBottom: 8,
-            }}
-          >
-            Donate
-          </h1>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-            Donate directly to an impact project. Same milestone-gated
-            withdrawal rules apply.
+          <h1 className="heading-page" style={{ marginBottom: 8 }}>Donate</h1>
+          <p className="text-body" style={{ margin: 0 }}>
+            Send tokens directly to an impact project. Same milestone-gating rules apply: funding only unlocks as milestones are verified onchain.
           </p>
         </div>
 
-        <div className="card" style={{ padding: 24 }}>
+        <div className="card" style={{ padding: 32 }}>
           {/* Pool ID */}
-          <div style={{ marginBottom: 16 }}>
-            <ProjectSelector value={poolIdInput} onChange={setPoolIdInput} label="PROJECT" />
+          <div style={{ marginBottom: 20 }}>
+            <ProjectSelector value={poolIdInput} onChange={setPoolIdInput} />
           </div>
 
           {/* Currency address */}
-          <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>CURRENCY (TOKEN ADDRESS)</label>
+          <div style={{ marginBottom: 20 }}>
+            <label className="text-label">Currency (token address)</label>
             <input
               type="text"
+              className="input"
               placeholder="0x0 for native ETH, or ERC20 address"
               value={currencyInput}
-              onChange={(e) => {
-                setCurrencyInput(e.target.value);
-                setErrorMsg("");
-              }}
-              style={inputStyle}
+              onChange={(e) => { setCurrencyInput(e.target.value); setErrorMsg(""); }}
             />
             {isNativeETH && currencyInput === "" && (
-              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4 }}>
-                Defaults to native ETH
-              </div>
+              <div className="text-helper">Defaults to native ETH</div>
             )}
             {address && isNativeETH && ethBalance && (
-              <div style={balanceTextStyle}>
+              <div className="text-helper">
                 Balance: {parseFloat(formatEther(ethBalance.value)).toFixed(4)} ETH
               </div>
             )}
             {address && !isNativeETH && currencyInput && erc20Balance !== undefined && (
-              <div style={balanceTextStyle}>
+              <div className="text-helper">
                 Balance: {parseFloat(formatEther(erc20Balance as bigint)).toFixed(4)}
               </div>
             )}
@@ -288,58 +245,36 @@ export default function DonatePage() {
 
           {/* Amount */}
           <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}>
-              AMOUNT {isNativeETH ? "(ETH)" : "(TOKEN UNITS)"}
+            <label className="text-label">
+              Amount {isNativeETH ? "(ETH)" : "(token units)"}
             </label>
             <input
               type="text"
+              className="input"
               placeholder="0.1"
               value={amountInput}
-              onChange={(e) => {
-                setAmountInput(e.target.value);
-                setErrorMsg("");
-              }}
-              style={inputStyle}
+              onChange={(e) => { setAmountInput(e.target.value); setErrorMsg(""); }}
             />
           </div>
 
-          {/* Project info display */}
+          {/* Project info */}
           {registered && poolIdInput && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr",
-                gap: 12,
-                marginBottom: 20,
-              }}
-            >
-              <div style={infoCardStyle}>
-                <div style={infoLabelStyle}>Recipient</div>
-                <div
-                  className="font-data"
-                  style={{ fontSize: 13, color: "var(--text-secondary)" }}
-                >
-                  {projectRecipient
-                    ? `${projectRecipient.slice(0, 6)}...${projectRecipient.slice(-4)}`
-                    : "-"}
+            <div className="grid-3" style={{ marginBottom: 20 }}>
+              <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <div className="text-label" style={{ marginBottom: 4 }}>Recipient</div>
+                <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                  {projectRecipient ? `${projectRecipient.slice(0, 6)}...${projectRecipient.slice(-4)}` : "-"}
                 </div>
               </div>
-              <div style={infoCardStyle}>
-                <div style={infoLabelStyle}>Milestones</div>
-                <div
-                  className="font-data"
-                  style={{ fontSize: 13, color: "var(--text-secondary)" }}
-                >
-                  {currentMilestone?.toString()}/{milestoneCount?.toString()}{" "}
-                  verified
+              <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <div className="text-label" style={{ marginBottom: 4 }}>Milestones</div>
+                <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                  {currentMilestone?.toString()}/{milestoneCount?.toString()} verified
                 </div>
               </div>
-              <div style={infoCardStyle}>
-                <div style={infoLabelStyle}>Current Fee</div>
-                <div
-                  className="font-data"
-                  style={{ fontSize: 13, color: "var(--accent-cyan, var(--text-secondary))" }}
-                >
+              <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <div className="text-label" style={{ marginBottom: 4 }}>Current Fee</div>
+                <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
                   {feePercent !== null ? `${feePercent}%` : "-"}
                 </div>
               </div>
@@ -348,89 +283,25 @@ export default function DonatePage() {
 
           {/* Not registered warning */}
           {poolIdInput && poolIdInput.length > 10 && registered === false && (
-            <div
-              style={{
-                marginBottom: 20,
-                padding: "10px 14px",
-                borderRadius: 2,
-                background: "rgba(239,68,68,0.06)",
-                border: "1px solid rgba(239,68,68,0.15)",
-                color: "#ef4444",
-                fontSize: 12,
-              }}
-            >
-              No project registered for this Pool ID.
+            <div style={{ marginBottom: 20, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
+              <span className="status-error" style={{ marginTop: 0 }}>No project registered for this Pool ID.</span>
             </div>
           )}
 
-          {/* Your impact stats */}
+          {/* Impact stats */}
           {registered && poolIdInput && isConnected && (
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 2,
-                background: "var(--accent-bg)",
-                border: "1px solid rgba(13,148,136,0.08)",
-                marginBottom: 20,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--accent)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.12em",
-                  marginBottom: 10,
-                }}
-              >
-                Your Impact
-              </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                }}
-              >
+            <div style={{ padding: 16, borderRadius: "var(--radius-btn)", background: "var(--accent-bg)", border: "1px solid rgba(13,148,136,0.08)", marginBottom: 20 }}>
+              <div className="text-superhead" style={{ marginBottom: 10 }}>Your Impact</div>
+              <div className="grid-2" style={{ gap: 12 }}>
                 <div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "var(--text-dim)",
-                      marginBottom: 2,
-                    }}
-                  >
-                    This pool
-                  </div>
-                  <div
-                    className="font-data"
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--success)",
-                    }}
-                  >
+                  <div className="text-caption" style={{ marginBottom: 2 }}>This pool</div>
+                  <div className="font-data" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
                     {poolContribution}
                   </div>
                 </div>
                 <div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "var(--text-dim)",
-                      marginBottom: 2,
-                    }}
-                  >
-                    All pools
-                  </div>
-                  <div
-                    className="font-data"
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--success)",
-                    }}
-                  >
+                  <div className="text-caption" style={{ marginBottom: 2 }}>All pools</div>
+                  <div className="font-data" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
                     {globalContribution}
                   </div>
                 </div>
@@ -438,56 +309,23 @@ export default function DonatePage() {
             </div>
           )}
 
-          {/* Approve button (ERC20 only, when allowance insufficient) */}
+          {/* Approve button */}
           {!isNativeETH && isEnabled && needsApproval() && (
             <button
               onClick={handleApprove}
               disabled={isApproving}
-              style={{
-                ...buttonBaseStyle,
-                marginBottom: 10,
-                border: "1px solid var(--accent-amber, #fbbf24)",
-                background: isApproving
-                  ? "var(--bg-elevated)"
-                  : "rgba(251,191,36,0.1)",
-                color: isApproving
-                  ? "var(--text-dim)"
-                  : "var(--accent-amber, #fbbf24)",
-                cursor: isApproving ? "not-allowed" : "pointer",
-              }}
+              className="btn-form"
+              style={{ marginBottom: 8, background: "rgba(245,158,11,0.08)", border: "1px solid var(--warning)", color: "var(--warning)" }}
             >
-              {isApproving
-                ? "Approving..."
-                : `Approve ${amountInput} tokens`}
+              {isApproving ? "Approving..." : `Approve ${amountInput} tokens`}
             </button>
           )}
 
           {/* Donate button */}
           <button
             onClick={handleDonate}
-            disabled={
-              !isEnabled ||
-              (!isNativeETH && needsApproval())
-            }
-            style={{
-              ...buttonBaseStyle,
-              border:
-                isEnabled && (isNativeETH || !needsApproval())
-                  ? "1px solid var(--accent)"
-                  : "1px solid var(--border-subtle)",
-              background:
-                isEnabled && (isNativeETH || !needsApproval())
-                  ? "var(--accent)"
-                  : "var(--bg-elevated)",
-              color:
-                isEnabled && (isNativeETH || !needsApproval())
-                  ? "#ffffff"
-                  : "var(--text-dim)",
-              cursor:
-                isEnabled && (isNativeETH || !needsApproval())
-                  ? "pointer"
-                  : "not-allowed",
-            }}
+            disabled={!isEnabled || (!isNativeETH && needsApproval())}
+            className="btn-form"
           >
             {isDonating
               ? "Donating..."
@@ -502,237 +340,92 @@ export default function DonatePage() {
                       : `Donate ${amountInput} ${isNativeETH ? "ETH" : "tokens"}`}
           </button>
 
-          {/* Transaction status: Approving */}
+          {/* Transaction statuses */}
           {isApproving && approveTxHash && (
-            <div style={{ ...statusStyle, ...statusPendingStyle }}>
+            <div className="status-pending">
               Approval pending...{" "}
-              <a
-                href={`https://sepolia.uniscan.xyz/tx/${approveTxHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={linkStyle}
-              >
+              <a href={`https://sepolia.uniscan.xyz/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
           )}
 
-          {/* Transaction status: Approve success */}
           {approveSuccess && !donateSuccess && (
-            <div style={{ ...statusStyle, ...statusSuccessStyle }}>
+            <div className="status-success">
               Approval confirmed. You can now donate.
             </div>
           )}
 
-          {/* Transaction status: Donating */}
           {isDonating && donateTxHash && (
-            <div style={{ ...statusStyle, ...statusPendingStyle }}>
+            <div className="status-pending">
               Donation pending...{" "}
-              <a
-                href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={linkStyle}
-              >
+              <a href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
           )}
 
-          {/* Transaction status: Donate success */}
           {donateSuccess && (
-            <div style={{ ...statusStyle, ...statusSuccessStyle }}>
+            <div className="status-success">
               Donation successful!{" "}
-              <a
-                href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={linkStyle}
-              >
+              <a href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
           )}
 
-          {/* Error message */}
           {errorMsg && (
-            <div style={{ ...statusStyle, ...statusErrorStyle }}>
+            <div className="status-error">
               {errorMsg}
             </div>
           )}
         </div>
 
-        {/* Demo preview when no pool entered */}
+        {/* Demo preview */}
         {!poolIdInput && (
-          <div
-            className="animate-fade-up delay-200"
-            style={{ marginTop: 24, position: "relative" }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                padding: "3px 8px",
-                borderRadius: 2,
-                fontSize: 10,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                background: "rgba(124,58,237,0.08)",
-                color: "#7c3aed",
-                border: "1px solid rgba(124,58,237,0.15)",
-                zIndex: 1,
-              }}
-            >
-              Preview
-            </div>
-            <div className="card" style={{ padding: 24 }}>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-dim)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  marginBottom: 6,
-                }}
-              >
+          <div className="animate-fade-up delay-200" style={{ marginTop: 24, position: "relative" }}>
+            <div className="card" style={{ padding: 32, position: "relative" }}>
+              <span className="badge badge-violet" style={{ position: "absolute", top: 16, right: 16, fontSize: 11, padding: "2px 10px" }}>
+                Preview
+              </span>
+              <div className="text-label" style={{ marginBottom: 12 }}>
                 Example: Clean Water - Chiapas Schools
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: 12,
-                  marginBottom: 16,
-                }}
-              >
-                <div style={infoCardStyle}>
-                  <div style={infoLabelStyle}>Recipient</div>
-                  <div
-                    className="font-data"
-                    style={{ fontSize: 13, color: "var(--text-secondary)" }}
-                  >
-                    0x1a2B...9c4D
-                  </div>
+              <div className="grid-3" style={{ marginBottom: 16 }}>
+                <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div className="text-label" style={{ marginBottom: 4 }}>Recipient</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>0x1a2B...9c4D</div>
                 </div>
-                <div style={infoCardStyle}>
-                  <div style={infoLabelStyle}>Milestones</div>
-                  <div
-                    className="font-data"
-                    style={{ fontSize: 13, color: "var(--text-secondary)" }}
-                  >
-                    4/4 verified
-                  </div>
+                <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div className="text-label" style={{ marginBottom: 4 }}>Milestones</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>4/4 verified</div>
                 </div>
-                <div style={infoCardStyle}>
-                  <div style={infoLabelStyle}>Current Fee</div>
-                  <div
-                    className="font-data"
-                    style={{ fontSize: 13, color: "var(--accent-cyan, var(--text-secondary))" }}
-                  >
-                    3.00%
+                <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div className="text-label" style={{ marginBottom: 4 }}>Current Fee</div>
+                  <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>3.00%</div>
+                </div>
+              </div>
+
+              <div style={{ padding: 16, borderRadius: "var(--radius-btn)", background: "var(--accent-bg)", border: "1px solid rgba(13,148,136,0.08)", marginBottom: 16 }}>
+                <div className="text-superhead" style={{ marginBottom: 8 }}>Your Impact</div>
+                <div className="grid-2" style={{ gap: 12 }}>
+                  <div>
+                    <div className="text-caption" style={{ marginBottom: 2 }}>This pool</div>
+                    <div className="font-data" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>0.847</div>
+                  </div>
+                  <div>
+                    <div className="text-caption" style={{ marginBottom: 2 }}>All pools</div>
+                    <div className="font-data" style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>2.134</div>
                   </div>
                 </div>
               </div>
-              <div
-                style={{
-                  padding: 16,
-                  borderRadius: 2,
-                  background: "var(--accent-bg)",
-                  border: "1px solid rgba(13,148,136,0.08)",
-                  marginBottom: 16,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "var(--accent)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.12em",
-                    marginBottom: 8,
-                  }}
-                >
-                  Your Impact
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 12,
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--text-dim)",
-                        marginBottom: 2,
-                      }}
-                    >
-                      This pool
-                    </div>
-                    <div
-                      className="font-data"
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "var(--success)",
-                      }}
-                    >
-                      0.847
-                    </div>
-                  </div>
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--text-dim)",
-                        marginBottom: 2,
-                      }}
-                    >
-                      All pools
-                    </div>
-                    <div
-                      className="font-data"
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "var(--success)",
-                      }}
-                    >
-                      2.134
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <button
-                disabled
-                style={{
-                  ...buttonBaseStyle,
-                  border: "1px solid rgba(124,58,237,0.3)",
-                  background: "rgba(124,58,237,0.08)",
-                  color: "var(--text-primary)",
-                  cursor: "not-allowed",
-                  opacity: 0.6,
-                }}
-              >
+
+              <button disabled className="btn-form" style={{ opacity: 0.5 }}>
                 Donate 0.5 ETH
               </button>
-              <div
-                style={{
-                  marginTop: 12,
-                  padding: "10px 14px",
-                  borderRadius: 2,
-                  background: "var(--accent-bg)",
-                  border: "1px solid rgba(13,148,136,0.08)",
-                  fontSize: 12,
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.5,
-                }}
-              >
-                Enter a Pool ID above to donate directly to an impact project.
-                For ERC20 tokens, approve the hook contract first.
+
+              <div className="text-helper" style={{ marginTop: 12, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--accent-bg)", border: "1px solid rgba(13,148,136,0.08)", textAlign: "center" }}>
+                Enter a Pool ID above to donate directly to an impact project. For ERC20 tokens, approve the hook contract first.
               </div>
             </div>
           </div>
@@ -741,90 +434,3 @@ export default function DonatePage() {
     </div>
   );
 }
-
-const labelStyle: React.CSSProperties = {
-  fontSize: 11,
-  color: "var(--text-dim)",
-  display: "block",
-  marginBottom: 6,
-  textTransform: "uppercase",
-  letterSpacing: "0.12em",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "10px 12px",
-  borderRadius: 6,
-  border: "1px solid var(--border-subtle)",
-  background: "var(--bg-elevated)",
-  color: "var(--text-primary)",
-  fontSize: 13,
-  outline: "none",
-  fontFamily: "inherit",
-  boxSizing: "border-box",
-};
-
-const buttonBaseStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "12px 20px",
-  borderRadius: 6,
-  fontSize: 13,
-  fontWeight: 600,
-  letterSpacing: "0.12em",
-  textTransform: "uppercase",
-  transition: "all 0.2s",
-  fontFamily: "inherit",
-};
-
-const infoCardStyle: React.CSSProperties = {
-  padding: 12,
-  borderRadius: 2,
-  background: "var(--bg-elevated)",
-  border: "1px solid var(--border-subtle)",
-};
-
-const infoLabelStyle: React.CSSProperties = {
-  fontSize: 11,
-  color: "var(--text-dim)",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  marginBottom: 4,
-};
-
-const statusStyle: React.CSSProperties = {
-  marginTop: 12,
-  padding: "10px 14px",
-  borderRadius: 2,
-  fontSize: 13,
-  textAlign: "center",
-};
-
-const statusPendingStyle: React.CSSProperties = {
-  background: "rgba(251,191,36,0.06)",
-  border: "1px solid rgba(251,191,36,0.15)",
-  color: "var(--accent-amber, #fbbf24)",
-};
-
-const statusSuccessStyle: React.CSSProperties = {
-  background: "rgba(5,150,105,0.06)",
-  border: "1px solid rgba(5,150,105,0.12)",
-  color: "var(--success)",
-};
-
-const statusErrorStyle: React.CSSProperties = {
-  background: "rgba(239,68,68,0.06)",
-  border: "1px solid rgba(239,68,68,0.15)",
-  color: "#ef4444",
-};
-
-const linkStyle: React.CSSProperties = {
-  color: "#7c3aed",
-  textDecoration: "underline",
-};
-
-const balanceTextStyle: React.CSSProperties = {
-  fontSize: 11,
-  color: "var(--text-dim)",
-  marginTop: 4,
-  fontFamily: "inherit",
-};

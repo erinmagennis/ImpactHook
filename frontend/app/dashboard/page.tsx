@@ -38,8 +38,6 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   const rawTotal = Number(milestoneCount) || 0;
   const lastIndex = rawTotal > 0 ? rawTotal - 1 : 0;
 
-  // Check if the last milestone is verified (contract doesn't increment
-  // currentMilestone past the last index, so we check directly)
   const { data: lastMilestoneVerified } = useReadContract({
     address: HOOK_ADDRESS,
     abi: impactHookAbi,
@@ -50,7 +48,6 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
 
   const showDemo = !registered;
 
-  // Demo data for preview when no real pool exists
   const demoRecipient = "0x1a2B...9c4D";
   const demoVerifier = "0x7e8F...3a1B";
   const rawCurrent = Number(currentMilestone);
@@ -60,146 +57,76 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
   const demoFee = showDemo ? 200 : (currentFeeBps || 0);
   const demoProgress = demoTotal ? demoCurrent / demoTotal : 0;
 
-  const milestoneNodes = [];
-  for (let i = 0; i < demoTotal; i++) {
-    const isVerified = i < demoCurrent;
-    const isActive = i === demoCurrent;
-    milestoneNodes.push(
-      <div
-        key={i}
-        className={`milestone-node ${isVerified ? "milestone-verified" : isActive ? "milestone-active" : "milestone-pending"}`}
-        style={{ width: 20, height: 20 }}
-      >
-        {isVerified && (
-          <span style={{ fontSize: 10, color: "var(--accent)" }}>&#10003;</span>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="card card-glow animate-fade-up delay-200" style={{ padding: 24, position: "relative" }}>
+    <div className="card animate-fade-up delay-200" style={{ position: "relative" }}>
       {showDemo && (
-        <div
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            padding: "3px 8px",
-            borderRadius: 6,
-            fontSize: 10,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            background: "rgba(124,58,237,0.08)",
-            color: "#7c3aed",
-            border: "1px solid rgba(124,58,237,0.15)",
-          }}
-        >
+        <span className="badge badge-violet" style={{ position: "absolute", top: 16, right: 16, fontSize: 11, padding: "2px 10px" }}>
           Preview
-        </div>
+        </span>
       )}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "var(--text-dim)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              marginBottom: 6,
-            }}
-          >
+          <div className="text-label" style={{ marginBottom: 4 }}>
             {registered ? (projectCategory || "Impact Project") : "No project registered"}
           </div>
           {registered && projectName && (
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>
               {projectName}
             </div>
           )}
-          <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+          <div className="font-data text-caption">
             {showDemo ? "0xa3f7c2...1b9e04d8" : `${poolId.slice(0, 10)}...${poolId.slice(-8)}`}
           </div>
         </div>
-        <div
+        <span
+          className={demoFee > 0 ? "badge badge-success" : "badge"}
           style={{
-            padding: "4px 10px",
-            borderRadius: 6,
             fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: "0.04em",
-            background:
-              demoFee > 0
-                ? "rgba(5,150,105,0.08)"
-                : "var(--bg-elevated)",
-            color:
-              demoFee > 0
-                ? "var(--success)"
-                : "var(--text-dim)",
-            border: `1px solid ${
-              demoFee > 0
-                ? "rgba(5,150,105,0.2)"
-                : "var(--border-subtle)"
-            }`,
+            ...(!demoFee ? { background: "var(--bg-elevated)", color: "var(--text-dim)", border: "1px solid var(--border-subtle)" } : {}),
           }}
         >
           {demoFee > 0 ? `${(Number(demoFee) / 100).toFixed(demoFee % 100 === 0 ? 0 : 1)}%` : "0%"}
-        </div>
+        </span>
       </div>
 
       {/* Milestone progress */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-          <span style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Milestone Progress
-          </span>
+          <span className="text-label" style={{ marginBottom: 0 }}>Milestone Progress</span>
           <span className="font-data" style={{ fontSize: 13, color: "var(--text-primary)" }}>
             {demoCurrent} / {demoTotal}
           </span>
         </div>
-        <div
-          style={{
-            height: 4,
-            borderRadius: 1,
-            background: "var(--bg-elevated)",
-            overflow: "hidden",
-            marginBottom: 12,
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              width: `${demoProgress * 100}%`,
-              borderRadius: 1,
-              background: "var(--accent)",
-              transition: "width 0.5s ease",
-            }}
-          />
+        <div className="progress-track" style={{ marginBottom: 12 }}>
+          <div className="progress-fill" style={{ width: `${demoProgress * 100}%` }} />
         </div>
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          {milestoneNodes}
+          {Array.from({ length: demoTotal }, (_, i) => {
+            const isVerified = i < demoCurrent;
+            return (
+              <div
+                key={i}
+                className={`milestone-node ${isVerified ? "milestone-verified" : "milestone-pending"}`}
+                style={{ width: 20, height: 20 }}
+              >
+                {isVerified && (
+                  <span style={{ fontSize: 10, color: "var(--accent)" }}>&#10003;</span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Info grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div className="grid-2" style={{ gap: 10 }}>
         <InfoItem label="Recipient" value={showDemo ? demoRecipient : `${recipient?.slice(0, 6)}...${recipient?.slice(-4)}`} />
         <InfoItem label="Verifier" value={showDemo ? demoVerifier : `${verifier?.slice(0, 6)}...${verifier?.slice(-4)}`} />
       </div>
 
       {showDemo && (
-        <div
-          style={{
-            marginTop: 16,
-            padding: "10px 14px",
-            borderRadius: 8,
-            background: "var(--accent-bg)",
-            border: "1px solid rgba(13,148,136,0.08)",
-            fontSize: 12,
-            color: "var(--text-secondary)",
-            lineHeight: 1.5,
-          }}
-        >
+        <div className="text-helper" style={{ marginTop: 16, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--accent-bg)", border: "1px solid rgba(13,148,136,0.08)" }}>
           This is a preview. Register a project to see live data from the hook contract.
         </div>
       )}
@@ -209,25 +136,8 @@ function PoolCard({ poolId }: { poolId: `0x${string}` }) {
 
 function InfoItem({ label, value }: { label: string; value?: string }) {
   return (
-    <div
-      style={{
-        padding: 12,
-        borderRadius: 8,
-        background: "var(--bg-elevated)",
-        border: "1px solid var(--border-subtle)",
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          color: "var(--text-dim)",
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          marginBottom: 4,
-        }}
-      >
-        {label}
-      </div>
+    <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+      <div className="text-label" style={{ marginBottom: 4 }}>{label}</div>
       <div className="font-data" style={{ fontSize: 13, color: "var(--text-secondary)" }}>
         {value || "-"}
       </div>
@@ -265,52 +175,42 @@ function HookStatus() {
   });
 
   return (
-    <div className="card card-glow animate-fade-up delay-100" style={{ padding: 24 }}>
+    <div className="card animate-fade-up delay-100">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <span className="font-display" style={{ fontSize: 14, color: "var(--text-primary)" }}>
-          Hook Status
-        </span>
-        <span
-          className="status-live"
-          style={{ fontSize: 12, color: isPaused ? "var(--error)" : "var(--success)" }}
-        >
-          {isPaused ? "Paused" : "Live"}
+        <span className="heading-sm" style={{ fontSize: 15 }}>Hook Status</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+          <span
+            className="status-dot"
+            style={{ background: isPaused ? "var(--error)" : "var(--success)", animation: isPaused ? "none" : "pulse-dot 2s ease-in-out infinite" }}
+          />
+          <span style={{ color: isPaused ? "var(--error)" : "var(--success)" }}>
+            {isPaused ? "Paused" : "Live"}
+          </span>
         </span>
       </div>
-      <div style={{ display: "grid", gap: 12 }}>
+      <div style={{ display: "grid", gap: 0 }}>
         <StatusRow label="Contract" value={HOOK_ADDRESS} />
         <StatusRow label="Owner" value={owner as string} />
         <StatusRow label="Callback Proxy" value={proxy as string} />
-        <StatusRow
-          label="EAS Schema"
-          value={schemaUID ? `${(schemaUID as string).slice(0, 14)}...` : "-"}
-        />
+        <StatusRow label="EAS Schema" value={schemaUID ? `${(schemaUID as string).slice(0, 14)}...` : "-"} last />
       </div>
     </div>
   );
 }
 
-function StatusRow({ label, value }: { label: string; value?: string }) {
+function StatusRow({ label, value, last }: { label: string; value?: string; last?: boolean }) {
   return (
     <div
       style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "8px 0",
-        borderBottom: "1px solid var(--border-subtle)",
+        padding: "10px 0",
+        borderBottom: last ? "none" : "1px solid var(--border-subtle)",
       }}
     >
-      <span style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-        {label}
-      </span>
-      <span
-        className="font-data"
-        style={{
-          fontSize: 12,
-          color: "var(--text-secondary)",
-        }}
-      >
+      <span className="text-label" style={{ marginBottom: 0 }}>{label}</span>
+      <span className="font-data" style={{ fontSize: 12, color: "var(--text-secondary)" }}>
         {value ? (value.length > 20 ? `${value.slice(0, 8)}...${value.slice(-6)}` : value) : "-"}
       </span>
     </div>
@@ -326,29 +226,19 @@ export default function DashboardPage() {
     : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "transparent" }}>
+    <div style={{ minHeight: "100vh" }}>
       <Navigation />
-      <main style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 24px" }}>
+      <main className="container-wide" style={{ paddingTop: 40, paddingBottom: 48 }}>
         <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <h1
-            className="font-display"
-            style={{
-              fontSize: 28,
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              marginBottom: 8,
-            }}
-          >
-            Dashboard
-          </h1>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
+          <h1 className="heading-page" style={{ marginBottom: 8 }}>Dashboard</h1>
+          <p className="text-body" style={{ margin: 0 }}>
             {isConnected
               ? "Live contract state from Unichain Sepolia"
               : "Connect your wallet to interact with ImpactHook"}
           </p>
         </div>
 
-        <div className="card animate-fade-up" style={{ padding: 16, marginBottom: 16 }}>
+        <div className="card animate-fade-up" style={{ marginBottom: 16, padding: 16 }}>
           <ProjectSelector
             value={poolIdInput}
             onChange={setPoolIdInput}
@@ -356,13 +246,13 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="grid-2">
           <HookStatus />
           {poolId ? (
             <PoolCard poolId={poolId} />
           ) : (
-            <div className="card card-glow animate-fade-up delay-200" style={{ padding: 24, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-dim)", fontSize: 13 }}>
-              Enter a Pool ID above to view project state
+            <div className="card animate-fade-up delay-200" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span className="text-small">Enter a Pool ID above to view project state</span>
             </div>
           )}
         </div>
@@ -371,38 +261,26 @@ export default function DashboardPage() {
         <YourImpact poolId={poolId} isConnected={isConnected} />
 
         {/* Verification paths */}
-        <div style={{ marginTop: 32 }}>
-          <h2
-            className="font-display animate-fade-up delay-300"
-            style={{
-              fontSize: 15,
-              color: "var(--text-primary)",
-              marginBottom: 16,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
+        <div style={{ marginTop: 48 }}>
+          <h2 className="heading-md animate-fade-up delay-300" style={{ marginBottom: 16 }}>
             Verification Paths
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+          <div className="grid-3">
             <PathCard
               title="Direct"
-              description="Verifier calls verifyMilestone() directly on Unichain Sepolia"
-              status="active"
+              description="Verifier calls verifyMilestone() directly on Unichain Sepolia. Simplest path for single-chain projects."
               accent="var(--accent)"
               delay="delay-400"
             />
             <PathCard
               title="Reactive Cross-Chain"
-              description="Oracle (Sepolia) -> Reactor (Reactive) -> Hook (Unichain)"
-              status="active"
+              description="Oracle emits event on origin chain. Reactive Network relays callback to ImpactHook on Unichain. No bridges needed."
               accent="#7c3aed"
               delay="delay-500"
             />
             <PathCard
               title="EAS Attestation"
-              description="Create attestation on EAS, then call verifyMilestoneEAS()"
-              status="active"
+              description="Create an Ethereum Attestation Service attestation, then call verifyMilestoneEAS(). Composable, credibly neutral proof."
               accent="var(--success)"
               delay="delay-600"
             />
@@ -415,13 +293,11 @@ export default function DashboardPage() {
 
 function ImpactMetric({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
-    <div className="card" style={{ padding: 16, textAlign: "center" }}>
-      <div className="font-data" style={{ fontSize: 20, fontWeight: 700, color: accent, marginBottom: 4 }}>
+    <div className="card" style={{ textAlign: "center" }}>
+      <div className="font-data" style={{ fontSize: 22, fontWeight: 700, color: accent, marginBottom: 6 }}>
         {value}
       </div>
-      <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-        {label}
-      </div>
+      <div className="text-label" style={{ marginBottom: 0 }}>{label}</div>
     </div>
   );
 }
@@ -440,28 +316,29 @@ function ProjectImpactCard({
   accent: string;
 }) {
   return (
-    <div className="card" style={{ padding: 16 }}>
-      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>
+    <div className="card" style={{ borderLeft: `2px solid ${accent}` }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12 }}>
         {name}
       </div>
-      <div style={{ display: "grid", gap: 6 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-          <span style={{ color: "var(--text-dim)" }}>Contributed</span>
-          <span className="font-data" style={{ color: accent }}>{contributed} ETH</span>
+      <div style={{ display: "grid", gap: 8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+          <span className="text-small" style={{ margin: 0 }}>Contributed</span>
+          <span className="font-data" style={{ color: accent, fontSize: 13 }}>{contributed} ETH</span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-          <span style={{ color: "var(--text-dim)" }}>Milestones</span>
-          <span className="font-data" style={{ color: "var(--text-secondary)" }}>{milestones}</span>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+          <span className="text-small" style={{ margin: 0 }}>Milestones</span>
+          <span className="font-data" style={{ color: "var(--text-secondary)", fontSize: 13 }}>{milestones}</span>
         </div>
         <div
           style={{
             marginTop: 4,
-            padding: "6px 10px",
-            borderRadius: 6,
+            padding: "8px 12px",
+            borderRadius: "var(--radius-sm)",
             background: `${accent}0d`,
             border: `1px solid ${accent}22`,
-            fontSize: 11,
+            fontSize: 12,
             color: accent,
+            lineHeight: 1.4,
           }}
         >
           {impact}
@@ -498,38 +375,25 @@ function YourImpact({ poolId, isConnected }: { poolId: `0x${string}` | null; isC
   const hasRealData = isConnected && !!poolId && (poolContribution !== "0" || globalContribution !== "0");
 
   return (
-    <div className="animate-fade-up delay-300" style={{ marginTop: 32 }}>
-      <h2
-        className="font-display"
-        style={{
-          fontSize: 15,
-          color: "var(--text-primary)",
-          marginBottom: 16,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-        }}
-      >
-        Your Impact
-      </h2>
+    <div className="animate-fade-up delay-300" style={{ marginTop: 48 }}>
+      <h2 className="heading-md" style={{ marginBottom: 16 }}>Your Impact</h2>
 
       {hasRealData ? (
-        <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-            <ImpactMetric label="This Pool" value={`${Number(poolContribution).toFixed(4)} ETH`} accent="var(--accent)" />
-            <ImpactMetric label="All Pools" value={`${Number(globalContribution).toFixed(4)} ETH`} accent="var(--success)" />
-            <ImpactMetric label="Loyalty Discount" value={discountBps > 0 ? `${(discountBps / 100).toFixed(discountBps % 100 === 0 ? 0 : 1)}%` : "None"} accent="var(--warning)" />
-          </div>
-        </>
+        <div className="grid-3">
+          <ImpactMetric label="This Pool" value={`${Number(poolContribution).toFixed(4)} ETH`} accent="var(--accent)" />
+          <ImpactMetric label="All Pools" value={`${Number(globalContribution).toFixed(4)} ETH`} accent="var(--success)" />
+          <ImpactMetric label="Loyalty Discount" value={discountBps > 0 ? `${(discountBps / 100).toFixed(discountBps % 100 === 0 ? 0 : 1)}%` : "None"} accent="var(--warning)" />
+        </div>
       ) : (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
+          <div className="grid-4" style={{ marginBottom: 16 }}>
             <ImpactMetric label="Total Contributed" value="2.134 ETH" accent="var(--success)" />
             <ImpactMetric label="Projects Supported" value="3" accent="var(--accent)" />
             <ImpactMetric label="People Reached" value="~1,240" accent="#7c3aed" />
             <ImpactMetric label="Loyalty Tier" value="Silver" accent="var(--warning)" />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+          <div className="grid-3">
             <ProjectImpactCard
               name="Clean Water - Chiapas"
               contributed="0.847"
@@ -553,18 +417,7 @@ function YourImpact({ poolId, isConnected }: { poolId: `0x${string}` | null; isC
             />
           </div>
 
-          <div
-            style={{
-              marginTop: 12,
-              padding: "10px 14px",
-              borderRadius: 8,
-              background: "rgba(124,58,237,0.04)",
-              border: "1px solid rgba(124,58,237,0.08)",
-              fontSize: 11,
-              color: "var(--text-dim)",
-              textAlign: "center",
-            }}
-          >
+          <div className="text-helper" style={{ marginTop: 12, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.08)", textAlign: "center" }}>
             {isConnected && poolId
               ? "No contributions yet. Swap through this impact pool to see your real stats."
               : "Preview data. Connect wallet and enter a pool ID to see your real contributions."}
@@ -578,48 +431,21 @@ function YourImpact({ poolId, isConnected }: { poolId: `0x${string}` | null; isC
 function PathCard({
   title,
   description,
-  status,
   accent,
   delay,
 }: {
   title: string;
   description: string;
-  status: string;
   accent: string;
   delay: string;
 }) {
   return (
-    <div
-      className={`card animate-fade-up ${delay}`}
-      style={{
-        padding: 20,
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: status === "active" ? accent : "var(--error)",
-            boxShadow: status === "active" ? `0 0 8px ${accent}` : "none",
-          }}
-        />
-        <span className="font-display" style={{ fontSize: 13, color: "var(--text-primary)" }}>
-          {title}
-        </span>
+    <div className={`card animate-fade-up ${delay}`}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <span className="status-dot" style={{ background: accent }} />
+        <span className="heading-sm" style={{ fontSize: 14 }}>{title}</span>
       </div>
-      <p
-        style={{
-          fontSize: 12,
-          color: "var(--text-secondary)",
-          lineHeight: 1.6,
-          margin: 0,
-        }}
-      >
+      <p className="text-small" style={{ margin: 0, lineHeight: 1.6 }}>
         {description}
       </p>
     </div>
