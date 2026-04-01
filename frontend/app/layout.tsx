@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "ImpactHook - Milestone-Gated DeFi Funding",
   description:
     "A Uniswap v4 hook that routes swap fees to impact projects based on verified milestones.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

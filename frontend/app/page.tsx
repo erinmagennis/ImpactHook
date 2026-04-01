@@ -14,864 +14,293 @@ function LandingNav() {
 
   return (
     <nav
+      className="landing-nav"
       style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        height: 64,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 32px",
-        background: scrolled ? "rgba(10,10,15,0.92)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+        background: scrolled ? "rgba(10,10,10,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
         borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent",
-        transition: "all 0.3s ease",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-        <Link
-          href="/"
-          style={{
-            fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-            fontSize: 18,
-            fontWeight: 700,
-            color: "var(--text-primary)",
-            textDecoration: "none",
-            letterSpacing: "-0.02em",
-          }}
-        >
+      <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
+        <Link href="/" className="nav-logo">
           <span style={{ color: "var(--accent)" }}>Impact</span>Hook
         </Link>
-        <div style={{ display: "flex", gap: 8 }}>
-          {[
-            { href: "/dashboard", label: "Dashboard" },
-            { href: "/impact", label: "Impact" },
-            { href: "/technical", label: "Technical" },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                padding: "6px 14px",
-                fontSize: 14,
-                fontWeight: 500,
-                color: "var(--text-secondary)",
-                textDecoration: "none",
-                borderRadius: 6,
-                transition: "color 0.15s, background 0.15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "var(--text-primary)";
-                e.currentTarget.style.background = "var(--bg-elevated)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "var(--text-secondary)";
-                e.currentTarget.style.background = "transparent";
-              }}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <a href="#how-it-works" className="landing-nav-link">How It Works</a>
+          <Link href="/impact" className="landing-nav-link">Impact</Link>
+          <Link href="/agent" className="landing-nav-link">Agent</Link>
+          <Link href="/technical" className="landing-nav-link">Technical</Link>
+          <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" className="landing-nav-link">GitHub</a>
+          <Link href="/dashboard" className="btn-primary" style={{ padding: "8px 20px", fontSize: 14 }}>
+            Launch App
+          </Link>
         </div>
       </div>
-      <a
-        href="https://github.com/erinmagennis/ImpactHook"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          fontSize: 14,
-          fontWeight: 500,
-          color: "var(--text-secondary)",
-          textDecoration: "none",
-          transition: "color 0.15s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-      >
-        GitHub
-      </a>
     </nav>
+  );
+}
+
+function BrowserFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ borderRadius: "var(--radius-card)", border: "1px solid var(--border-subtle)", overflow: "hidden", boxShadow: "var(--shadow-lg)" }}>
+      <div style={{ height: 36, background: "var(--bg-elevated)", display: "flex", alignItems: "center", padding: "0 12px", gap: 6 }}>
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ffbd2e" }} />
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ flex: 1, textAlign: "right", fontSize: 11, color: "var(--text-dim)" }}>impacthook.vercel.app</span>
+      </div>
+      <div style={{ background: "var(--bg-primary)", padding: 24, minHeight: 280 }}>
+        {children}
+      </div>
+    </div>
   );
 }
 
 export default function LandingPage() {
   return (
-    <div
-      style={{
-        background: "var(--bg-primary)",
-        color: "var(--text-primary)",
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        minHeight: "100vh",
-        WebkitFontSmoothing: "antialiased",
-      }}
-    >
+    <div style={{ minHeight: "100vh" }}>
       <LandingNav />
 
-      {/* ═══════════════════════════════════════════
-          SECTION 1: HERO
-          ═══════════════════════════════════════════ */}
-      <div className="section-teal" style={{ position: "relative", overflow: "hidden" }}>
-        {/* Dot pattern overlay */}
-        <div
-          className="pattern-dots"
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0.4,
-            pointerEvents: "none",
-          }}
-        />
-        <section
-          style={{
-            position: "relative",
-            maxWidth: 1120,
-            margin: "0 auto",
-            padding: "140px 32px 120px",
-            display: "flex",
-            alignItems: "center",
-            gap: 80,
-            flexWrap: "wrap",
-          }}
-        >
-          {/* Left: text */}
+      {/* ── HERO ── */}
+      <section className="container" style={{ paddingTop: 140, paddingBottom: 140 }}>
+        <div style={{ display: "flex", gap: 80, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ flex: "1 1 480px", maxWidth: 560 }}>
-            {/* Feature tags */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-              <span className="feature-tag">Uniswap v4 Hook</span>
-              <span className="feature-tag">Deployed on Unichain</span>
-              <span className="feature-tag">Hypercerts</span>
-              <span className="feature-tag">Filecoin/IPFS</span>
-            </div>
-            <h1
-              style={{
-                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                fontSize: 48,
-                fontWeight: 700,
-                lineHeight: 1.1,
-                letterSpacing: "-0.03em",
-                color: "var(--text-primary)",
-                margin: "0 0 20px 0",
-              }}
-            >
-              Every swap funds
-              <br />
-              verified impact
+            <span className="badge badge-accent" style={{ marginBottom: 20, display: "inline-flex" }}>
+              Uniswap v4 Hook · Live on Unichain
+            </span>
+            <h1 className="heading-xl" style={{ fontSize: 56, marginBottom: 20 }}>
+              Every swap funds{"\n"}verified impact
             </h1>
-            <p
-              style={{
-                fontSize: 18,
-                lineHeight: 1.6,
-                color: "var(--text-secondary)",
-                margin: "0 0 36px 0",
-                maxWidth: 460,
-              }}
-            >
+            <p className="text-body" style={{ fontSize: 18, lineHeight: 1.7, marginBottom: 36, maxWidth: 460 }}>
               ImpactHook routes a share of trading fees and LP yield to
               milestone-verified projects. Funding unlocks only when real
               progress is proven onchain.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <Link
-                href="/dashboard"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "12px 28px",
-                  borderRadius: 6,
-                  background: "var(--accent)",
-                  color: "#ffffff",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  transition: "opacity 0.15s, transform 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.9";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                Create Impact
+              <Link href="/dashboard" className="btn-primary" style={{ padding: "14px 32px", fontSize: 16 }}>
+                Launch App
               </Link>
-              <Link
-                href="/impact"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "12px 28px",
-                  borderRadius: 6,
-                  background: "transparent",
-                  color: "var(--text-primary)",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  border: "1px solid var(--border-subtle)",
-                  transition: "border-color 0.15s, background 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "var(--accent)";
-                  e.currentTarget.style.background = "var(--accent-bg)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--border-subtle)";
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                Learn More
+              <Link href="/technical" className="btn-secondary" style={{ padding: "14px 32px", fontSize: 16 }}>
+                Read the Docs
               </Link>
             </div>
           </div>
 
-          {/* Right: flow visual + stats */}
-          <div style={{ flex: "1 1 360px", maxWidth: 480, paddingTop: 16 }}>
-            {/* Visual flow diagram */}
-            <div
-              className="card card-glow"
-              style={{
-                padding: 32,
-                marginBottom: 20,
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "var(--text-secondary)",
-                  textTransform: "uppercase" as const,
-                  letterSpacing: "0.08em",
-                  marginBottom: 24,
-                }}
-              >
-                How funding flows
+          <div className="animate-fade-up delay-200" style={{ flex: "1 1 400px", maxWidth: 520 }}>
+            <BrowserFrame>
+              {/* Mini dashboard preview */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <span className="heading-sm" style={{ fontSize: 14 }}>Dashboard</span>
+                <span className="badge badge-success" style={{ fontSize: 10, padding: "2px 8px" }}>Live</span>
               </div>
-
-              {/* Flow nodes */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                {/* Row 1: Sources */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 4 }}>
-                  <FlowNode label="Traders" sublabel="Swap fees" color="var(--accent)" delay={0} />
-                  <FlowNode label="LPs" sublabel="Yield skim" color="var(--success)" delay={150} />
+              <div className="grid-2" style={{ gap: 12, marginBottom: 16 }}>
+                <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)" }}>
+                  <div className="text-caption" style={{ marginBottom: 4 }}>Impact Fee</div>
+                  <div className="font-data" style={{ fontSize: 18, color: "var(--accent)" }}>2.00%</div>
                 </div>
-
-                {/* Arrow down */}
-                <div style={{ display: "flex", justifyContent: "center", padding: "4px 0" }}>
-                  <div className="animate-fade-in delay-300" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                    <div style={{ width: 2, height: 16, background: "linear-gradient(180deg, var(--accent), var(--accent-border))" }} />
-                    <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "6px solid var(--accent)" }} />
-                  </div>
-                </div>
-
-                {/* Row 2: Hook */}
-                <div style={{ marginBottom: 4 }}>
-                  <div
-                    className="animate-fade-up delay-400"
-                    style={{
-                      padding: "14px 20px",
-                      borderRadius: 8,
-                      background: "var(--accent)",
-                      color: "white",
-                      textAlign: "center",
-                      position: "relative",
-                    }}
-                  >
-                    <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-0.01em" }}>ImpactHook</div>
-                    <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2 }}>Milestone-gated fee accumulation</div>
-                  </div>
-                </div>
-
-                {/* Arrow down */}
-                <div style={{ display: "flex", justifyContent: "center", padding: "4px 0" }}>
-                  <div className="animate-fade-in delay-500" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                    <div style={{ width: 2, height: 16, background: "linear-gradient(180deg, var(--accent), var(--accent-border))" }} />
-                    <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "6px solid var(--accent)" }} />
-                  </div>
-                </div>
-
-                {/* Row 3: Verification */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 4 }}>
-                  <FlowNode label="Direct" sublabel="EOA verify" color="var(--accent)" delay={600} small />
-                  <FlowNode label="Cross-chain" sublabel="Reactive" color="#7c3aed" delay={700} small />
-                  <FlowNode label="EAS" sublabel="Attestation" color="var(--success)" delay={800} small />
-                </div>
-
-                {/* Arrow down */}
-                <div style={{ display: "flex", justifyContent: "center", padding: "4px 0" }}>
-                  <div className="animate-fade-in delay-700" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                    <div style={{ width: 2, height: 16, background: "linear-gradient(180deg, var(--success), #a7f3d0)" }} />
-                    <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "6px solid var(--success)" }} />
-                  </div>
-                </div>
-
-                {/* Row 4: Output */}
-                <div className="animate-fade-up delay-800">
-                  <div
-                    style={{
-                      padding: "14px 20px",
-                      borderRadius: 8,
-                      background: "rgba(5, 150, 105, 0.08)",
-                      border: "1px solid rgba(5, 150, 105, 0.2)",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--success)" }}>Impact Project Funded</div>
-                    <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>Withdraw verified milestone earnings</div>
-                  </div>
+                <div style={{ padding: 12, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)" }}>
+                  <div className="text-caption" style={{ marginBottom: 4 }}>Milestones</div>
+                  <div className="font-data" style={{ fontSize: 18, color: "var(--success)" }}>2 / 4</div>
                 </div>
               </div>
-            </div>
-
-            {/* Stats row */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr",
-                gap: 12,
-              }}
-            >
-              {[
-                { value: "5", label: "Funding channels" },
-                { value: "3", label: "Verification paths" },
-                { value: "Live", label: "On Unichain" },
-              ].map((s, i) => (
-                <div key={i} className="stat-highlight">
-                  <div
-                    style={{
-                      fontFamily: "'Departure Mono', 'SF Mono', monospace",
-                      fontSize: 24,
-                      fontWeight: 600,
-                      color: "var(--accent)",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {s.value}
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 6 }}>
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ═══════════════════════════════════════════
-          SECTION 2: HOW IT WORKS
-          ═══════════════════════════════════════════ */}
-      <div style={{ background: "var(--bg-primary)" }}>
-        <section
-          style={{
-            maxWidth: 1120,
-            margin: "0 auto",
-            padding: "96px 32px",
-          }}
-        >
-          <div style={{ marginBottom: 56 }}>
-            <h2
-              style={{
-                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                fontSize: 36,
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                color: "var(--text-primary)",
-                margin: "0 0 12px 0",
-              }}
-            >
-              How it works
-            </h2>
-            <p
-              style={{
-                fontSize: 16,
-                color: "var(--text-secondary)",
-                margin: 0,
-                maxWidth: 520,
-                lineHeight: 1.5,
-              }}
-            >
-              Two funding channels - swap fees from traders and yield skim from
-              LPs - both gated by the same onchain milestone verification.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 32,
-            }}
-          >
-            {[
-              {
-                number: "1",
-                title: "Register a project",
-                description:
-                  "Define milestones and assign a verifier. The hook deploys with your parameters and begins collecting fees from swaps on that pool.",
-                barWidth: "100%",
-              },
-              {
-                number: "2",
-                title: "Trade and fund",
-                description:
-                  "Traders swap as normal. A small fee (up to 5%) is captured by the hook. LPs can also contribute a share of yield. Both channels accumulate in the hook contract.",
-                barWidth: "65%",
-              },
-              {
-                number: "3",
-                title: "Verify and withdraw",
-                description:
-                  "Milestones are verified onchain via EAS attestations, oracle callbacks, or the Reactive Network. Each verified milestone unlocks the next fee tier and allows withdrawal.",
-                barWidth: "40%",
-              },
-            ].map((step, i) => (
-              <div key={i} className="card" style={{ minWidth: 0, padding: 28 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                  <div className="step-number">{step.number}</div>
-                  <h3
-                    style={{
-                      fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                      fontSize: 20,
-                      fontWeight: 600,
-                      color: "var(--text-primary)",
-                      margin: 0,
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {step.title}
-                  </h3>
-                </div>
-                <p
-                  style={{
-                    fontSize: 15,
-                    lineHeight: 1.6,
-                    color: "var(--text-secondary)",
-                    margin: "0 0 16px 0",
-                  }}
-                >
-                  {step.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* ═══════════════════════════════════════════
-          SECTION 3: ACCOUNTABILITY
-          ═══════════════════════════════════════════ */}
-      <div style={{ background: "var(--bg-primary)" }}>
-        <section
-          style={{
-            maxWidth: 1120,
-            margin: "0 auto",
-            padding: "96px 32px",
-          }}
-        >
-          <div style={{ marginBottom: 56 }}>
-            <h2
-              style={{
-                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                fontSize: 36,
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                color: "var(--text-primary)",
-                margin: "0 0 12px 0",
-              }}
-            >
-              Built-in accountability
-            </h2>
-            <p
-              style={{
-                fontSize: 16,
-                color: "var(--text-secondary)",
-                margin: 0,
-                maxWidth: 560,
-                lineHeight: 1.6,
-              }}
-            >
-              Every dollar is tracked onchain. Projects must prove progress before
-              funding unlocks. Dead projects auto-expire. No intermediaries, no opacity.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 20,
-              marginBottom: 48,
-            }}
-          >
-            {/* Example project */}
-            <div className="card card-accent" style={{ padding: 28 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>
-                    Clean Water - Chiapas Schools
-                  </div>
-                  <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Climate / WASH</div>
-                </div>
-                <span className="feature-tag">Live</span>
-              </div>
-              {[
-                { name: "Baseline water testing", status: "verified", fee: "0%" },
-                { name: "Systems installed in 20 schools", status: "verified", fee: "1%" },
-                { name: "3-month water quality verified", status: "verified", fee: "2%" },
-                { name: "Community management trained", status: "verified", fee: "3%" },
-              ].map((m, i) => (
-                <div key={i} style={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  padding: "10px 0", borderTop: "1px solid var(--border-subtle)",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{
-                      width: 18, height: 18, borderRadius: 4,
-                      background: m.status === "verified" ? "var(--accent-bg)" : "var(--bg-elevated)",
-                      border: m.status === "verified" ? "1.5px solid var(--accent)" : "1.5px solid var(--border-subtle)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, color: "var(--accent)",
-                    }}>
-                      {m.status === "verified" && "\u2713"}
-                    </div>
-                    <span style={{ fontSize: 14, color: "var(--text-primary)" }}>{m.name}</span>
-                  </div>
-                  <span className="font-data" style={{ fontSize: 12, color: "var(--text-secondary)" }}>{m.fee}</span>
-                </div>
-              ))}
-              <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: 6, background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Accumulated fees</span>
-                  <span className="font-data" style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)" }}>1.247 ETH</span>
+              <div style={{ marginBottom: 12 }}>
+                <div className="text-caption" style={{ marginBottom: 6 }}>Milestone Progress</div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: "50%" }} />
                 </div>
               </div>
-            </div>
-
-            {/* Why it works */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {[
-                { title: "Milestone-gated", desc: "Fee tiers increase as projects deliver. Zero funding until the first milestone is verified. No results, no money." },
-                { title: "Heartbeat expiration", desc: "Projects must send periodic proof-of-life. If a project goes silent, fees stop automatically. No manual intervention needed." },
-                { title: "Cross-chain verification", desc: "Milestones can be verified from any supported chain via Reactive Network, or through EAS attestations on Unichain." },
-                { title: "Decentralized evidence", desc: "Milestone evidence stored on Filecoin/IPFS via Storacha. CIDs persisted onchain and embedded in Hypercerts, creating composable, verifiable impact records." },
-                { title: "Per-project controls", desc: "Individual projects can be paused without affecting others. Progressive decentralization from owner-gated to fully permissionless." },
-              ].map((item, i) => (
-                <div key={i} className="card" style={{ padding: 20 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>
-                    {item.title}
+              <div className="grid-3" style={{ gap: 8 }}>
+                {[
+                  { label: "Swap Fees", value: "0.847 ETH" },
+                  { label: "LP Skim", value: "0.312 ETH" },
+                  { label: "Donations", value: "0.088 ETH" },
+                ].map((s) => (
+                  <div key={s.label} style={{ padding: 8, borderRadius: "var(--radius-sm)", background: "var(--bg-elevated)", textAlign: "center" }}>
+                    <div className="font-data" style={{ fontSize: 13, color: "var(--accent)", marginBottom: 2 }}>{s.value}</div>
+                    <div className="text-caption" style={{ fontSize: 10 }}>{s.label}</div>
                   </div>
-                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-secondary)", margin: 0 }}>
-                    {item.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ═══════════════════════════════════════════
-          SECTION 4: BUILT FOR EVERY PARTICIPANT
-          ═══════════════════════════════════════════ */}
-      <section
-        style={{
-          maxWidth: 1120,
-          margin: "0 auto",
-          padding: "96px 32px",
-        }}
-      >
-        <div style={{ marginBottom: 56 }}>
-          <h2
-            style={{
-              fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-              fontSize: 36,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: "var(--text-primary)",
-              margin: "0 0 12px 0",
-            }}
-          >
-            Built for every participant
-          </h2>
-          <p
-            style={{
-              fontSize: 16,
-              color: "var(--text-secondary)",
-              margin: 0,
-              maxWidth: 520,
-              lineHeight: 1.5,
-            }}
-          >
-            Whether you trade, provide liquidity, or run an impact project,
-            the hook works for you.
-          </p>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 20,
-            alignItems: "start",
-          }}
-        >
-          {/* Traders */}
-          <div
-            className="card card-accent"
-            style={{
-              padding: 32,
-              transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
-            }}
-          >
-            <span className="feature-tag" style={{ marginBottom: 16, display: "inline-block" }}>
-              Traders
-            </span>
-            <h3
-              style={{
-                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                fontSize: 22,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                margin: "0 0 12px 0",
-                letterSpacing: "-0.01em",
-                lineHeight: 1.3,
-              }}
-            >
-              Swap as usual.
-              <br />
-              Impact happens automatically.
-            </h3>
-            <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, margin: "0 0 24px 0" }}>
-              A small fee on each swap is routed to verified impact projects.
-              No extra steps, no separate donations. Your trading volume
-              directly funds real-world outcomes.
-            </p>
-            <Link
-              href="/dashboard"
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "var(--accent)",
-                textDecoration: "none",
-                transition: "opacity 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              View dashboard
-            </Link>
-          </div>
-
-          {/* LPs / Sponsors */}
-          <div
-            className="card card-accent-success"
-            style={{
-              padding: 32,
-              transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
-            }}
-          >
-            <span
-              className="feature-tag"
-              style={{
-                marginBottom: 16,
-                display: "inline-block",
-                background: "rgba(16, 185, 129, 0.08)",
-                color: "var(--success)",
-                borderColor: "#a7f3d0",
-              }}
-            >
-              LPs / Sponsors
-            </span>
-            <h3
-              style={{
-                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                fontSize: 22,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                margin: "0 0 12px 0",
-                letterSpacing: "-0.01em",
-                lineHeight: 1.3,
-              }}
-            >
-              Provide liquidity.
-              <br />
-              A share of yield funds impact.
-            </h3>
-            <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, margin: "0 0 24px 0" }}>
-              Liquidity providers can allocate a portion of their yield
-              to milestone-gated projects through the Alkahest escrow channel.
-            </p>
-            <Link
-              href="/impact"
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "var(--accent)",
-                textDecoration: "none",
-                transition: "opacity 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              Learn more
-            </Link>
-          </div>
-
-          {/* Project Owners */}
-          <div
-            className="card card-accent-violet"
-            style={{
-              padding: 32,
-              transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
-            }}
-          >
-            <span
-              className="feature-tag"
-              style={{
-                marginBottom: 16,
-                display: "inline-block",
-                background: "rgba(124, 58, 237, 0.08)",
-                color: "#7c3aed",
-                borderColor: "#c4b5fd",
-              }}
-            >
-              Project Owners
-            </span>
-            <h3
-              style={{
-                fontFamily: "'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                fontSize: 22,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                margin: "0 0 12px 0",
-                letterSpacing: "-0.01em",
-                lineHeight: 1.3,
-              }}
-            >
-              Register your project.
-              <br />
-              Hit milestones. Get funded.
-            </h3>
-            <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, margin: "0 0 24px 0" }}>
-              Define milestones, assign a verifier, and let funding accumulate
-              as your pool trades. Withdraw earned fees as each milestone
-              is verified onchain.
-            </p>
-            <Link
-              href="/milestones"
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "var(--accent)",
-                textDecoration: "none",
-                transition: "opacity 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              View milestones
-            </Link>
+                ))}
+              </div>
+            </BrowserFrame>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════
-          FOOTER
-          ═══════════════════════════════════════════ */}
-      <footer
-        style={{
-          maxWidth: 1120,
-          margin: "0 auto",
-          padding: "48px 32px",
-          borderTop: "2px solid var(--accent)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 16,
-        }}
-      >
-        <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>
-          Built for PL Genesis. Deployed on Unichain Sepolia.
+      {/* ── HOW IT WORKS ── */}
+      <section id="how-it-works" className="container" style={{ paddingBottom: 140 }}>
+        <div style={{ marginBottom: 48 }}>
+          <h2 className="heading-lg" style={{ marginBottom: 12 }}>How it works</h2>
+          <p className="text-body" style={{ maxWidth: 560 }}>
+            Two funding channels -- swap fees from traders and yield skim from
+            LPs -- both gated by the same onchain milestone verification.
+          </p>
         </div>
-        <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-          <a
-            href="https://github.com/erinmagennis/ImpactHook"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: 14,
-              color: "var(--text-secondary)",
-              textDecoration: "none",
-              transition: "color 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-          >
-            GitHub
+
+        <div className="grid-3" style={{ gap: 24 }}>
+          {[
+            {
+              num: "01",
+              title: "Register a project",
+              desc: "Define milestones and assign a verifier. The Uniswap v4 hook deploys with your parameters and begins collecting fees from swaps on that pool.",
+            },
+            {
+              num: "02",
+              title: "Trade and fund",
+              desc: "Traders swap as normal. A small fee is captured by the hook. LPs can also contribute a share of yield via afterAddLiquidity. Both channels accumulate in the hook contract.",
+            },
+            {
+              num: "03",
+              title: "Verify and withdraw",
+              desc: "Milestones are verified onchain via direct call, Reactive Network cross-chain callbacks, or EAS attestations. Each verified milestone unlocks the next fee tier.",
+            },
+          ].map((step) => (
+            <div key={step.num} className="card" style={{ padding: 28 }}>
+              <div className="font-data" style={{ fontSize: 40, fontWeight: 700, color: "var(--text-dim)", opacity: 0.3, marginBottom: 12 }}>
+                {step.num}
+              </div>
+              <h3 className="heading-sm" style={{ marginBottom: 8 }}>{step.title}</h3>
+              <p className="text-small" style={{ lineHeight: 1.6, margin: 0 }}>{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── THREE AUDIENCES ── */}
+      <section className="container" style={{ paddingBottom: 140 }}>
+        <div style={{ marginBottom: 48 }}>
+          <h2 className="heading-lg" style={{ marginBottom: 12 }}>Built for every participant</h2>
+          <p className="text-body" style={{ maxWidth: 520 }}>
+            Whether you trade, provide liquidity, or run an impact project, the hook works for you.
+          </p>
+        </div>
+
+        <div className="grid-3" style={{ gap: 24 }}>
+          <div className="card" style={{ padding: 32 }}>
+            <span className="badge badge-accent" style={{ marginBottom: 16, display: "inline-flex" }}>Traders</span>
+            <h3 className="heading-md" style={{ fontSize: 20, lineHeight: 1.3, marginBottom: 12 }}>
+              Swap as usual.{"\n"}Impact happens automatically.
+            </h3>
+            <p className="text-small" style={{ lineHeight: 1.6, marginBottom: 20 }}>
+              A small fee on each swap is routed to verified impact projects via the Uniswap v4 afterSwap hook.
+              No extra steps. Your trading volume directly funds real-world outcomes.
+            </p>
+            <Link href="/swap" className="btn-ghost">View swap &rarr;</Link>
+          </div>
+
+          <div className="card" style={{ padding: 32 }}>
+            <span className="badge badge-success" style={{ marginBottom: 16, display: "inline-flex" }}>Projects</span>
+            <h3 className="heading-md" style={{ fontSize: 20, lineHeight: 1.3, marginBottom: 12 }}>
+              Register your project.{"\n"}Hit milestones. Get funded.
+            </h3>
+            <p className="text-small" style={{ lineHeight: 1.6, marginBottom: 20 }}>
+              Define milestones, assign a verifier, and let funding accumulate
+              as your pool trades. Withdraw earned fees as each milestone
+              is verified onchain. Mint Hypercerts as composable proof of impact.
+            </p>
+            <Link href="/create" className="btn-ghost">Create project &rarr;</Link>
+          </div>
+
+          <div className="card" style={{ padding: 32 }}>
+            <span className="badge badge-violet" style={{ marginBottom: 16, display: "inline-flex" }}>LPs / Sponsors</span>
+            <h3 className="heading-md" style={{ fontSize: 20, lineHeight: 1.3, marginBottom: 12 }}>
+              Provide liquidity.{"\n"}A share of yield funds impact.
+            </h3>
+            <p className="text-small" style={{ lineHeight: 1.6, marginBottom: 20 }}>
+              LP fee skim via afterAddLiquidity routes a portion of yield
+              to milestone-gated projects. Institutional sponsors can use
+              Alkahest escrow gated by the same onchain milestone state.
+            </p>
+            <Link href="/impact" className="btn-ghost">Learn more &rarr;</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── ACCOUNTABILITY + TECH PROOF ── */}
+      <section className="container" style={{ paddingBottom: 140 }}>
+        <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
+          {/* Left: accountability features */}
+          <div style={{ flex: "1 1 400px" }}>
+            <h2 className="heading-lg" style={{ marginBottom: 32 }}>Built for accountability</h2>
+            {[
+              { title: "Milestone-gated", desc: "Fee tiers increase as projects deliver. Zero funding until the first milestone is verified. No results, no money." },
+              { title: "Heartbeat expiration", desc: "Projects must send periodic proof-of-life via heartbeat(). Silent projects auto-expire. No manual intervention." },
+              { title: "Cross-chain verification via Reactive Network", desc: "Milestones can be verified from any supported chain. Events on the origin chain trigger callbacks on Unichain automatically." },
+              { title: "EAS attestations", desc: "Ethereum Attestation Service provides credibly neutral, composable proof. Anyone can call verifyMilestoneEAS() permissionlessly." },
+              { title: "AI agent verification", desc: "An autonomous agent monitors evidence uploads, analyzes them with Claude, and submits verification onchain. Reports stored permanently on Filecoin." },
+            ].map((f) => (
+              <div key={f.title} style={{ marginBottom: 24 }}>
+                <h4 className="heading-sm" style={{ fontSize: 15, marginBottom: 4 }}>{f.title}</h4>
+                <p className="text-small" style={{ lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Right: technical stats */}
+          <div style={{ flex: "1 1 320px" }}>
+            <div className="card" style={{ padding: 32 }}>
+              <div className="text-superhead" style={{ marginBottom: 24 }}>Technical Proof</div>
+              <div className="grid-2" style={{ gap: 24 }}>
+                {[
+                  { value: "174", label: "Tests Passing" },
+                  { value: "5", label: "Contracts" },
+                  { value: "3", label: "Verification Paths" },
+                  { value: "5", label: "Funding Channels" },
+                  { value: "7", label: "Hook Callbacks" },
+                  { value: "3", label: "Chains" },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <div className="stat-value" style={{ color: "var(--accent)" }}>{s.value}</div>
+                    <div className="stat-label">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-caption" style={{ marginTop: 20 }}>
+                All contracts deployed and verified on Unichain Sepolia, Ethereum Sepolia, and Reactive Lasna.
+              </div>
+            </div>
+
+            {/* Tech stack badges */}
+            <div className="card" style={{ padding: 24, marginTop: 16 }}>
+              <div className="text-superhead" style={{ marginBottom: 12 }}>Built With</div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {["Uniswap v4", "EAS", "Reactive Network", "Alkahest", "Hypercerts", "Filecoin/IPFS", "Claude"].map((t) => (
+                  <span key={t} className="badge badge-accent" style={{ fontSize: 12 }}>{t}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="container" style={{ paddingBottom: 120, textAlign: "center" }}>
+        <h2 className="heading-lg" style={{ marginBottom: 12 }}>Start building impact</h2>
+        <p className="text-body" style={{ maxWidth: 480, margin: "0 auto 32px" }}>
+          Create a project, make a swap, or explore the architecture.
+        </p>
+        <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
+          <Link href="/dashboard" className="btn-primary" style={{ padding: "14px 32px", fontSize: 16 }}>
+            Launch App
+          </Link>
+          <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: "14px 32px", fontSize: 16 }}>
+            View on GitHub
           </a>
-          <a
-            href="/technical"
-            style={{
-              fontSize: 14,
-              color: "var(--text-secondary)",
-              textDecoration: "none",
-              transition: "color 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-          >
-            Technical
-          </a>
-          <a
-            href="/impact"
-            style={{
-              fontSize: 14,
-              color: "var(--text-secondary)",
-              textDecoration: "none",
-              transition: "color 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-          >
-            Impact
-          </a>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="container" style={{ paddingTop: 32, paddingBottom: 32, borderTop: "1px solid var(--border-subtle)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+          <span className="text-caption">Built for the UHI8 Hookathon. Deployed on Unichain Sepolia.</span>
+          <div style={{ display: "flex", gap: 24 }}>
+            <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" className="landing-nav-link">GitHub</a>
+            <Link href="/impact" className="landing-nav-link">Impact</Link>
+            <Link href="/agent" className="landing-nav-link">Agent</Link>
+            <Link href="/technical" className="landing-nav-link">Technical</Link>
+          </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function FlowNode({ label, sublabel, color, delay, small }: {
-  label: string; sublabel: string; color: string; delay: number; small?: boolean;
-}) {
-  const delayClass = delay <= 100 ? "delay-100" : delay <= 200 ? "delay-200" : delay <= 300 ? "delay-300"
-    : delay <= 400 ? "delay-400" : delay <= 500 ? "delay-500" : delay <= 600 ? "delay-600"
-    : delay <= 700 ? "delay-700" : "delay-800";
-
-  return (
-    <div
-      className={`animate-fade-up ${delayClass}`}
-      style={{
-        padding: small ? "10px 8px" : "12px 16px",
-        borderRadius: 8,
-        background: `${color}0a`,
-        border: `1px solid ${color}22`,
-        textAlign: "center",
-      }}
-    >
-      <div style={{ fontSize: small ? 12 : 14, fontWeight: 600, color: color }}>
-        {label}
-      </div>
-      <div style={{ fontSize: small ? 10 : 11, color: "var(--text-secondary)", marginTop: 2 }}>
-        {sublabel}
-      </div>
     </div>
   );
 }

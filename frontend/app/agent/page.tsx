@@ -286,15 +286,13 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
               href="https://github.com/erinmagennis/ImpactHook/tree/main/agent"
               target="_blank"
               rel="noopener noreferrer"
-              className="cta-primary inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide"
-              style={{ borderRadius: 6, textDecoration: "none" }}
+              className="btn-primary"
             >
               View Source
             </a>
             <Link
               href="/technical"
-              className="inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide"
-              style={{ color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", borderRadius: 6, textDecoration: "none" }}
+              className="btn-secondary"
             >
               Technical Deep Dive
             </Link>
