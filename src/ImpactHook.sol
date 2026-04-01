@@ -179,7 +179,7 @@ contract ImpactHook is IHooks {
     PoolId[] public registeredPools;
     // Percentage of native v4 LP donations to route to impact project (bps, max 5000)
     mapping(PoolId => uint16) public donateSkimBps;
-    // Evidence CIDs per milestone (IPFS/Filecoin content identifiers)
+    /// @notice Evidence CIDs per milestone (IPFS/Filecoin content identifiers stored via Storacha or Filecoin Pin)
     mapping(PoolId => mapping(uint256 => string)) public milestoneEvidence;
 
     // ──────────────────── Modifiers ────────────────────
