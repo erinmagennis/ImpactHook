@@ -1,10 +1,10 @@
 # ImpactHook
 
-**Asset-class specific liquidity for real-world impact.**
+**Automatically turns trading volume into verified, milestone-gated public goods funding.**
 
-ImpactHook is a Uniswap v4 hook that creates a new category of liquidity pool where swap fees are programmatically routed to verified impact projects. Pools are differentiated not just by token pair or fee tier, but by the real-world outcome they fund - clean water, climate research, school meals, open-source infrastructure.
+ImpactHook is a Uniswap v4 hook that creates a new category of liquidity pool where fees are programmatically routed to verified impact projects. Pools are differentiated not just by token pair or fee tier, but by the real-world outcome they fund: DeSci research, open-source infrastructure, climate action, education.
 
-This is asset-class specific liquidity: pools with distinct characteristics shaped by milestone-gated funding, cross-chain verification, and performance-based fee progression. Traders self-select into impact-aligned venues. LPs provide liquidity knowing their pools serve a purpose beyond yield. The result is a new DeFi primitive that turns trading volume into measurable social impact.
+Juan Benet has long advocated for chains to donate a percentage of fees to open source, DeSci, and public goods. ImpactHook makes this vision practical: instead of requiring protocol-level changes or political consensus, normal DeFi activity becomes continuous, verified public goods funding through a single Uniswap v4 hook. Traders self-select into impact-aligned venues. LPs provide liquidity knowing their yield serves a purpose beyond returns. The result is a new DeFi primitive that turns trading volume into measurable social impact.
 
 **Five funding channels. Three verification paths. All milestone-gated.**
 
@@ -13,8 +13,8 @@ This is asset-class specific liquidity: pools with distinct characteristics shap
 Most fee-charging hooks make pools less competitive for routing - aggregators skip them for cheaper alternatives. ImpactHook solves this with the **LP fee skim model**: a configurable percentage of LP earnings funds the project, while swap pricing stays identical to regular pools. Routers have no reason to skip it. LPs opt in. Swappers don't pay extra. Impact happens as a byproduct of normal DeFi activity.
 
 **Key features:**
-- **5 funding channels**: swap fees, LP fee skim, native v4 donate skim, direct donations, institutional escrow - all gated by the same milestones
-- **3 verification paths**: direct (EOA/multisig), Reactive Network cross-chain, EAS attestations
+- **5 funding channels**: swap fees, LP fee skim, native v4 donate skim, direct donations, and institutional grant escrow via [Arkhai's](https://github.com/arkhai-io/alkahest) Zellic-audited Alkahest protocol - all gated by the same milestones
+- **3 verification paths**: direct (EOA/multisig), Reactive Network cross-chain, and [EAS](https://attest.org) attestations with a custom schema for third-party milestone verification
 - **Heartbeat expiration**: projects must prove they're still alive or fees stop automatically
 - **Loyalty discounts**: repeat contributors earn reduced swap fees
 - **Behavior-customizable templates**: templates define LP skim rates, donate skim rates, heartbeat intervals, and swap fee mode per project type
@@ -23,14 +23,16 @@ Most fee-charging hooks make pools less competitive for routing - aggregators sk
 
 ## Why This Matters
 
-$2.5 trillion in daily crypto trading volume generates zero social impact. Meanwhile, traditional impact funding is opaque and slow - grant recipients wait months for disbursement, donors can't verify outcomes, and intermediaries take cuts.
+$2.5 trillion in daily crypto trading volume generates zero social impact. Meanwhile, DeSci researchers wait months for grant disbursements, open-source maintainers go unpaid, and public goods funding remains opaque and slow. Donors can't verify outcomes. Intermediaries take cuts.
 
 ImpactHook connects these two worlds:
-- **Continuous funding**: Every swap and LP fee collection generates funding, not once-a-year grants
-- **Milestone-gated**: No results, no funding. Verification happens on-chain before fees release
+- **Continuous public goods funding**: Every swap and LP fee collection generates funding for DeSci, open source, and public goods - not once-a-year grants
+- **Milestone-gated accountability**: No results, no funding. Verification happens onchain before fees release
 - **Router-competitive**: LP skim model keeps swap pricing identical to regular pools
 - **Cross-chain**: Milestones can be verified from any supported chain via Reactive Network
-- **Self-enforcing accountability**: Heartbeat expiration auto-stops dead projects
+- **Institutional escrow**: Arkhai's Alkahest protocol enables milestone-gated grant escrow, with `MilestoneArbiter` reading onchain milestone state to gate release
+- **Attestation-based verification**: EAS integration enables third-party verifiers to attest to milestone completion, adding an independent accountability layer
+- **Self-enforcing**: Heartbeat expiration auto-stops dead projects
 
 ## How It Works
 
@@ -89,9 +91,9 @@ Each pool has a `Project` config with:
 
 4. **Direct donations**: Anyone can donate ERC20 or native ETH directly to a project's fund.
 
-5. **Grant escrow** (institutional): Integration with [Alkahest](https://github.com/arkhai-io/alkahest) (Zellic-audited) escrow. `MilestoneArbiter` reads milestone state from the hook to gate escrow release.
+5. **Grant escrow** (institutional): Integration with [Arkhai's Alkahest](https://github.com/arkhai-io/alkahest) (Zellic-audited) escrow protocol. `MilestoneArbiter` implements Alkahest's `IArbiter` interface, reading milestone state directly from the hook to gate escrow release. This enables traditional grant-makers and institutions to fund DeSci and public goods projects with the same milestone accountability as DeFi-native channels.
 
-All channels are gated by the same on-chain milestone state, heartbeat expiration, and per-project pause controls.
+All channels are gated by the same onchain milestone state, heartbeat expiration, and per-project pause controls. Milestone verification supports three paths: direct verification (EOA/multisig), cross-chain via Reactive Network, and [EAS](https://attest.org) attestations using a custom schema that enables independent third-party verification.
 
 ### Cross-Chain Milestone Verification
 
@@ -115,7 +117,10 @@ Authorization: the Reactive Network overwrites the first callback argument with 
 | **Uniswap Foundation** | Novel v4 hook creating asset-class specific liquidity via milestone-gated fee routing (`afterSwapReturnDelta`) | `src/ImpactHook.sol` |
 | **Unichain** | Deployed on Unichain Sepolia (OP Stack L2). EAS attestations for milestone verification. | All contracts |
 | **Reactive Network** | Cross-chain milestone verification: `MilestoneOracle` → `MilestoneReactor` RSC → `verifyMilestoneReactive()` | `src/MilestoneOracle.sol`, `src/MilestoneReactor.sol`, `src/ImpactHook.sol` |
-| **Arkhai (Alkahest)** | Milestone-gated escrow via `IArbiter` integration | `src/MilestoneArbiter.sol` |
+| **Arkhai (Alkahest)** | Milestone-gated escrow via `IArbiter` integration. Zellic-audited escrow protocol gates grant release on onchain milestone state. | `src/MilestoneArbiter.sol` |
+| **Hypercerts** | Verified milestones mint Hypercerts on Ethereum, creating composable impact records in the public goods funding ecosystem | `frontend/lib/hypercerts.ts`, `frontend/app/milestones/page.tsx` |
+| **Storacha (Filecoin/IPFS)** | Milestone evidence (reports, images, data) uploaded to decentralized storage via Storacha. CIDs embedded in EAS attestations and Hypercert metadata. | `frontend/app/api/upload/route.ts`, `frontend/components/EvidenceUpload.tsx` |
+| **EAS** | Custom attestation schema for independent third-party milestone verification on Unichain | `frontend/app/milestones/page.tsx`, `src/ImpactHook.sol` |
 
 ## Fee Model
 

@@ -6,8 +6,10 @@ import {
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useSwitchChain,
 } from "wagmi";
 import { encodeAbiParameters, keccak256 } from "viem";
+import { sepolia } from "viem/chains";
 import { Navigation } from "../../components/Navigation";
 import {
   HOOK_ADDRESS,
@@ -17,12 +19,23 @@ import {
   easAbi,
 } from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
+import {
+  HYPERCERT_MINTER_ADDRESS,
+  hypercertMinterAbi,
+  TransferRestrictions,
+  buildMilestoneHypercertMetadata,
+  metadataToDataUri,
+} from "../../lib/hypercerts";
+import { EvidenceUpload } from "../../components/EvidenceUpload";
 
 function MilestoneCard({
   poolId,
   poolKey,
   index,
   isVerifier,
+  projectName,
+  recipient,
+  verifier,
 }: {
   poolId: `0x${string}`;
   poolKey: {
@@ -34,6 +47,9 @@ function MilestoneCard({
   };
   index: number;
   isVerifier: boolean;
+  projectName: string;
+  recipient: string;
+  verifier: string;
 }) {
   const { data: milestone } = useReadContract({
     address: HOOK_ADDRESS,
@@ -54,10 +70,52 @@ function MilestoneCard({
 
   // EAS attestation flow
   const [evidence, setEvidence] = useState("");
+  const [evidenceCid, setEvidenceCid] = useState<string | null>(null);
   const { writeContract: createAttestation, data: attestHash } =
     useWriteContract();
   const { isLoading: attestLoading, isSuccess: attestSuccess } =
     useWaitForTransactionReceipt({ hash: attestHash });
+
+  const handleEvidenceUpload = (cid: string, url: string) => {
+    setEvidenceCid(cid);
+    setEvidence(`ipfs://${cid}`);
+  };
+
+  // Hypercert minting
+  const { switchChain } = useSwitchChain();
+  const { writeContract: mintHypercert, data: hypercertHash } =
+    useWriteContract();
+  const { isLoading: hypercertLoading, isSuccess: hypercertSuccess } =
+    useWaitForTransactionReceipt({ hash: hypercertHash, chainId: sepolia.id });
+
+  const handleMintHypercert = () => {
+    const metadata = buildMilestoneHypercertMetadata({
+      projectName,
+      milestoneDescription: description,
+      milestoneIndex: index,
+      poolId,
+      recipient,
+      verifier,
+      evidenceCid: evidenceCid || undefined,
+    });
+    const uri = metadataToDataUri(metadata);
+
+    // Switch to Sepolia for Hypercert minting
+    switchChain({ chainId: sepolia.id });
+
+    mintHypercert({
+      address: HYPERCERT_MINTER_ADDRESS,
+      abi: hypercertMinterAbi,
+      functionName: "mintClaim",
+      args: [
+        recipient as `0x${string}`,
+        BigInt(10000),
+        uri,
+        TransferRestrictions.AllowAll,
+      ],
+      chainId: sepolia.id,
+    });
+  };
 
   const handleDirectVerify = () => {
     verifyDirect({
@@ -181,6 +239,71 @@ function MilestoneCard({
         </div>
       </div>
 
+      {/* Mint Hypercert for verified milestones */}
+      {verified && (
+        <div
+          style={{
+            marginTop: 16,
+            paddingTop: 16,
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          <EvidenceUpload onUpload={handleEvidenceUpload} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={handleMintHypercert}
+              disabled={hypercertLoading || hypercertSuccess}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 6,
+                border: '1px solid rgba(249,115,22,0.2)',
+                background: hypercertSuccess
+                  ? 'rgba(5,150,105,0.06)'
+                  : 'rgba(249,115,22,0.06)',
+                color: hypercertSuccess ? 'var(--success)' : '#f97316',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: hypercertSuccess ? 'default' : 'pointer',
+                whiteSpace: 'nowrap',
+                opacity: hypercertLoading ? 0.4 : 1,
+              }}
+            >
+              {hypercertSuccess
+                ? 'Hypercert Minted'
+                : hypercertLoading
+                ? 'Minting...'
+                : 'Mint Hypercert'}
+            </button>
+            <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
+              {hypercertSuccess
+                ? 'Impact recorded on Ethereum Sepolia'
+                : 'Mint a Hypercert on Ethereum to record this verified impact'}
+            </span>
+          </div>
+          {hypercertSuccess && hypercertHash && (
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 12,
+                color: 'var(--text-dim)',
+              }}
+            >
+              <a
+                href={`https://sepolia.etherscan.io/tx/${hypercertHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)', textDecoration: 'none' }}
+              >
+                View on Etherscan
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Action buttons for unverified milestones */}
       {!verified && isVerifier && (
         <div
@@ -218,6 +341,11 @@ function MilestoneCard({
             >
               {directLoading ? 'Verifying...' : 'Direct Verify'}
             </button>
+          </div>
+
+          {/* Upload evidence to Storacha/IPFS */}
+          <div style={{ marginBottom: 8 }}>
+            <EvidenceUpload onUpload={handleEvidenceUpload} />
           </div>
 
           {/* EAS attestation */}
@@ -342,11 +470,21 @@ export default function MilestonesPage() {
   });
 
   const registered = projectInfo?.[5];
-  const verifier = projectInfo?.[1];
+  const recipient = projectInfo?.[0] as string || "";
+  const verifier = projectInfo?.[1] as string || "";
   const currentFeeBps = projectInfo?.[4];
   const milestoneCount = Number(projectInfo?.[3] || 0);
   const isVerifier =
     isConnected && address?.toLowerCase() === verifier?.toLowerCase();
+
+  const { data: projectMetadata } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "getProjectMetadata",
+    args: [poolId],
+    chainId: unichainSepolia.id,
+  });
+  const projectName = (projectMetadata?.[0] as string) || "Impact Project";
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
@@ -453,11 +591,63 @@ export default function MilestonesPage() {
                 poolKey={poolKey}
                 index={i}
                 isVerifier={isVerifier}
+                projectName={projectName}
+                recipient={recipient}
+                verifier={verifier}
               />
             ))}
           </div>
         ) : (
           /* Demo milestones preview */
+          <DemoMilestones />
+        )}
+      </main>
+    </div>
+  );
+}
+
+function DemoMilestones() {
+  const { address, isConnected, chainId } = useAccount();
+  const { switchChain } = useSwitchChain();
+  const [demoCids, setDemoCids] = useState<Record<number, string>>({});
+
+  const { writeContract: mintHypercert, data: hypercertHash } = useWriteContract();
+  const { isLoading: hypercertLoading, isSuccess: hypercertSuccess } =
+    useWaitForTransactionReceipt({ hash: hypercertHash, chainId: sepolia.id });
+  const [mintingIndex, setMintingIndex] = useState<number | null>(null);
+
+  const handleDemoMint = (milestone: { desc: string }, index: number) => {
+    setMintingIndex(index);
+    const metadata = buildMilestoneHypercertMetadata({
+      projectName: "Clean Water Initiative",
+      milestoneDescription: milestone.desc,
+      milestoneIndex: index,
+      poolId: "0xdemo",
+      recipient: address || "0x0000000000000000000000000000000000000000",
+      verifier: address || "0x0000000000000000000000000000000000000000",
+      evidenceCid: demoCids[index] || undefined,
+    });
+    const uri = metadataToDataUri(metadata);
+
+    if (chainId !== sepolia.id) {
+      switchChain({ chainId: sepolia.id });
+    }
+
+    mintHypercert({
+      address: HYPERCERT_MINTER_ADDRESS,
+      abi: hypercertMinterAbi,
+      functionName: "mintClaim",
+      args: [
+        address as `0x${string}`,
+        BigInt(10000),
+        uri,
+        TransferRestrictions.AllowAll,
+      ],
+      chainId: sepolia.id,
+    });
+  };
+
+  return (
           <div className="animate-fade-up delay-200" style={{ position: 'relative' }}>
             <div
               style={{
@@ -528,6 +718,66 @@ export default function MilestonesPage() {
                       {m.verified ? 'Verified' : 'Pending'}
                     </div>
                   </div>
+                  {/* Storacha upload + Hypercert mint on demo cards */}
+                  <div
+                    style={{
+                      marginTop: 16,
+                      paddingTop: 16,
+                      borderTop: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12,
+                    }}
+                  >
+                    <EvidenceUpload onUpload={(cid) => setDemoCids(prev => ({ ...prev, [i]: cid }))} />
+                    {m.verified && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <button
+                          onClick={() => handleDemoMint(m, i)}
+                          disabled={!isConnected || (hypercertLoading && mintingIndex === i) || (hypercertSuccess && mintingIndex === i)}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 6,
+                            border: '1px solid rgba(249,115,22,0.2)',
+                            background: (hypercertSuccess && mintingIndex === i)
+                              ? 'rgba(5,150,105,0.06)'
+                              : 'rgba(249,115,22,0.06)',
+                            color: (hypercertSuccess && mintingIndex === i) ? 'var(--success)' : '#f97316',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            cursor: !isConnected || (hypercertLoading && mintingIndex === i) ? 'default' : 'pointer',
+                            whiteSpace: 'nowrap',
+                            opacity: !isConnected || (hypercertLoading && mintingIndex === i) ? 0.4 : 1,
+                          }}
+                        >
+                          {(hypercertSuccess && mintingIndex === i)
+                            ? 'Hypercert Minted'
+                            : (hypercertLoading && mintingIndex === i)
+                            ? 'Minting...'
+                            : 'Mint Hypercert'}
+                        </button>
+                        <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
+                          {(hypercertSuccess && mintingIndex === i)
+                            ? 'Impact recorded on Ethereum Sepolia'
+                            : isConnected
+                            ? 'Mint a Hypercert on Ethereum to record this verified impact'
+                            : 'Connect wallet to mint impact record on Ethereum'}
+                        </span>
+                      </div>
+                    )}
+                    {hypercertSuccess && mintingIndex === i && hypercertHash && (
+                      <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+                        <a
+                          href={`https://sepolia.etherscan.io/tx/${hypercertHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: 'var(--accent)', textDecoration: 'none' }}
+                        >
+                          View on Etherscan
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -546,9 +796,6 @@ export default function MilestonesPage() {
               Enter your pool key above to view real milestone data, or connect your wallet to verify milestones.
             </div>
           </div>
-        )}
-      </main>
-    </div>
   );
 }
 
