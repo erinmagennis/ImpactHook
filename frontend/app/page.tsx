@@ -128,7 +128,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── TECH BAR ── */}
-      <section style={{ borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: "24px 0", marginBottom: 80 }}>
+      <section style={{ borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: "24px 0", marginBottom: 48 }}>
         <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 48, flexWrap: "wrap" }}>
           {["Uniswap v4", "EAS", "Reactive Network", "Arkhai", "Hypercerts", "Filecoin / IPFS", "Storacha", "Claude"].map((tech) => (
             <span key={tech} className="font-data" style={{ fontSize: 13, color: "var(--text-dim)", letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
@@ -175,9 +175,15 @@ export default function LandingPage() {
           ))}
         </div>
 
-        <p className="heading-lg" style={{ maxWidth: 640, margin: "80px auto 0", lineHeight: 1.4, textAlign: "center" }}>
-          Trade normally. Fund impact automatically. Projects only get paid when they deliver.
-        </p>
+      </section>
+
+      {/* ── THESIS ── */}
+      <section style={{ background: "var(--bg-card)", padding: "64px 0", marginBottom: 140 }}>
+        <div className="container" style={{ textAlign: "center" }}>
+          <p className="heading-lg" style={{ maxWidth: 640, margin: "0 auto", lineHeight: 1.4 }}>
+            Trade normally. Fund impact automatically. Projects only get paid when they deliver.
+          </p>
+        </div>
       </section>
 
       {/* ── THREE AUDIENCES ── */}
