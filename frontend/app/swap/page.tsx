@@ -420,6 +420,10 @@ export default function SwapPage() {
               >
                 View transaction
               </a>
+              {" · "}
+              <a href="/portfolio" style={{ color: "var(--accent)", textDecoration: "none" }}>
+                View your impact portfolio
+              </a>
             </div>
           )}
 

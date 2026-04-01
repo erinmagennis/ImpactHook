@@ -93,9 +93,9 @@ function ContributedProjectCard({
 
 function EmptyState({ isConnected }: { isConnected: boolean }) {
   return (
-    <div className="card animate-fade-up delay-200" style={{ padding: "48px 32px", textAlign: "center" }}>
-      <div style={{ marginBottom: 16, opacity: 0.4 }}>
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ display: "inline-block" }}>
+    <div className="card animate-fade-up delay-200" style={{ padding: "64px 32px", textAlign: "center" }}>
+      <div style={{ marginBottom: 24, opacity: 0.4 }}>
+        <svg width="64" height="64" viewBox="0 0 48 48" fill="none" style={{ display: "inline-block" }}>
           <rect x="4" y="8" width="40" height="32" rx="4" stroke="var(--text-dim)" strokeWidth="2" fill="none" />
           <line x1="4" y1="18" x2="44" y2="18" stroke="var(--text-dim)" strokeWidth="2" />
         </svg>

@@ -175,7 +175,7 @@ function HookStatus() {
   });
 
   return (
-    <div className="card animate-fade-up delay-100">
+    <div className="card animate-fade-up delay-100" style={{ cursor: "default" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <span className="heading-sm" style={{ fontSize: 15 }}>Hook Status</span>
         <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>

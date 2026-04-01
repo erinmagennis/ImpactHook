@@ -63,7 +63,7 @@ export default function LandingPage() {
       <LandingNav />
 
       {/* ── HERO ── */}
-      <section className="container" style={{ paddingTop: 140, paddingBottom: 140 }}>
+      <section className="container" style={{ paddingTop: 140, paddingBottom: 96 }}>
         <div style={{ display: "flex", gap: 80, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ flex: "1 1 480px", maxWidth: 560 }}>
             <span className="badge badge-accent" style={{ marginBottom: 20, display: "inline-flex" }}>
@@ -73,9 +73,9 @@ export default function LandingPage() {
               Every swap funds{"\n"}verified impact
             </h1>
             <p className="text-body" style={{ fontSize: 18, lineHeight: 1.7, marginBottom: 36, maxWidth: 460 }}>
-              ImpactHook routes a share of trading fees and LP yield to
-              milestone-verified projects. Funding unlocks only when real
-              progress is proven onchain.
+              A Uniswap v4 hook that sends a portion of trading fees and LP yield
+              to verified impact projects. No funding releases until milestones
+              are proven onchain.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <Link href="/dashboard" className="btn-primary" style={{ padding: "14px 32px", fontSize: 16 }}>
@@ -87,7 +87,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="animate-fade-up delay-200" style={{ flex: "1 1 400px", maxWidth: 520 }}>
+          <div className="animate-fade-up delay-200" style={{ flex: "1 1 340px", maxWidth: 520 }}>
             <BrowserFrame>
               {/* Mini dashboard preview */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -139,11 +139,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="container" style={{ paddingBottom: 140 }}>
+      <section id="how-it-works" className="container" style={{ paddingBottom: 96 }}>
         <div style={{ marginBottom: 48 }}>
           <h2 className="heading-lg" style={{ marginBottom: 12 }}>How it works</h2>
           <p className="text-body" style={{ maxWidth: 560 }}>
-            Swap fees from traders and yield skim from LPs, both gated by the same onchain milestone verification.
+            Fees from swaps and liquidity earnings, both gated by the same onchain milestone verification.
           </p>
         </div>
 
@@ -187,7 +187,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── THREE AUDIENCES ── */}
-      <section className="container" style={{ paddingBottom: 140 }}>
+      <section className="container" style={{ paddingBottom: 96 }}>
         <div style={{ marginBottom: 48 }}>
           <h2 className="heading-lg" style={{ marginBottom: 12 }}>Built for every participant</h2>
           <p className="text-body" style={{ maxWidth: 520 }}>
@@ -237,7 +237,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── ACCOUNTABILITY + TECH PROOF ── */}
-      <section className="container" style={{ paddingBottom: 140 }}>
+      <section className="container" style={{ paddingBottom: 96 }}>
         <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
           {/* Left: accountability features */}
           <div style={{ flex: "1 1 400px" }}>

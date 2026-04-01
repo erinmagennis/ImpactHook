@@ -148,7 +148,7 @@ body {
 
 .text-label {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-dim);
   margin-bottom: 6px;
   display: block;
@@ -1116,6 +1116,24 @@ textarea::placeholder {
 
   .card {
     padding: 20px;
+  }
+
+  .btn-form {
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 14px 24px;
+  }
+
+  .landing-nav .container {
+    padding: 0 20px;
+  }
+
+  .landing-nav-link {
+    display: none;
   }
 }
 

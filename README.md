@@ -228,6 +228,20 @@ Frontend (live at [impacthook.vercel.app](https://impacthook.vercel.app)):
 cd frontend && bun install && bun run dev
 ```
 
+Environment variables (`frontend/.env.local`):
+```
+STORACHA_KEY=...          # Ed25519 signer key for Storacha uploads
+STORACHA_PROOF=...        # Space delegation proof
+FILECOIN_PRIVATE_KEY=0x.. # Wallet key for Filecoin Pin (Calibration testnet)
+```
+
+Agent (see [`agent/README.md`](agent/README.md) for full setup):
+```shell
+cd agent && bun install
+bun agent.ts --dry-run    # analyze without submitting txs
+bun agent.ts              # live mode with onchain verification
+```
+
 ## Usage
 
 ### Build

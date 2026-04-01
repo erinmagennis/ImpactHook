@@ -115,7 +115,7 @@ export default function ImpactPage() {
               { label: "Withdrawals are public", desc: "Every withdrawal is a FeesWithdrawn event with the recipient address and exact amount. No money moves without a visible onchain record.", icon: "->" },
               { label: "Heartbeat expiration", desc: "Projects must send periodic proof-of-life or fees stop automatically. Dead projects auto-expire without manual intervention.", icon: "~~" },
               { label: "Per-project controls", desc: "Individual projects can be paused without affecting others. Progressive decentralization from owner-gated to fully permissionless.", icon: "||" },
-              { label: "Open source, auditable", desc: "All contracts verified onchain, source code public on GitHub. 156 tests, 94% line coverage. Audited with Slither and Feynman.", icon: "<>" },
+              { label: "Open source, auditable", desc: "All contracts verified onchain, source code public on GitHub. 174 tests, 94% line coverage. Audited with Slither and Feynman.", icon: "<>" },
             ].map((item) => (
               <div key={item.label} className="card p-6">
                 <div className="flex items-center gap-3 mb-3">

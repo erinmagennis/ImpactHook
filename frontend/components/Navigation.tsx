@@ -162,7 +162,7 @@ export function Navigation() {
                         >
                           {rc.label}
                         </div>
-                        <div className="text-caption">
+                        <div className="text-caption" style={{ color: "var(--text-secondary)" }}>
                           {rc.description}
                         </div>
                       </button>
