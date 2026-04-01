@@ -248,11 +248,13 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   padding: 24px;
-  transition: border-color var(--transition-base);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .card:hover {
   border-color: #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .card-accent {
@@ -280,7 +282,7 @@ body {
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
   font-family: inherit;
   text-decoration: none;
   display: inline-flex;
@@ -289,12 +291,21 @@ body {
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13,148,136,0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .btn-primary:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-secondary {
@@ -315,7 +326,8 @@ body {
 }
 
 .btn-secondary:hover {
-  border-color: #444;
+  border-color: #555;
+  background: rgba(255,255,255,0.03);
 }
 
 .btn-form {
@@ -409,16 +421,17 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-input);
   color: var(--text-primary);
-  padding: 10px 14px;
+  padding: 12px 14px;
   font-size: 14px;
   width: 100%;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   font-family: inherit;
 }
 
 .input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
 }
 
 .input::placeholder {
@@ -437,10 +450,10 @@ select {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-input);
   color: var(--text-primary);
-  padding: 10px 14px;
+  padding: 12px 14px;
   font-family: inherit;
   font-size: 14px;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
 }
 
@@ -448,6 +461,7 @@ input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
 }
 
 input::placeholder,
@@ -924,8 +938,9 @@ textarea::placeholder {
 }
 
 .nav-link-active {
-  color: var(--text-primary);
-  background: var(--bg-elevated);
+  color: var(--accent);
+  background: rgba(13,148,136,0.08);
+  border-color: rgba(13,148,136,0.15);
 }
 
 .chain-warning {
@@ -1139,4 +1154,23 @@ textarea::placeholder {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.5; }
+}
+
+.skeleton {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Milestone verified state - stronger visual */
+.milestone-verified-card {
+  background: rgba(5,150,105,0.06) !important;
+  border-color: rgba(5,150,105,0.18) !important;
+  border-left: 3px solid var(--success) !important;
 }
