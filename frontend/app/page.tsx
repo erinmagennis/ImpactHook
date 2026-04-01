@@ -19,7 +19,7 @@ function LandingNav() {
         background: scrolled ? "rgba(10,10,10,0.92)" : "transparent",
         backdropFilter: scrolled ? "blur(16px)" : "none",
         WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent",
+        borderBottom: "1px solid var(--border-subtle)",
       }}
     >
       <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
