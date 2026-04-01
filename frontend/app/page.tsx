@@ -312,7 +312,14 @@ export default function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className="container" style={{ paddingTop: 32, paddingBottom: 32, borderTop: "1px solid var(--border-subtle)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-          <span className="text-caption">Programmable impact infrastructure.</span>
+          <span className="text-caption" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="18" height="18">
+              <path d="M8 8L2 16L8 24" stroke="#666" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M24 8L30 16L24 24" stroke="#666" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M12 16.5L15 19.5L21 12.5" stroke="#0d9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            </svg>
+            Programmable impact infrastructure.
+          </span>
           <div style={{ display: "flex", gap: 24 }}>
             <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" className="landing-nav-link">GitHub</a>
             <Link href="/impact" className="landing-nav-link">Impact</Link>
