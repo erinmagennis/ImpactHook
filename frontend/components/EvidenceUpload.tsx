@@ -76,50 +76,19 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
         />
 
         {/* Storage backend toggle */}
-        <div
-          style={{
-            display: "flex",
-            borderRadius: 6,
-            border: "1px solid var(--border-subtle)",
-            overflow: "hidden",
-            fontSize: 11,
-            fontWeight: 600,
-          }}
-        >
+        <div className="evidence-toggle">
           <button
             onClick={() => setBackend("storacha")}
             disabled={uploading}
-            style={{
-              padding: "5px 10px",
-              border: "none",
-              background:
-                backend === "storacha"
-                  ? "rgba(59,130,246,0.12)"
-                  : "var(--bg-elevated)",
-              color:
-                backend === "storacha" ? "#3b82f6" : "var(--text-dim)",
-              cursor: "pointer",
-              letterSpacing: "0.04em",
-            }}
+            className={`evidence-toggle-btn ${backend === "storacha" ? "evidence-toggle-active" : ""}`}
           >
             Storacha
           </button>
           <button
             onClick={() => setBackend("filecoin")}
             disabled={uploading}
-            style={{
-              padding: "5px 10px",
-              border: "none",
-              borderLeft: "1px solid var(--border-subtle)",
-              background:
-                backend === "filecoin"
-                  ? "rgba(59,130,246,0.12)"
-                  : "var(--bg-elevated)",
-              color:
-                backend === "filecoin" ? "#3b82f6" : "var(--text-dim)",
-              cursor: "pointer",
-              letterSpacing: "0.04em",
-            }}
+            className={`evidence-toggle-btn ${backend === "filecoin" ? "evidence-toggle-active" : ""}`}
+            style={{ borderLeft: "1px solid var(--border-subtle)" }}
           >
             Filecoin Pin
           </button>
@@ -128,45 +97,42 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
         <button
           onClick={() => fileRef.current?.click()}
           disabled={disabled || uploading}
-          style={{
-            padding: "8px 14px",
-            borderRadius: 6,
-            border: "1px solid rgba(59,130,246,0.2)",
-            background: uploadedCid
-              ? "rgba(5,150,105,0.06)"
-              : "rgba(59,130,246,0.06)",
-            color: uploadedCid ? "var(--success)" : "#3b82f6",
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: disabled || uploading ? "default" : "pointer",
-            whiteSpace: "nowrap",
-            opacity: disabled || uploading ? 0.4 : 1,
-          }}
+          className={`evidence-upload-btn ${uploadedCid ? "evidence-upload-done" : ""}`}
         >
-          {uploading
-            ? `Uploading to ${backend === "filecoin" ? "Filecoin" : "IPFS"}...`
-            : uploadedCid
-            ? `Stored: ${fileName}`
-            : "Upload Evidence"}
+          {uploading ? (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                style={{
+                  width: 14,
+                  height: 14,
+                  border: "2px solid rgba(255,255,255,0.2)",
+                  borderTopColor: backend === "filecoin" ? "#3b82f6" : "var(--accent)",
+                  borderRadius: "50%",
+                  animation: "spin 0.8s linear infinite",
+                  display: "inline-block",
+                }}
+              />
+              {backend === "filecoin"
+                ? "Storing on Filecoin..."
+                : "Storing on IPFS..."}
+            </span>
+          ) : uploadedCid ? (
+            `Stored: ${fileName}`
+          ) : (
+            "Upload Evidence"
+          )}
         </button>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>
-          {uploadedCid ? backendLabel : "Images, PDFs, reports, data"}
+        <span className="text-caption">
+          {uploading && backend === "filecoin"
+            ? "First upload may take ~30s (deposit + storage)"
+            : uploadedCid
+            ? backendLabel
+            : "Images, PDFs, reports, data"}
         </span>
       </div>
 
       {uploadedCid && uploadedUrl && (
-        <div
-          style={{
-            marginTop: 8,
-            padding: "6px 12px",
-            borderRadius: 6,
-            background: "rgba(59,130,246,0.04)",
-            border: "1px solid rgba(59,130,246,0.08)",
-            fontSize: 12,
-            color: "var(--text-dim)",
-            wordBreak: "break-all",
-          }}
-        >
+        <div className="evidence-cid">
           <span style={{ color: "var(--text-secondary)" }}>CID: </span>
           <a
             href={uploadedUrl}
@@ -180,19 +146,7 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
       )}
 
       {error && (
-        <div
-          style={{
-            marginTop: 8,
-            padding: "6px 12px",
-            borderRadius: 6,
-            background: "rgba(239,68,68,0.04)",
-            border: "1px solid rgba(239,68,68,0.08)",
-            fontSize: 12,
-            color: "#ef4444",
-          }}
-        >
-          {error}
-        </div>
+        <div className="evidence-error">{error}</div>
       )}
     </div>
   );
