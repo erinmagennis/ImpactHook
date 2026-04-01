@@ -2,6 +2,8 @@
 
 import { useState, useRef } from "react";
 
+type StorageBackend = "storacha" | "filecoin";
+
 interface EvidenceUploadProps {
   onUpload: (cid: string, url: string) => void;
   disabled?: boolean;
@@ -13,6 +15,8 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [backend, setBackend] = useState<StorageBackend>("storacha");
+  const [usedBackend, setUsedBackend] = useState<StorageBackend | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
@@ -20,11 +24,14 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
     setError(null);
     setFileName(file.name);
 
+    const endpoint =
+      backend === "filecoin" ? "/api/upload-filecoin" : "/api/upload";
+
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch(endpoint, {
         method: "POST",
         body: formData,
       });
@@ -39,6 +46,7 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
 
       setUploadedCid(data.cid);
       setUploadedUrl(data.url);
+      setUsedBackend(backend);
       onUpload(data.cid, data.url);
     } catch {
       setError("Failed to connect to upload service");
@@ -47,9 +55,14 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
     }
   };
 
+  const backendLabel =
+    usedBackend === "filecoin"
+      ? "Stored on Filecoin (Calibration)"
+      : "Stored on Filecoin/IPFS";
+
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
         <input
           ref={fileRef}
           type="file"
@@ -61,6 +74,57 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
           style={{ display: "none" }}
           accept="image/*,.pdf,.json,.csv,.txt,.md"
         />
+
+        {/* Storage backend toggle */}
+        <div
+          style={{
+            display: "flex",
+            borderRadius: 6,
+            border: "1px solid var(--border-subtle)",
+            overflow: "hidden",
+            fontSize: 11,
+            fontWeight: 600,
+          }}
+        >
+          <button
+            onClick={() => setBackend("storacha")}
+            disabled={uploading}
+            style={{
+              padding: "5px 10px",
+              border: "none",
+              background:
+                backend === "storacha"
+                  ? "rgba(59,130,246,0.12)"
+                  : "var(--bg-elevated)",
+              color:
+                backend === "storacha" ? "#3b82f6" : "var(--text-dim)",
+              cursor: "pointer",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Storacha
+          </button>
+          <button
+            onClick={() => setBackend("filecoin")}
+            disabled={uploading}
+            style={{
+              padding: "5px 10px",
+              border: "none",
+              borderLeft: "1px solid var(--border-subtle)",
+              background:
+                backend === "filecoin"
+                  ? "rgba(59,130,246,0.12)"
+                  : "var(--bg-elevated)",
+              color:
+                backend === "filecoin" ? "#3b82f6" : "var(--text-dim)",
+              cursor: "pointer",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Filecoin Pin
+          </button>
+        </div>
+
         <button
           onClick={() => fileRef.current?.click()}
           disabled={disabled || uploading}
@@ -80,15 +144,13 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
           }}
         >
           {uploading
-            ? "Uploading to IPFS..."
+            ? `Uploading to ${backend === "filecoin" ? "Filecoin" : "IPFS"}...`
             : uploadedCid
             ? `Stored: ${fileName}`
-            : "Upload Evidence to Storacha"}
+            : "Upload Evidence"}
         </button>
         <span style={{ fontSize: 11, color: "var(--text-dim)" }}>
-          {uploadedCid
-            ? "Stored on Filecoin/IPFS"
-            : "Images, PDFs, reports, data"}
+          {uploadedCid ? backendLabel : "Images, PDFs, reports, data"}
         </span>
       </div>
 

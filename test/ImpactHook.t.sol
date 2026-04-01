@@ -2580,6 +2580,66 @@ contract ImpactHookTest is Test, Deployers {
             ""
         );
     }
+
+    // ──────────────────── Evidence Tests ────────────────────
+
+    function test_setMilestoneEvidence() public {
+        string memory cid = "bafkreigyhml5ch37czfappdfpl5pdzzrd3zuwtf5b7c2ze7xu4vcs6hjy4";
+        vm.prank(verifier);
+        hook.setMilestoneEvidence(poolId, 0, cid);
+        assertEq(hook.milestoneEvidence(poolId, 0), cid);
+    }
+
+    function test_setMilestoneEvidence_byRecipient() public {
+        string memory cid = "bafkreiexamplecid";
+        vm.prank(recipient);
+        hook.setMilestoneEvidence(poolId, 0, cid);
+        assertEq(hook.milestoneEvidence(poolId, 0), cid);
+    }
+
+    function test_setMilestoneEvidence_emitsEvent() public {
+        string memory cid = "bafkreigyhml5ch37czfappdfpl5pdzzrd3zuwtf5b7c2ze7xu4vcs6hjy4";
+        vm.prank(verifier);
+        vm.expectEmit(true, true, false, true);
+        emit ImpactHook.EvidenceAttached(poolId, 0, cid);
+        hook.setMilestoneEvidence(poolId, 0, cid);
+    }
+
+    function test_setMilestoneEvidence_notVerifierOrRecipient_reverts() public {
+        vm.prank(address(0xBEEF));
+        vm.expectRevert(ImpactHook.ImpactHook__NotVerifier.selector);
+        hook.setMilestoneEvidence(poolId, 0, "bafkrei123");
+    }
+
+    function test_setMilestoneEvidence_invalidIndex_reverts() public {
+        vm.prank(verifier);
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidMilestoneIndex.selector);
+        hook.setMilestoneEvidence(poolId, 99, "bafkrei123");
+    }
+
+    function test_setMilestoneEvidence_canUpdate() public {
+        vm.prank(verifier);
+        hook.setMilestoneEvidence(poolId, 0, "bafkrei_old");
+        vm.prank(verifier);
+        hook.setMilestoneEvidence(poolId, 0, "bafkrei_new");
+        assertEq(hook.milestoneEvidence(poolId, 0), "bafkrei_new");
+    }
+
+    function test_setMilestoneEvidence_beforeAndAfterVerification() public {
+        // Set evidence before verification
+        vm.prank(verifier);
+        hook.setMilestoneEvidence(poolId, 0, "bafkrei_before");
+        assertEq(hook.milestoneEvidence(poolId, 0), "bafkrei_before");
+
+        // Verify milestone
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+
+        // Update evidence after verification
+        vm.prank(verifier);
+        hook.setMilestoneEvidence(poolId, 0, "bafkrei_after");
+        assertEq(hook.milestoneEvidence(poolId, 0), "bafkrei_after");
+    }
 }
 
 // ────────── HookMiner Tests ──────────

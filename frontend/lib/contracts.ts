@@ -268,6 +268,37 @@ export const impactHookAbi = [
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
   },
+  // Evidence
+  {
+    type: "function",
+    name: "milestoneEvidence",
+    inputs: [
+      { name: "", type: "bytes32" },
+      { name: "", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "setMilestoneEvidence",
+    inputs: [
+      { name: "poolId", type: "bytes32" },
+      { name: "milestoneIndex", type: "uint256" },
+      { name: "cid", type: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "event",
+    name: "EvidenceAttached",
+    inputs: [
+      { name: "poolId", type: "bytes32", indexed: true },
+      { name: "milestoneIndex", type: "uint256", indexed: true },
+      { name: "cid", type: "string", indexed: false },
+    ],
+  },
   // Project pause status
   {
     type: "function",

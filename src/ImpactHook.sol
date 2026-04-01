@@ -95,6 +95,8 @@ contract ImpactHook is IHooks {
     event DonateSkimmed(PoolId indexed poolId, Currency indexed currency, uint256 amount);
     /// @notice Emitted when the donate skim rate is set
     event DonateSkimBpsSet(PoolId indexed poolId, uint16 donateSkimBps);
+    /// @notice Emitted when evidence is attached to a milestone (IPFS/Filecoin CID)
+    event EvidenceAttached(PoolId indexed poolId, uint256 indexed milestoneIndex, string cid);
 
     // ──────────────────── Constants ────────────────────
 
@@ -177,6 +179,8 @@ contract ImpactHook is IHooks {
     PoolId[] public registeredPools;
     // Percentage of native v4 LP donations to route to impact project (bps, max 5000)
     mapping(PoolId => uint16) public donateSkimBps;
+    // Evidence CIDs per milestone (IPFS/Filecoin content identifiers)
+    mapping(PoolId => mapping(uint256 => string)) public milestoneEvidence;
 
     // ──────────────────── Modifiers ────────────────────
 
@@ -480,6 +484,23 @@ contract ImpactHook is IHooks {
 
         project.lastHeartbeat = block.timestamp; // milestone verification refreshes heartbeat
         emit MilestoneVerified(poolId, milestoneIndex, milestone.projectFeeBps);
+    }
+
+    // ──────────────────── Evidence ────────────────────
+
+    /// @notice Attach evidence to a milestone (IPFS/Filecoin CID). Callable by verifier or recipient.
+    /// Can be called before or after verification.
+    /// @param poolId The pool ID
+    /// @param milestoneIndex The milestone to attach evidence to
+    /// @param cid The IPFS/Filecoin content identifier (e.g. "bafkreiXXX")
+    function setMilestoneEvidence(PoolId poolId, uint256 milestoneIndex, string calldata cid) external {
+        Project storage project = projects[poolId];
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+        if (msg.sender != project.verifier && msg.sender != project.recipient) revert ImpactHook__NotVerifier();
+        if (milestoneIndex >= milestones[poolId].length) revert ImpactHook__InvalidMilestoneIndex();
+
+        milestoneEvidence[poolId][milestoneIndex] = cid;
+        emit EvidenceAttached(poolId, milestoneIndex, cid);
     }
 
     // ──────────────────── Fee Withdrawal ────────────────────

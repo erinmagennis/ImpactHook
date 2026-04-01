@@ -63,10 +63,25 @@ function MilestoneCard({
   const feeBps = milestone?.[1] || 0;
   const verified = milestone?.[2] || false;
 
+  // Read stored evidence CID from contract
+  const { data: storedEvidence } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "milestoneEvidence",
+    args: [poolId, BigInt(index)],
+    chainId: unichainSepolia.id,
+  });
+  const storedCid = (storedEvidence as string) || "";
+
   // Direct verification
   const { writeContract: verifyDirect, data: directHash } = useWriteContract();
   const { isLoading: directLoading, isSuccess: directSuccess } =
     useWaitForTransactionReceipt({ hash: directHash });
+
+  // Store evidence onchain
+  const { writeContract: storeEvidence, data: evidenceHash } = useWriteContract();
+  const { isLoading: evidenceStoring, isSuccess: evidenceStored } =
+    useWaitForTransactionReceipt({ hash: evidenceHash });
 
   // EAS attestation flow
   const [evidence, setEvidence] = useState("");
@@ -79,6 +94,15 @@ function MilestoneCard({
   const handleEvidenceUpload = (cid: string, url: string) => {
     setEvidenceCid(cid);
     setEvidence(`ipfs://${cid}`);
+
+    // Store evidence CID onchain
+    storeEvidence({
+      address: HOOK_ADDRESS,
+      abi: impactHookAbi,
+      functionName: "setMilestoneEvidence",
+      args: [poolId, BigInt(index), cid],
+      chainId: unichainSepolia.id,
+    });
   };
 
   // Hypercert minting
@@ -96,7 +120,7 @@ function MilestoneCard({
       poolId,
       recipient,
       verifier,
-      evidenceCid: evidenceCid || undefined,
+      evidenceCid: evidenceCid || storedCid || undefined,
     });
     const uri = metadataToDataUri(metadata);
 
@@ -219,6 +243,19 @@ function MilestoneCard({
           >
             Fee tier: {(Number(feeBps) / 100).toFixed(2)}%
           </span>
+          {storedCid && (
+            <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-dim)' }}>
+              Evidence:{' '}
+              <a
+                href={`https://${storedCid}.ipfs.storacha.link`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#3b82f6', textDecoration: 'none' }}
+              >
+                {storedCid.slice(0, 20)}...
+              </a>
+            </div>
+          )}
         </div>
         <div
           style={{
