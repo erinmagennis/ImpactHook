@@ -193,7 +193,7 @@ The LP skim makes impact pools viable even in a fully agentic routing environmen
 ## Quick Start
 
 ```shell
-forge test         # 163 tests, all passing
+forge test         # 167 tests, all passing
 forge coverage     # 94%+ line coverage on core hook, 100% on supporting contracts
 ```
 
@@ -216,7 +216,7 @@ forge build
 forge test
 ```
 
-163 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
+167 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
 
 
 ### Deploy (Unichain Sepolia)
@@ -264,7 +264,7 @@ Everything in this repo was built from scratch during the hackathon window. Repo
 - **Storacha integration**: upload milestone evidence (reports, images, data) to Filecoin/IPFS, CIDs stored onchain via `setMilestoneEvidence()` and embedded in Hypercert metadata and EAS attestations
 - **Filecoin Pin integration**: alternative decentralized storage backend via Filecoin Calibration network
 - **Onchain evidence persistence**: `milestoneEvidence` mapping + `EvidenceAttached` event for permanent, queryable evidence records
-- **163 tests**: comprehensive coverage including evidence storage, access control, and fuzz tests
+- **167 tests**: comprehensive coverage including evidence storage, access control, and fuzz tests
 - **Full Next.js frontend**: swap, donate, milestones, withdraw, create, portfolio, dashboard, impact, technical pages
 - **Deployed**: Unichain Sepolia (hook, router, arbiter), Ethereum Sepolia (oracle, Hypercerts), Reactive Lasna (reactor)
 

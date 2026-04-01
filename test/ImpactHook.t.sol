@@ -2625,6 +2625,40 @@ contract ImpactHookTest is Test, Deployers {
         assertEq(hook.milestoneEvidence(poolId, 0), "bafkrei_new");
     }
 
+    function test_setMilestoneHypercert() public {
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        bytes32 txHash = bytes32(uint256(0xdeadbeef));
+        vm.prank(verifier);
+        hook.setMilestoneHypercert(poolId, 0, txHash);
+        assertEq(hook.milestoneHypercert(poolId, 0), txHash);
+    }
+
+    function test_setMilestoneHypercert_emitsEvent() public {
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        bytes32 txHash = bytes32(uint256(0xdeadbeef));
+        vm.prank(verifier);
+        vm.expectEmit(true, true, false, true);
+        emit ImpactHook.HypercertLinked(poolId, 0, txHash);
+        hook.setMilestoneHypercert(poolId, 0, txHash);
+    }
+
+    function test_setMilestoneHypercert_notVerified_reverts() public {
+        bytes32 txHash = bytes32(uint256(0xdeadbeef));
+        vm.prank(verifier);
+        vm.expectRevert(ImpactHook.ImpactHook__InvalidMilestoneIndex.selector);
+        hook.setMilestoneHypercert(poolId, 0, txHash);
+    }
+
+    function test_setMilestoneHypercert_notAuthorized_reverts() public {
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+        vm.prank(address(0xBEEF));
+        vm.expectRevert(ImpactHook.ImpactHook__NotVerifier.selector);
+        hook.setMilestoneHypercert(poolId, 0, bytes32(uint256(1)));
+    }
+
     function test_setMilestoneEvidence_beforeAndAfterVerification() public {
         // Set evidence before verification
         vm.prank(verifier);

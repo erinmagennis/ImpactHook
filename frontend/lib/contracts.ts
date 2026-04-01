@@ -281,6 +281,36 @@ export const impactHookAbi = [
   },
   {
     type: "function",
+    name: "milestoneHypercert",
+    inputs: [
+      { name: "", type: "bytes32" },
+      { name: "", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bytes32" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "setMilestoneHypercert",
+    inputs: [
+      { name: "poolId", type: "bytes32" },
+      { name: "milestoneIndex", type: "uint256" },
+      { name: "txHash", type: "bytes32" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "event",
+    name: "HypercertLinked",
+    inputs: [
+      { name: "poolId", type: "bytes32", indexed: true },
+      { name: "milestoneIndex", type: "uint256", indexed: true },
+      { name: "txHash", type: "bytes32", indexed: false },
+    ],
+  },
+  {
+    type: "function",
     name: "setMilestoneEvidence",
     inputs: [
       { name: "poolId", type: "bytes32" },

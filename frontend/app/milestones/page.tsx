@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useAccount,
   useReadContract,
@@ -73,6 +73,16 @@ function MilestoneCard({
   });
   const storedCid = (storedEvidence as string) || "";
 
+  // Read stored Hypercert tx hash from contract
+  const { data: storedHypercertHash } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "milestoneHypercert",
+    args: [poolId, BigInt(index)],
+    chainId: unichainSepolia.id,
+  });
+  const hasHypercert = storedHypercertHash && storedHypercertHash !== "0x0000000000000000000000000000000000000000000000000000000000000000";
+
   // Direct verification
   const { writeContract: verifyDirect, data: directHash } = useWriteContract();
   const { isLoading: directLoading, isSuccess: directSuccess } =
@@ -82,6 +92,9 @@ function MilestoneCard({
   const { writeContract: storeEvidence, data: evidenceHash } = useWriteContract();
   const { isLoading: evidenceStoring, isSuccess: evidenceStored } =
     useWaitForTransactionReceipt({ hash: evidenceHash });
+
+  // Store Hypercert reference onchain after successful mint
+  const { writeContract: storeHypercert } = useWriteContract();
 
   // EAS attestation flow
   const [evidence, setEvidence] = useState("");
@@ -111,6 +124,20 @@ function MilestoneCard({
     useWriteContract();
   const { isLoading: hypercertLoading, isSuccess: hypercertSuccess } =
     useWaitForTransactionReceipt({ hash: hypercertHash, chainId: sepolia.id });
+
+  // After Hypercert mint succeeds, store the tx hash onchain on Unichain
+  useEffect(() => {
+    if (hypercertSuccess && hypercertHash && !hasHypercert) {
+      switchChain({ chainId: unichainSepolia.id });
+      storeHypercert({
+        address: HOOK_ADDRESS,
+        abi: impactHookAbi,
+        functionName: "setMilestoneHypercert",
+        args: [poolId, BigInt(index), hypercertHash as `0x${string}`],
+        chainId: unichainSepolia.id,
+      });
+    }
+  }, [hypercertSuccess]);
 
   const handleMintHypercert = () => {
     const metadata = buildMilestoneHypercertMetadata({
@@ -289,6 +316,31 @@ function MilestoneCard({
           }}
         >
           <EvidenceUpload onUpload={handleEvidenceUpload} />
+          {hasHypercert ? (
+            <div
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                background: 'rgba(249,115,22,0.04)',
+                border: '1px solid rgba(249,115,22,0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#f97316' }}>
+                Hypercert Minted
+              </span>
+              <a
+                href={`https://sepolia.etherscan.io/tx/${storedHypercertHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none' }}
+              >
+                View on Etherscan
+              </a>
+            </div>
+          ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
               onClick={handleMintHypercert}
@@ -320,10 +372,10 @@ function MilestoneCard({
                 : 'Mint a Hypercert on Ethereum to record this verified impact'}
             </span>
           </div>
+          )}
           {hypercertSuccess && hypercertHash && (
             <div
               style={{
-                marginTop: 8,
                 fontSize: 12,
                 color: 'var(--text-dim)',
               }}

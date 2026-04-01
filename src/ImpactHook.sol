@@ -97,6 +97,8 @@ contract ImpactHook is IHooks {
     event DonateSkimBpsSet(PoolId indexed poolId, uint16 donateSkimBps);
     /// @notice Emitted when evidence is attached to a milestone (IPFS/Filecoin CID)
     event EvidenceAttached(PoolId indexed poolId, uint256 indexed milestoneIndex, string cid);
+    /// @notice Emitted when a Hypercert is linked to a verified milestone
+    event HypercertLinked(PoolId indexed poolId, uint256 indexed milestoneIndex, bytes32 txHash);
 
     // ──────────────────── Constants ────────────────────
 
@@ -181,6 +183,8 @@ contract ImpactHook is IHooks {
     mapping(PoolId => uint16) public donateSkimBps;
     /// @notice Evidence CIDs per milestone (IPFS/Filecoin content identifiers stored via Storacha or Filecoin Pin)
     mapping(PoolId => mapping(uint256 => string)) public milestoneEvidence;
+    /// @notice Hypercert transaction hashes per milestone (minted on Ethereum via HypercertMinter)
+    mapping(PoolId => mapping(uint256 => bytes32)) public milestoneHypercert;
 
     // ──────────────────── Modifiers ────────────────────
 
@@ -501,6 +505,22 @@ contract ImpactHook is IHooks {
 
         milestoneEvidence[poolId][milestoneIndex] = cid;
         emit EvidenceAttached(poolId, milestoneIndex, cid);
+    }
+
+    /// @notice Link a Hypercert to a verified milestone. Callable by verifier or recipient.
+    /// Stores the Ethereum transaction hash of the Hypercert mint for cross-chain discoverability.
+    /// @param poolId The pool ID
+    /// @param milestoneIndex The milestone the Hypercert was minted for
+    /// @param txHash The Ethereum transaction hash of the Hypercert mint
+    function setMilestoneHypercert(PoolId poolId, uint256 milestoneIndex, bytes32 txHash) external {
+        Project storage project = projects[poolId];
+        if (!project.registered) revert ImpactHook__ProjectNotRegistered();
+        if (msg.sender != project.verifier && msg.sender != project.recipient) revert ImpactHook__NotVerifier();
+        if (milestoneIndex >= milestones[poolId].length) revert ImpactHook__InvalidMilestoneIndex();
+        if (!milestones[poolId][milestoneIndex].verified) revert ImpactHook__InvalidMilestoneIndex();
+
+        milestoneHypercert[poolId][milestoneIndex] = txHash;
+        emit HypercertLinked(poolId, milestoneIndex, txHash);
     }
 
     // ──────────────────── Fee Withdrawal ────────────────────
