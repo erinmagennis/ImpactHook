@@ -4,8 +4,11 @@ import {
   createCarFromFile,
   checkUploadReadiness,
   executeUpload,
+  setMaxAllowances,
 } from "filecoin-pin";
+import { depositUSDFC } from "filecoin-pin/core/payments";
 import { calibration } from "@filoz/synapse-sdk";
+import { parseUnits } from "viem";
 
 const noopLogger = {
   info: () => {},
@@ -40,7 +43,22 @@ export async function POST(request: Request) {
       chain: calibration,
     });
 
+    // Ensure allowances are set for WarmStorage operator
+    try {
+      await setMaxAllowances(synapse);
+    } catch {
+      // Already set
+    }
+
     const { carBytes, rootCid } = await createCarFromFile(file);
+
+    // Deposit USDFC into Filecoin Pay contract if needed
+    try {
+      await depositUSDFC(synapse, parseUnits("1", 18));
+    } catch {
+      // May fail if already deposited sufficiently
+    }
+
     await checkUploadReadiness({ synapse, fileSize: carBytes.length });
     await executeUpload(synapse, carBytes, rootCid, { logger: noopLogger });
 
