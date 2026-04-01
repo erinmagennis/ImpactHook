@@ -312,7 +312,7 @@ export default function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className="container" style={{ paddingTop: 32, paddingBottom: 32, borderTop: "1px solid var(--border-subtle)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-          <span className="text-caption">Built for the UHI8 Hookathon. Deployed on Unichain Sepolia.</span>
+          <span className="text-caption">Programmable impact infrastructure.</span>
           <div style={{ display: "flex", gap: 24 }}>
             <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" className="landing-nav-link">GitHub</a>
             <Link href="/impact" className="landing-nav-link">Impact</Link>
