@@ -127,17 +127,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── THESIS ── */}
-      <section className="container" style={{ paddingBottom: 80, textAlign: "center" }}>
-        <p className="heading-lg" style={{ maxWidth: 640, margin: "0 auto", lineHeight: 1.4 }}>
-          Trade normally. Fund impact automatically. Projects only get paid when they deliver.
-        </p>
-      </section>
-
       {/* ── TECH BAR ── */}
       <section style={{ borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: "24px 0", marginBottom: 80 }}>
         <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 48, flexWrap: "wrap" }}>
-          {["Uniswap v4", "EAS", "Reactive Network", "Alkahest", "Hypercerts", "Filecoin / IPFS", "Storacha", "Claude"].map((tech) => (
+          {["Uniswap v4", "EAS", "Reactive Network", "Arkhai", "Hypercerts", "Filecoin / IPFS", "Storacha", "Claude"].map((tech) => (
             <span key={tech} className="font-data" style={{ fontSize: 13, color: "var(--text-dim)", letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
               {tech}
             </span>
@@ -181,6 +174,10 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        <p className="heading-lg" style={{ maxWidth: 640, margin: "80px auto 0", lineHeight: 1.4, textAlign: "center" }}>
+          Trade normally. Fund impact automatically. Projects only get paid when they deliver.
+        </p>
       </section>
 
       {/* ── THREE AUDIENCES ── */}
@@ -226,7 +223,7 @@ export default function LandingPage() {
             <p className="text-small" style={{ lineHeight: 1.6, marginBottom: 20 }}>
               LP fee skim via afterAddLiquidity routes a portion of yield
               to milestone-gated projects. Institutional sponsors can use
-              Alkahest escrow gated by the same onchain milestone state.
+              Arkhai escrow gated by the same onchain milestone state.
             </p>
             <Link href="/impact" className="btn-ghost">Learn more &rarr;</Link>
           </div>
@@ -281,7 +278,7 @@ export default function LandingPage() {
             <div className="card" style={{ padding: 24, marginTop: 16 }}>
               <div className="text-superhead" style={{ marginBottom: 12 }}>Built With</div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {["Uniswap v4", "EAS", "Reactive Network", "Alkahest", "Hypercerts", "Filecoin/IPFS", "Claude"].map((t) => (
+                {["Uniswap v4", "EAS", "Reactive Network", "Arkhai", "Hypercerts", "Filecoin/IPFS", "Claude"].map((t) => (
                   <span key={t} className="badge badge-accent" style={{ fontSize: 12 }}>{t}</span>
                 ))}
               </div>
