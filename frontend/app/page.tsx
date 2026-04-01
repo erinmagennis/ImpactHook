@@ -139,7 +139,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="container" style={{ paddingBottom: 96 }}>
+      <section id="how-it-works" className="container" style={{ paddingBottom: 96, scrollMarginTop: 80 }}>
         <div style={{ marginBottom: 48 }}>
           <h2 className="heading-lg" style={{ marginBottom: 12 }}>How it works</h2>
           <p className="text-body" style={{ maxWidth: 560 }}>
