@@ -193,7 +193,7 @@ The LP skim makes impact pools viable even in a fully agentic routing environmen
 ## Quick Start
 
 ```shell
-forge test         # 156 tests, all passing
+forge test         # 163 tests, all passing
 forge coverage     # 94%+ line coverage on core hook, 100% on supporting contracts
 ```
 
@@ -216,7 +216,7 @@ forge build
 forge test
 ```
 
-156 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
+163 tests covering: project registration, swap fee accumulation (both directions), LP fee skimming, milestone verification (direct, Reactive, EAS), fee progression, withdrawal, direct donations, impact contribution tracking, loyalty fee discounts, project templates, access control, Reactive Network callbacks, MilestoneOracle, MilestoneReactor, MilestoneArbiter (Alkahest), EAS attestation verification, end-to-end cross-chain flow, and fuzz testing.
 
 
 ### Deploy (Unichain Sepolia)
@@ -250,6 +250,23 @@ EAS Schema UID: `0xe4614a0cea117a9a198431d54972835ab8d84b8d6e3d18e482032377af9bf
 | Callback Proxy | `0x9299472A6399Fd1027ebF067571Eb3e3D7837FC4` |
 | EAS | `0x4200000000000000000000000000000000000021` |
 | SchemaRegistry | `0x4200000000000000000000000000000000000020` |
+
+## Hackathon Changelog (PL Genesis, Feb 10 - Apr 1 2026)
+
+Everything in this repo was built from scratch during the hackathon window. Repo created March 2, 2026.
+
+- **Core hook** (`ImpactHook.sol`): 7 callbacks, fee routing via `afterSwapReturnDelta`, LP fee skim, donate skim, milestone tracking, loyalty discounts, project templates, heartbeat expiration, per-project pause, onchain registry
+- **ImpactSwapRouter**: custom swap router with slippage protection for impact pools
+- **MilestoneArbiter**: Alkahest `IArbiter` integration for milestone-gated grant escrow
+- **MilestoneOracle + MilestoneReactor**: Reactive Network cross-chain milestone verification
+- **EAS integration**: custom attestation schema for third-party milestone verification
+- **Hypercerts integration**: mint composable impact records on Ethereum when milestones are verified, with project metadata and evidence CIDs auto-populated from onchain state
+- **Storacha integration**: upload milestone evidence (reports, images, data) to Filecoin/IPFS, CIDs stored onchain via `setMilestoneEvidence()` and embedded in Hypercert metadata and EAS attestations
+- **Filecoin Pin integration**: alternative decentralized storage backend via Filecoin Calibration network
+- **Onchain evidence persistence**: `milestoneEvidence` mapping + `EvidenceAttached` event for permanent, queryable evidence records
+- **163 tests**: comprehensive coverage including evidence storage, access control, and fuzz tests
+- **Full Next.js frontend**: swap, donate, milestones, withdraw, create, portfolio, dashboard, impact, technical pages
+- **Deployed**: Unichain Sepolia (hook, router, arbiter), Ethereum Sepolia (oracle, Hypercerts), Reactive Lasna (reactor)
 
 ## License
 

@@ -423,6 +423,37 @@ function afterAddLiquidity(
           </div>
         </div>
 
+        {/* Evidence & Impact Records */}
+        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
+          <h2 className="font-display text-[18px] mb-4" style={{ color: 'var(--text-primary)' }}>
+            Evidence storage and impact records
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="card p-5">
+              <div className="text-[13px] font-semibold mb-2" style={{ color: '#3b82f6' }}>Storacha / Filecoin Pin</div>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Milestone evidence (reports, images, data) uploaded to Filecoin/IPFS via Storacha or Filecoin Pin.
+                CIDs stored onchain via <span className="font-data" style={{ color: 'var(--accent)' }}>setMilestoneEvidence()</span> for
+                permanent, queryable records.
+              </p>
+            </div>
+            <div className="card p-5">
+              <div className="text-[13px] font-semibold mb-2" style={{ color: '#f97316' }}>Hypercerts</div>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Verified milestones mint Hypercerts on Ethereum, creating composable impact records.
+                Metadata auto-populated from onchain state: project name, milestone description, contributors, and evidence CIDs.
+              </p>
+            </div>
+            <div className="card p-5">
+              <div className="text-[13px] font-semibold mb-2" style={{ color: 'var(--accent)' }}>Triple persistence</div>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Evidence persists in three places: ImpactHook contract (Unichain), Hypercert metadata (Ethereum),
+                and EAS attestation data (Unichain). Each independently verifiable.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Divider */}
         <div className="divider" style={{ margin: '48px 0' }} />
 
@@ -437,7 +468,7 @@ function afterAddLiquidity(
 
           <div className="card p-6" style={{ marginBottom: 16 }}>
             <div className="flex items-center gap-4 mb-6">
-              <div className="font-data text-3xl" style={{ color: 'var(--success)' }}>156</div>
+              <div className="font-data text-3xl" style={{ color: 'var(--success)' }}>163</div>
               <div>
                 <div className="text-[13px]" style={{ color: 'var(--text-primary)' }}>tests passing</div>
                 <div className="text-[11px]" style={{ color: 'var(--text-dim)' }}>0 failed, 0 skipped</div>
@@ -447,7 +478,7 @@ function afterAddLiquidity(
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <TestGroup name="Core Hook" count={35} items={["Registration", "Fee routing (both dirs)", "Milestone progression", "Withdrawal", "Impact tracking", "LP fee skim"]} />
               <TestGroup name="Access & Safety" count={28} items={["Verifier auth", "Recipient auth", "Callback proxy", "Owner checks", "Heartbeat expiry", "Per-project pause"]} />
-              <TestGroup name="Integrations" count={19} items={["MilestoneArbiter (3)", "Reactive callbacks (5)", "Oracle events (4)", "EAS verification (7)"]} />
+              <TestGroup name="Integrations" count={26} items={["MilestoneArbiter (3)", "Reactive callbacks (5)", "Oracle events (4)", "EAS verification (7)", "Evidence storage (7)"]} />
               <TestGroup name="Features & Fuzz" count={30} items={["Loyalty discounts (6)", "Templates (7)", "Donations (8)", "Fuzz tests", "HookMiner (7)", "Edge cases"]} />
             </div>
           </div>

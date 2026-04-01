@@ -143,6 +143,8 @@ export default function LandingPage() {
             <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
               <span className="feature-tag">Uniswap v4 Hook</span>
               <span className="feature-tag">Deployed on Unichain</span>
+              <span className="feature-tag">Hypercerts</span>
+              <span className="feature-tag">Filecoin/IPFS</span>
             </div>
             <h1
               style={{
@@ -557,6 +559,7 @@ export default function LandingPage() {
                 { title: "Milestone-gated", desc: "Fee tiers increase as projects deliver. Zero funding until the first milestone is verified. No results, no money." },
                 { title: "Heartbeat expiration", desc: "Projects must send periodic proof-of-life. If a project goes silent, fees stop automatically. No manual intervention needed." },
                 { title: "Cross-chain verification", desc: "Milestones can be verified from any supported chain via Reactive Network, or through EAS attestations on Unichain." },
+                { title: "Decentralized evidence", desc: "Milestone evidence stored on Filecoin/IPFS via Storacha. CIDs persisted onchain and embedded in Hypercerts, creating composable, verifiable impact records." },
                 { title: "Per-project controls", desc: "Individual projects can be paused without affecting others. Progressive decentralization from owner-gated to fully permissionless." },
               ].map((item, i) => (
                 <div key={i} className="card" style={{ padding: 20 }}>
