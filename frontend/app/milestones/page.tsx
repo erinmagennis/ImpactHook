@@ -253,11 +253,7 @@ function MilestoneCard({
 
   return (
     <div
-      className="card"
-      style={{
-        background: verified ? "rgba(5,150,105,0.04)" : undefined,
-        borderColor: verified ? "rgba(5,150,105,0.12)" : undefined,
-      }}
+      className={`card ${verified ? "milestone-verified-card" : ""}`}
     >
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
@@ -706,11 +702,7 @@ function DemoMilestones() {
         {demoMilestones.map((m, i) => (
           <div
             key={i}
-            className="card"
-            style={{
-              background: m.verified ? "rgba(5,150,105,0.04)" : undefined,
-              borderColor: m.verified ? "rgba(5,150,105,0.12)" : undefined,
-            }}
+            className={`card ${m.verified ? "milestone-verified-card" : ""}`}
           >
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
