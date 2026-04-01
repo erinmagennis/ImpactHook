@@ -132,8 +132,7 @@ export default function LandingPage() {
         <div style={{ marginBottom: 48 }}>
           <h2 className="heading-lg" style={{ marginBottom: 12 }}>How it works</h2>
           <p className="text-body" style={{ maxWidth: 560 }}>
-            Two funding channels -- swap fees from traders and yield skim from
-            LPs -- both gated by the same onchain milestone verification.
+            Swap fees from traders and yield skim from LPs, both gated by the same onchain milestone verification.
           </p>
         </div>
 
