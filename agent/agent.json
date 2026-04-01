@@ -1,0 +1,48 @@
+{
+  "name": "ImpactAccountabilityAgent",
+  "version": "1.0.0",
+  "description": "Autonomous AI agent that monitors, evaluates, and verifies impact project milestones. Retrieves evidence from decentralized storage, analyzes it using AI, stores verification reports on Filecoin, and submits onchain verification transactions.",
+  "operator": "0xA8a5a06e12c1589D06511Df75de514186060256f",
+  "capabilities": [
+    "evidence-retrieval",
+    "evidence-analysis",
+    "milestone-verification",
+    "report-generation",
+    "persistent-memory"
+  ],
+  "tools": [
+    "claude-api",
+    "storacha",
+    "filecoin-pin",
+    "unichain-sepolia-rpc"
+  ],
+  "chains": [
+    "unichain-sepolia",
+    "filecoin-calibration"
+  ],
+  "contracts": {
+    "impactHook": "0xC8A18E4A64224D2785D505c77923ed8c1d4F2557",
+    "milestoneArbiter": "0xF51197176Fc8B8D4F780Dc67E431a90E85Fc52Fb"
+  },
+  "storage": {
+    "memory": "storacha",
+    "reports": "filecoin-calibration",
+    "executionLogs": "filecoin-calibration"
+  },
+  "taskCategories": [
+    "impact-verification",
+    "evidence-analysis",
+    "milestone-monitoring"
+  ],
+  "computeConstraints": {
+    "maxClaudeCallsPerHour": 20,
+    "maxGasPerVerification": "500000",
+    "confidenceThreshold": 70
+  },
+  "guardrails": {
+    "humanInTheLoop": "dry-run mode available",
+    "confidenceGating": "only auto-verifies above threshold",
+    "budgetAwareness": "tracks gas and storage costs per session",
+    "errorRecovery": "retries with backoff, logs all failures"
+  }
+}

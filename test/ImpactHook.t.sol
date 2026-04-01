@@ -2581,6 +2581,34 @@ contract ImpactHookTest is Test, Deployers {
         );
     }
 
+    // ──────────────────── afterDonate Skim Tests ────────────────────
+
+    function test_donateSkimBpsConfig() public {
+        // Default is 0
+        assertEq(hook.donateSkimBps(poolId), 0);
+
+        // Set 10% donate skim
+        hook.setDonateSkimBps(poolId, 1000);
+        assertEq(hook.donateSkimBps(poolId), 1000);
+
+        // Update to 20%
+        hook.setDonateSkimBps(poolId, 2000);
+        assertEq(hook.donateSkimBps(poolId), 2000);
+    }
+
+    function test_donateSkimZeroBps_noSkim() public {
+        // With 0 skim bps, donate should work without any skim
+        vm.prank(verifier);
+        hook.verifyMilestone(poolKey, 0);
+
+        donateRouter.donate(poolKey, 5 ether, 5 ether, "");
+
+        uint256 skimmed0 = hook.accumulatedFees(poolId, currency0);
+        uint256 skimmed1 = hook.accumulatedFees(poolId, currency1);
+        assertEq(skimmed0, 0, "No skim with 0 bps");
+        assertEq(skimmed1, 0, "No skim with 0 bps");
+    }
+
     // ──────────────────── Evidence Tests ────────────────────
 
     function test_setMilestoneEvidence() public {

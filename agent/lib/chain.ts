@@ -26,8 +26,8 @@ export const unichainSepolia = defineChain({
 });
 
 // Deployed contract addresses
-export const HOOK_ADDRESS = "0xD178A9caEB1AA3EB89363E035e288433CD002557" as const;
-export const ARBITER_ADDRESS = "0xEf78e662F587C3193dfD22853dd039F258C6537A" as const;
+export const HOOK_ADDRESS = "0xC8A18E4A64224D2785D505c77923ed8c1d4F2557" as const;
+export const ARBITER_ADDRESS = "0xF51197176Fc8B8D4F780Dc67E431a90E85Fc52Fb" as const;
 
 // ABI for the functions/events the agent needs
 export const impactHookAbi = [

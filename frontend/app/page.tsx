@@ -798,7 +798,7 @@ export default function LandingPage() {
         }}
       >
         <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>
-          Built for the UHI8 Hookathon. Deployed on Unichain Sepolia.
+          Built for PL Genesis. Deployed on Unichain Sepolia.
         </div>
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
           <a
