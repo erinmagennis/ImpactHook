@@ -127,6 +127,13 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── THESIS ── */}
+      <section className="container" style={{ paddingBottom: 80, textAlign: "center" }}>
+        <p className="heading-lg" style={{ maxWidth: 720, margin: "0 auto", lineHeight: 1.4 }}>
+          Normal DeFi trading. Automatic impact funding. Every swap, every LP position, every donation goes through the same onchain milestone gate. Projects only get paid when they deliver.
+        </p>
+      </section>
+
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" className="container" style={{ paddingBottom: 140 }}>
         <div style={{ marginBottom: 48 }}>
