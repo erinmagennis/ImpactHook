@@ -135,7 +135,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── TECH BAR ── */}
-      <section style={{ borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: "24px 0" }}>
+      <section style={{ borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: "24px 0", marginBottom: 80 }}>
         <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 48, flexWrap: "wrap" }}>
           {["Uniswap v4", "EAS", "Reactive Network", "Alkahest", "Hypercerts", "Filecoin / IPFS", "Storacha", "Claude"].map((tech) => (
             <span key={tech} className="font-data" style={{ fontSize: 13, color: "var(--text-dim)", letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
