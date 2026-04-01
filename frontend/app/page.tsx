@@ -129,9 +129,20 @@ export default function LandingPage() {
 
       {/* ── THESIS ── */}
       <section className="container" style={{ paddingBottom: 80, textAlign: "center" }}>
-        <p className="heading-lg" style={{ maxWidth: 720, margin: "0 auto", lineHeight: 1.4 }}>
-          Normal DeFi trading. Automatic impact funding. Every swap, every LP position, every donation goes through the same onchain milestone gate. Projects only get paid when they deliver.
+        <p className="heading-lg" style={{ maxWidth: 640, margin: "0 auto", lineHeight: 1.4 }}>
+          Trade normally. Fund impact automatically. Projects only get paid when they deliver.
         </p>
+      </section>
+
+      {/* ── TECH BAR ── */}
+      <section style={{ borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)", padding: "24px 0" }}>
+        <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 48, flexWrap: "wrap" }}>
+          {["Uniswap v4", "EAS", "Reactive Network", "Alkahest", "Hypercerts", "Filecoin / IPFS", "Storacha", "Claude"].map((tech) => (
+            <span key={tech} className="font-data" style={{ fontSize: 13, color: "var(--text-dim)", letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
+              {tech}
+            </span>
+          ))}
+        </div>
       </section>
 
       {/* ── HOW IT WORKS ── */}
