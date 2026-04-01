@@ -236,6 +236,27 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── YOUR IMPACT ── */}
+      <section className="container" style={{ paddingBottom: 96 }}>
+        <div style={{ marginBottom: 48 }}>
+          <h2 className="heading-lg" style={{ marginBottom: 12 }}>Every trade leaves a mark</h2>
+          <p className="text-body" style={{ maxWidth: 560 }}>
+            Swap through an impact pool and your contribution is tracked automatically.
+            No extra steps, no donations page. Just trade as normal and watch your impact grow.
+          </p>
+        </div>
+        <div style={{ borderRadius: "var(--radius-card)", overflow: "hidden", border: "1px solid var(--border-subtle)", boxShadow: "var(--shadow-lg)" }}>
+          <img
+            src="/impact-preview.png"
+            alt="Your Impact dashboard showing contributions to Clean Water, Solar Schools, and Reforestation projects"
+            style={{ width: "100%", display: "block" }}
+          />
+        </div>
+        <p className="text-caption" style={{ marginTop: 16, maxWidth: 480 }}>
+          Loyalty tiers reward repeat contributors with lower fees. The more you trade, the more impact you create, and the better your rates get.
+        </p>
+      </section>
+
       {/* ── ACCOUNTABILITY + TECH PROOF ── */}
       <section className="container" style={{ paddingBottom: 96 }}>
         <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
