@@ -50,7 +50,7 @@ export default function TechnicalPage() {
             role="Core Hook"
             description="afterSwap fee routing, LP fee skim, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates"
             chain="Unichain Sepolia"
-            address="0xD178A9caEB1AA3EB89363E035e288433CD002557"
+            address="0xC8A18E4A64224D2785D505c77923ed8c1d4F2557"
             accent="cyan"
           />
           <ContractCard
@@ -58,7 +58,7 @@ export default function TechnicalPage() {
             role="Escrow Gate"
             description="Alkahest IArbiter - gates escrow release on verified milestone state"
             chain="Unichain Sepolia"
-            address="0x65B5661743765F135229e4901F214EE9A7b80181"
+            address="0xF51197176Fc8B8D4F780Dc67E431a90E85Fc52Fb"
             accent="violet"
           />
           <ContractCard
@@ -510,8 +510,8 @@ function afterAddLiquidity(
               </thead>
               <tbody>
                 {[
-                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0xD178A9caEB1AA3EB89363E035e288433CD002557" },
-                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0x65B5661743765F135229e4901F214EE9A7b80181" },
+                  { name: "ImpactHook", chain: "Unichain Sepolia", address: "0xC8A18E4A64224D2785D505c77923ed8c1d4F2557" },
+                  { name: "MilestoneArbiter", chain: "Unichain Sepolia", address: "0xF51197176Fc8B8D4F780Dc67E431a90E85Fc52Fb" },
                   { name: "MilestoneOracle", chain: "Ethereum Sepolia", address: "0xDd5c349fb1dcc3Daf60cC7a5ff73175ef9567cBc" },
                   { name: "MilestoneReactor", chain: "Reactive Lasna", address: "0x19D5bfa64Ff4992e917FC627B246eBdDf6A7d872" },
                   { name: "ImpactSwapRouter", chain: "Unichain Sepolia", address: "0x66452162B01442d92fc77d607EE2Cff3e76043c2" },

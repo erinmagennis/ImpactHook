@@ -19,7 +19,7 @@ import {ImpactHook} from "../src/ImpactHook.sol";
 contract DemoSwapScript is Script {
     using PoolIdLibrary for PoolKey;
 
-    address constant HOOK = 0xD178A9caEB1AA3EB89363E035e288433CD002557;
+    address constant HOOK = 0xC8A18E4A64224D2785D505c77923ed8c1d4F2557;
     uint24 constant FEE = 500;
     int24 constant TICK_SPACING = 10;
 
