@@ -119,8 +119,10 @@ Authorization: the Reactive Network overwrites the first callback argument with 
 | **Reactive Network** | Cross-chain milestone verification: `MilestoneOracle` → `MilestoneReactor` RSC → `verifyMilestoneReactive()` | `src/MilestoneOracle.sol`, `src/MilestoneReactor.sol`, `src/ImpactHook.sol` |
 | **Arkhai (Alkahest)** | Milestone-gated escrow via `IArbiter` integration. Zellic-audited escrow protocol gates grant release on onchain milestone state. | `src/MilestoneArbiter.sol` |
 | **Hypercerts** | Verified milestones mint Hypercerts on Ethereum, creating composable impact records in the public goods funding ecosystem | `frontend/lib/hypercerts.ts`, `frontend/app/milestones/page.tsx` |
-| **Storacha (Filecoin/IPFS)** | Milestone evidence (reports, images, data) uploaded to decentralized storage via Storacha. CIDs embedded in EAS attestations and Hypercert metadata. | `frontend/app/api/upload/route.ts`, `frontend/components/EvidenceUpload.tsx` |
+| **Storacha (IPFS)** | Milestone evidence uploaded to decentralized storage. Agent memory persisted across sessions. CIDs embedded in EAS attestations and Hypercert metadata. | `frontend/app/api/upload/route.ts`, `agent/lib/memory.ts` |
+| **Filecoin Pin (Synapse SDK)** | Agent verification reports and execution logs stored permanently on Filecoin Calibration testnet via Synapse SDK. Evidence also uploadable via Filecoin Pin from frontend. | `agent/lib/reporter.ts`, `agent/lib/logger.ts`, `frontend/app/api/upload-filecoin/route.ts` |
 | **EAS** | Custom attestation schema for independent third-party milestone verification on Unichain | `frontend/app/milestones/page.tsx`, `src/ImpactHook.sol` |
+| **Claude (Anthropic)** | AI evidence analysis for autonomous milestone verification. Vision for images, document analysis for PDFs, structured JSON verdicts. | `agent/lib/analyzer.ts` |
 
 ## Autonomous Verification Agent
 

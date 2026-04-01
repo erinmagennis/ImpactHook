@@ -21,6 +21,7 @@ const roleConfig: Record<
       { href: "/dashboard", label: "Dashboard" },
       { href: "/donate", label: "Donate" },
       { href: "/impact", label: "Impact" },
+      { href: "/agent", label: "Agent" },
       { href: "/technical", label: "Technical" },
     ],
   },
@@ -57,8 +58,8 @@ const roleConfig: Record<
     description: "How ImpactHook works",
     nav: [
       { href: "/impact", label: "Impact" },
+      { href: "/agent", label: "Agent" },
       { href: "/technical", label: "Technical" },
-      { href: "/dashboard", label: "Dashboard" },
     ],
   },
 };
