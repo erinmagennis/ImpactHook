@@ -279,7 +279,7 @@ function MilestoneCard({
                 href={`https://${storedCid}.ipfs.storacha.link`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#3b82f6", textDecoration: "none" }}
+                style={{ color: "var(--accent)", textDecoration: "none" }}
               >
                 {storedCid.slice(0, 20)}...
               </a>
@@ -299,8 +299,8 @@ function MilestoneCard({
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 12 }}>
           <EvidenceUpload onUpload={handleEvidenceUpload} />
           {hasHypercert ? (
-            <div style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", background: "rgba(249,115,22,0.04)", border: "1px solid rgba(249,115,22,0.12)", display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="badge badge-warning" style={{ fontSize: 12, padding: "2px 10px" }}>Hypercert Minted</span>
+            <div style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", background: "var(--accent-bg)", border: "1px solid var(--accent-border)", display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="badge badge-accent" style={{ fontSize: 12, padding: "2px 10px" }}>Hypercert Minted</span>
               <a
                 href={`https://sepolia.etherscan.io/tx/${storedHypercertHash}`}
                 target="_blank"
@@ -315,7 +315,7 @@ function MilestoneCard({
               <button
                 onClick={handleMintHypercert}
                 disabled={hypercertLoading || hypercertSuccess}
-                className={hypercertSuccess ? "btn-action-teal" : "btn-action-orange"}
+                className="btn-action-teal"
               >
                 {hypercertSuccess ? "Hypercert Minted" : hypercertLoading ? "Minting..." : "Mint Hypercert"}
               </button>
@@ -370,8 +370,13 @@ function MilestoneCard({
             <button
               onClick={handleEASAttest}
               disabled={attestLoading || !evidence}
-              className="btn-action-violet"
+              className="btn-action-teal"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
             >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 2l7 4v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
               {attestLoading ? "Attesting..." : "Verify via EAS"}
             </button>
           </div>
@@ -382,10 +387,10 @@ function MilestoneCard({
             </div>
           )}
           {attestSuccess && !easVerifySuccess && (
-            <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: "var(--radius-sm)", background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.12)" }}>
+            <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: "var(--radius-sm)", background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
               <div className="status-success" style={{ marginTop: 0, marginBottom: 8 }}>
                 EAS attestation created.{" "}
-                <a href={`https://sepolia.uniscan.xyz/tx/${attestHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>View tx</a>
+                <a href={`https://sepolia.uniscan.xyz/tx/${attestHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>View tx</a>
               </div>
               <div className="text-helper" style={{ marginBottom: 8 }}>
                 Step 2: Paste the attestation UID from EAS Explorer, then complete verification onchain.
@@ -402,7 +407,7 @@ function MilestoneCard({
                 <button
                   onClick={handleCompleteEASVerify}
                   disabled={easVerifyLoading || !attestationUID.startsWith("0x")}
-                  className="btn-action-violet"
+                  className="btn-action-teal"
                 >
                   {easVerifyLoading ? "Verifying..." : "Complete EAS Verify"}
                 </button>
@@ -543,12 +548,12 @@ export default function MilestonesPage() {
         {registered ? (
           <div className="animate-fade-up delay-200" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {isVerifier && (
-              <div className="badge badge-violet" style={{ padding: "8px 14px", fontSize: 13, width: "fit-content" }}>
+              <div className="badge badge-accent" style={{ padding: "8px 14px", fontSize: 13, width: "fit-content" }}>
                 You are the verifier for this pool
               </div>
             )}
             {isAgentVerifier && !isVerifier && (
-              <div style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.12)", fontSize: 13, color: "#3b82f6", display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", background: "rgba(100,116,139,0.06)", border: "1px solid rgba(100,116,139,0.15)", fontSize: 13, color: "var(--slate-light)", display: "flex", alignItems: "center", gap: 8 }}>
                 <AgentVerifierBadge verifier={verifier} />
                 <span>This project is verified by an autonomous AI agent</span>
               </div>
@@ -633,7 +638,7 @@ function HeartbeatSection({
       {heartbeatSuccess && heartbeatHash && (
         <div className="status-success">
           Heartbeat recorded.{" "}
-          <a href={`https://sepolia.uniscan.xyz/tx/${heartbeatHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
+          <a href={`https://sepolia.uniscan.xyz/tx/${heartbeatHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>
             View transaction
           </a>
         </div>
@@ -695,7 +700,7 @@ function DemoMilestones() {
 
   return (
     <div className="animate-fade-up delay-200" style={{ position: "relative" }}>
-      <span className="badge badge-violet" style={{ marginBottom: 12, display: "inline-flex", fontSize: 11, padding: "2px 10px" }}>
+      <span className="badge badge-neutral" style={{ marginBottom: 12, display: "inline-flex", fontSize: 11, padding: "2px 10px" }}>
         Preview
       </span>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -740,9 +745,9 @@ function DemoMilestones() {
                     style={{
                       padding: "8px 16px",
                       borderRadius: "var(--radius-sm)",
-                      border: "1px solid rgba(249,115,22,0.2)",
-                      background: (hypercertSuccess && mintingIndex === i) ? "rgba(5,150,105,0.06)" : "rgba(249,115,22,0.06)",
-                      color: (hypercertSuccess && mintingIndex === i) ? "var(--success)" : "#f97316",
+                      border: "1px solid var(--accent-border)",
+                      background: (hypercertSuccess && mintingIndex === i) ? "rgba(5,150,105,0.06)" : "var(--accent-bg)",
+                      color: (hypercertSuccess && mintingIndex === i) ? "var(--success)" : "var(--accent)",
                       fontSize: 13,
                       fontWeight: 500,
                       cursor: (!isConnected || (hypercertLoading && mintingIndex === i)) ? "default" : "pointer",

@@ -416,7 +416,7 @@ export default function SwapPage() {
                 href={`https://sepolia.uniscan.xyz/tx/${swapHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#7c3aed", textDecoration: "underline" }}
+                style={{ color: "var(--accent)", textDecoration: "underline" }}
               >
                 View transaction
               </a>

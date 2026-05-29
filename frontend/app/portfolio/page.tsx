@@ -8,11 +8,11 @@ import { usePoolDiscovery, DiscoveredProject } from "../../hooks/usePoolDiscover
 import { HOOK_ADDRESS, impactHookAbi } from "../../lib/contracts";
 import { unichainSepolia } from "../../lib/chains";
 
+// Quiet two-step alternation — teal accent + slate neutral. No decorative use of the
+// locked semantic colors (green = verified, amber = pending).
 const ACCENT_CYCLE = [
   { color: "var(--accent)", border: "var(--accent)" },
-  { color: "var(--success)", border: "var(--success)" },
-  { color: "#7c3aed", border: "#7c3aed" },
-  { color: "#fbbf24", border: "#fbbf24" },
+  { color: "var(--slate-light)", border: "var(--slate)" },
 ];
 
 function SummaryCard({ label, value, delay }: { label: string; value: string; delay: string }) {
@@ -33,11 +33,23 @@ function ContributedProjectCard({
   contribution: bigint;
   index: number;
 }) {
+  const { address } = useAccount();
   const accent = ACCENT_CYCLE[index % ACCENT_CYCLE.length];
   const verified = Number(project.currentMilestone);
   const total = Number(project.milestoneCount);
   const progressPct = total > 0 ? (verified / total) * 100 : 0;
   const allVerified = total > 0 && verified >= total - 1;
+
+  // Loyalty discount this wallet has earned on this pool (repeat-contributor reward).
+  const { data: loyaltyDiscount } = useReadContract({
+    address: HOOK_ADDRESS,
+    abi: impactHookAbi,
+    functionName: "getLoyaltyDiscount",
+    args: [address ?? "0x0000000000000000000000000000000000000000", project.poolId],
+    chainId: unichainSepolia.id,
+    query: { enabled: !!address },
+  });
+  const discountBps = Number(loyaltyDiscount || 0);
 
   return (
     <div
@@ -86,6 +98,11 @@ function ContributedProjectCard({
         <span className="text-small" style={{ margin: 0 }}>
           Recipient: <span className="font-data" style={{ color: "var(--text-secondary)" }}>{project.recipient.slice(0, 6)}...{project.recipient.slice(-4)}</span>
         </span>
+        {discountBps > 0 && (
+          <span className="text-small" style={{ margin: 0 }}>
+            Loyalty: <span className="font-data" style={{ color: "var(--accent)" }}>-{discountBps / 100}%</span>
+          </span>
+        )}
       </div>
     </div>
   );
@@ -179,9 +196,13 @@ export default function PortfolioPage() {
           <h1 className="heading-lg" style={{ marginBottom: 8 }}>
             Your Impact Portfolio
           </h1>
-          <p className="text-body" style={{ maxWidth: 520, margin: 0 }}>
+          <p className="text-body" style={{ maxWidth: 520, margin: "0 0 20px" }}>
             Every swap through an impact pool funds real-world outcomes. This is what your trades have built so far.
           </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <Link href="/swap" className="btn-primary" style={{ padding: "10px 22px", fontSize: 14 }}>Swap to fund</Link>
+            <Link href="/donate" className="btn-secondary" style={{ padding: "10px 22px", fontSize: 14 }}>Donate directly</Link>
+          </div>
         </div>
 
         {/* Summary stats */}
@@ -230,6 +251,26 @@ export default function PortfolioPage() {
             <EmptyState isConnected={isConnected} />
           </div>
         )}
+
+        {/* Other ways to fund */}
+        <div className="grid-2" style={{ gap: 16, marginBottom: 16 }}>
+          <Link href="/partners" className="card principle-card" style={{ textDecoration: "none", display: "block" }}>
+            <div className="heading-sm" style={{ fontSize: 15, marginBottom: 6 }}>Provide liquidity</div>
+            <p className="text-small" style={{ lineHeight: 1.6, margin: "0 0 10px" }}>
+              Add liquidity to an impact pool and a configurable share of your LP fees funds the
+              project, while your position keeps earning.
+            </p>
+            <span className="btn-ghost" style={{ padding: 0 }}>How it works →</span>
+          </Link>
+          <Link href="/partners" className="card principle-card" style={{ textDecoration: "none", display: "block" }}>
+            <div className="heading-sm" style={{ fontSize: 15, marginBottom: 6 }}>Fund as an institution</div>
+            <p className="text-small" style={{ lineHeight: 1.6, margin: "0 0 10px" }}>
+              Run a milestone-gated escrow pool to your own standard, with audit-grade onchain
+              reporting. Capital releases only against verified results.
+            </p>
+            <span className="btn-ghost" style={{ padding: 0 }}>Partner with us →</span>
+          </Link>
+        </div>
 
         {/* How this works */}
         <div className="card card-accent animate-fade-up delay-500">

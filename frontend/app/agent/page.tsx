@@ -11,7 +11,7 @@ export default function AgentPage() {
 
         {/* Header */}
         <div className="animate-fade-up" style={{ marginBottom: 48 }}>
-          <div className="text-superhead" style={{ color: "#3b82f6" }}>Autonomous Verification</div>
+          <div className="text-superhead" style={{ color: "var(--accent)" }}>Autonomous Verification</div>
           <h1 className="heading-xl mt-3 mb-6" style={{ fontSize: "clamp(1.8rem, 5vw, 2.8rem)" }}>
             Impact Accountability Agent
           </h1>
@@ -57,7 +57,7 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
-                <span className="font-data" style={{ fontSize: 18, color: "#3b82f6" }}>1</span>
+                <span className="font-data" style={{ fontSize: 18, color: "var(--accent)" }}>1</span>
                 <span className="heading-sm">Watches</span>
               </div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
@@ -68,7 +68,7 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
-                <span className="font-data" style={{ fontSize: 18, color: "#3b82f6" }}>2</span>
+                <span className="font-data" style={{ fontSize: 18, color: "var(--accent)" }}>2</span>
                 <span className="heading-sm">Fetches</span>
               </div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
@@ -78,7 +78,7 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
-                <span className="font-data" style={{ fontSize: 18, color: "#3b82f6" }}>3</span>
+                <span className="font-data" style={{ fontSize: 18, color: "var(--accent)" }}>3</span>
                 <span className="heading-sm">Analyzes</span>
               </div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
@@ -89,7 +89,7 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
-                <span className="font-data" style={{ fontSize: 18, color: "#3b82f6" }}>4</span>
+                <span className="font-data" style={{ fontSize: 18, color: "var(--accent)" }}>4</span>
                 <span className="heading-sm">Verifies</span>
               </div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
@@ -106,15 +106,15 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
 
         {/* Storage Architecture */}
         <div className="animate-fade-up" style={{ marginBottom: 48 }}>
-          <div className="text-superhead" style={{ color: "#3b82f6" }}>Decentralized Storage</div>
+          <div className="text-superhead" style={{ color: "var(--accent)" }}>Decentralized Storage</div>
           <h2 className="heading-md mt-3 mb-6">Where agent data lives</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <span className="status-dot" style={{ background: "#3b82f6" }} />
+                <span className="status-dot" style={{ background: "var(--accent)" }} />
                 <span className="heading-sm" style={{ fontSize: 13 }}>Agent Memory</span>
               </div>
-              <div className="font-data text-caption mb-2" style={{ color: "#3b82f6" }}>Storacha (IPFS)</div>
+              <div className="font-data text-caption mb-2" style={{ color: "var(--accent)" }}>Storacha (IPFS)</div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 Past verifications, project knowledge, and processed event history.
                 Persists across sessions. Agent loads its memory from the latest CID on restart.
@@ -122,10 +122,10 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <span className="status-dot" style={{ background: "#3b82f6" }} />
+                <span className="status-dot" style={{ background: "var(--accent)" }} />
                 <span className="heading-sm" style={{ fontSize: 13 }}>Verification Reports</span>
               </div>
-              <div className="font-data text-caption mb-2" style={{ color: "#3b82f6" }}>Filecoin Pin (Calibration)</div>
+              <div className="font-data text-caption mb-2" style={{ color: "var(--accent)" }}>Filecoin Pin (Calibration)</div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 Structured JSON reports with per-criterion analysis, confidence scores, and reasoning.
                 Stored via Synapse SDK. Permanent, verifiable audit trail accessible via IPFS CID.
@@ -133,10 +133,10 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <span className="status-dot" style={{ background: "#3b82f6" }} />
+                <span className="status-dot" style={{ background: "var(--accent)" }} />
                 <span className="heading-sm" style={{ fontSize: 13 }}>Execution Logs</span>
               </div>
-              <div className="font-data text-caption mb-2" style={{ color: "#3b82f6" }}>Filecoin Pin (Calibration)</div>
+              <div className="font-data text-caption mb-2" style={{ color: "var(--accent)" }}>Filecoin Pin (Calibration)</div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 Structured logs of every decision, tool call, and error. Flushed to Filecoin on shutdown.
                 Proves the agent operated autonomously and made verifiable decisions.
@@ -192,7 +192,7 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
           <h2 className="heading-md mb-4">Onchain Agent Registry</h2>
           <div className="card p-6" style={{ marginBottom: 16 }}>
             <p className="text-small" style={{ lineHeight: 1.7, marginBottom: 16 }}>
-              <span className="font-data" style={{ color: "#3b82f6" }}>AgentRegistry.sol</span> on Filecoin Calibration
+              <span className="font-data" style={{ color: "var(--accent)" }}>AgentRegistry.sol</span> on Filecoin Calibration
               lets agents register identity, store metadata and state CIDs, and build verifiable reputation from
               their verification history.
             </p>
@@ -267,7 +267,7 @@ Storacha/IPFS           event onchain           milestone criteria      Filecoin
                 href="https://bafkreihotoq7p7kfktdosvotvkuujlsrx66xkpielk5ujm3vobuuf25fcu.ipfs.storacha.link"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ fontSize: 12, color: "#3b82f6", textDecoration: "none" }}
+                style={{ fontSize: 12, color: "var(--accent)", textDecoration: "none" }}
               >
                 View evidence on Storacha
               </a>

@@ -1,7 +1,11 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import Link from "next/link";
+import { useReadContract } from "wagmi";
 import { Navigation } from "../../components/Navigation";
+import { unichainSepolia } from "../../lib/chains";
 import {
   HOOK_ADDRESS,
   ARBITER_ADDRESS,
@@ -13,6 +17,7 @@ import {
   EAS_ADDRESS,
   SCHEMA_REGISTRY,
   MILESTONE_SCHEMA_UID,
+  impactHookAbi,
 } from "../../lib/contracts";
 
 function CheckIcon() {
@@ -20,6 +25,41 @@ function CheckIcon() {
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
+  );
+}
+
+// Live, pool-independent state of the deployed hook (owner, pause, callback proxy, EAS schema).
+function HookStatus() {
+  const { data: owner } = useReadContract({ address: HOOK_ADDRESS, abi: impactHookAbi, functionName: "owner", chainId: unichainSepolia.id });
+  const { data: isPaused } = useReadContract({ address: HOOK_ADDRESS, abi: impactHookAbi, functionName: "paused", chainId: unichainSepolia.id });
+  const { data: proxy } = useReadContract({ address: HOOK_ADDRESS, abi: impactHookAbi, functionName: "callbackProxy", chainId: unichainSepolia.id });
+  const { data: schemaUID } = useReadContract({ address: HOOK_ADDRESS, abi: impactHookAbi, functionName: "milestoneSchemaUID", chainId: unichainSepolia.id });
+
+  return (
+    <div className="card p-5 mb-4">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <span className="heading-sm" style={{ fontSize: 15 }}>Live hook status</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+          <span className="status-dot" style={{ background: isPaused ? "var(--error)" : "var(--success)", animation: isPaused ? "none" : "pulse-dot 2s ease-in-out infinite" }} />
+          <span style={{ color: isPaused ? "var(--error)" : "var(--success)" }}>{isPaused ? "Paused" : "Live"}</span>
+        </span>
+      </div>
+      <StatusRow label="Contract" value={HOOK_ADDRESS} />
+      <StatusRow label="Owner" value={owner as string} />
+      <StatusRow label="Callback Proxy" value={proxy as string} />
+      <StatusRow label="EAS Schema" value={schemaUID as string} last />
+    </div>
+  );
+}
+
+function StatusRow({ label, value, last }: { label: string; value?: string; last?: boolean }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: last ? "none" : "1px solid var(--border-subtle)" }}>
+      <span className="text-label" style={{ marginBottom: 0 }}>{label}</span>
+      <span className="font-data" style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+        {value ? (value.length > 20 ? `${value.slice(0, 8)}...${value.slice(-6)}` : value) : "-"}
+      </span>
+    </div>
   );
 }
 
@@ -54,11 +94,11 @@ export default function TechnicalPage() {
 
         {/* Contracts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-up delay-100" style={{ marginBottom: 48 }}>
-          <ContractCard name="ImpactHook.sol" role="Core Hook" description="afterSwap fee routing, LP fee skim via afterAddLiquidity, donate skim via afterDonate, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates" chain="Unichain Sepolia" address={HOOK_ADDRESS} accent="cyan" />
-          <ContractCard name="MilestoneArbiter.sol" role="Alkahest Escrow Gate" description="Implements IArbiter from the Zellic-audited Alkahest escrow protocol. Gates grant release on verified milestone state from ImpactHook." chain="Unichain Sepolia" address={ARBITER_ADDRESS} accent="violet" />
-          <ContractCard name="MilestoneReactor.sol" role="Reactive Network RSC" description="Subscribes to MilestoneSubmitted events on origin chain. Emits cross-chain callbacks to ImpactHook on Unichain. No bridges needed." chain="Reactive Lasna" address={REACTOR_ADDRESS} accent="emerald" />
-          <ContractCard name="MilestoneOracle.sol" role="Origin Chain Event Source" description="Deployed on any supported origin chain. Emits MilestoneSubmitted events that Reactive Network relays to Unichain." chain="Ethereum Sepolia" address={ORACLE_ADDRESS} accent="amber" />
-          <ContractCard name="ImpactSwapRouter.sol" role="Custom Swap Router" description="Clean swap(key, zeroForOne, amountIn, minAmountOut) interface with slippage protection. Handles afterSwapReturnDelta internally so callers don't need to." chain="Unichain Sepolia" address={SWAP_ROUTER_ADDRESS} accent="cyan" />
+          <ContractCard name="ImpactHook.sol" role="Core Hook" description="afterSwap fee routing, LP fee skim via afterAddLiquidity, donate skim via afterDonate, milestone tracking, 3 verification paths, loyalty discounts, heartbeat expiration, project templates" chain="Unichain Sepolia" address={HOOK_ADDRESS} icon="hook" />
+          <ContractCard name="MilestoneArbiter.sol" role="Alkahest Escrow Gate" description="Implements IArbiter from the Zellic-audited Alkahest escrow protocol. Gates grant release on verified milestone state from ImpactHook." chain="Unichain Sepolia" address={ARBITER_ADDRESS} icon="gate" />
+          <ContractCard name="MilestoneReactor.sol" role="Reactive Network RSC" description="Subscribes to MilestoneSubmitted events on origin chain. Emits cross-chain callbacks to ImpactHook on Unichain. No bridges needed." chain="Reactive Lasna" address={REACTOR_ADDRESS} icon="reactor" />
+          <ContractCard name="MilestoneOracle.sol" role="Origin Chain Event Source" description="Deployed on any supported origin chain. Emits MilestoneSubmitted events that Reactive Network relays to Unichain." chain="Ethereum Sepolia" address={ORACLE_ADDRESS} icon="oracle" />
+          <ContractCard name="ImpactSwapRouter.sol" role="Custom Swap Router" description="Clean swap(key, zeroForOne, amountIn, minAmountOut) interface with slippage protection. Handles afterSwapReturnDelta internally so callers don't need to." chain="Unichain Sepolia" address={SWAP_ROUTER_ADDRESS} icon="router" />
         </div>
 
         {/* Cross-chain flow */}
@@ -95,12 +135,12 @@ MilestoneOracle    -->    MilestoneReactor    -->    ImpactHook
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-2 mb-3">
-                <span className="status-dot" style={{ background: '#7c3aed' }} />
+                <span className="status-dot" style={{ background: 'var(--accent)' }} />
                 <span className="heading-sm" style={{ fontSize: 13 }}>Reactive Cross-Chain</span>
               </div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 MilestoneOracle on origin chain emits event. MilestoneReactor on Reactive Network
-                subscribes and triggers <span className="font-data" style={{ color: '#7c3aed' }}>verifyMilestoneReactive()</span> on Unichain. No bridges.
+                subscribes and triggers <span className="font-data" style={{ color: 'var(--accent)' }}>verifyMilestoneReactive()</span> on Unichain. No bridges.
               </p>
             </div>
             <div className="card p-5">
@@ -201,7 +241,7 @@ function afterAddLiquidity(
                           {m.verified ? (
                             <span style={{ color: 'var(--accent)' }}><CheckIcon /></span>
                           ) : isActive ? (
-                            <span className="w-2 h-2 rounded-full" style={{ background: '#7c3aed' }} />
+                            <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
                           ) : (
                             <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--text-dim)' }} />
                           )}
@@ -347,14 +387,14 @@ function afterAddLiquidity(
           <h2 className="heading-md mb-4">Evidence storage and impact records</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-5">
-              <div className="heading-sm mb-2" style={{ fontSize: 13, color: '#3b82f6' }}>Storacha / Filecoin Pin</div>
+              <div className="heading-sm mb-2" style={{ fontSize: 13, color: 'var(--accent)' }}>Storacha / Filecoin Pin</div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 Milestone evidence (reports, images, data) uploaded to Filecoin/IPFS via Storacha or Filecoin Pin.
                 CIDs stored onchain via <span className="font-data" style={{ color: 'var(--accent)' }}>setMilestoneEvidence()</span>.
               </p>
             </div>
             <div className="card p-5">
-              <div className="heading-sm mb-2" style={{ fontSize: 13, color: '#f97316' }}>Hypercerts</div>
+              <div className="heading-sm mb-2" style={{ fontSize: 13, color: 'var(--accent)' }}>Hypercerts</div>
               <p className="text-caption" style={{ lineHeight: 1.6 }}>
                 Verified milestones mint Hypercerts on Ethereum, creating composable, tradeable impact certificates.
                 Metadata auto-populated from onchain state: project name, milestone, contributors, evidence CIDs.
@@ -373,8 +413,8 @@ function afterAddLiquidity(
         {/* AI Agent */}
         <div className="animate-fade-up" style={{ marginBottom: 48 }}>
           <h2 className="heading-md mb-4">Autonomous verification agent</h2>
-          <div className="card p-6 mb-4" style={{ borderLeft: '2px solid #3b82f6' }}>
-            <span className="badge badge-accent mb-4" style={{ display: "inline-flex", background: "rgba(59,130,246,0.08)", color: "#3b82f6", borderColor: "rgba(59,130,246,0.2)" }}>AI-Powered Milestone Verification</span>
+          <div className="card p-6 mb-4 card-accent">
+            <span className="badge badge-accent mb-4" style={{ display: "inline-flex" }}>AI-Powered Milestone Verification</span>
             <p className="text-small" style={{ lineHeight: 1.7, marginBottom: 16 }}>
               A standalone Bun service that monitors <span className="font-data" style={{ color: 'var(--accent)' }}>EvidenceAttached</span> events,
               retrieves evidence from Storacha/IPFS, analyzes it with Claude, and submits{' '}
@@ -402,7 +442,7 @@ to Storacha/IPFS    -->  EvidenceAttached   -->  evidence vs         -->  on Fil
             ].map(item => (
               <div key={item.title} className="card p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="status-dot" style={{ background: '#3b82f6' }} />
+                  <span className="status-dot" style={{ background: 'var(--accent)' }} />
                   <span className="heading-sm" style={{ fontSize: 13 }}>{item.title}</span>
                 </div>
                 <p className="text-caption" style={{ lineHeight: 1.6 }}>{item.desc}</p>
@@ -484,6 +524,11 @@ to Storacha/IPFS    -->  EvidenceAttached   -->  evidence vs         -->  on Fil
           </div>
         </div>
 
+        {/* Live hook status */}
+        <div className="animate-fade-up" style={{ marginBottom: 48 }}>
+          <HookStatus />
+        </div>
+
         {/* Key addresses */}
         <div className="card p-5 animate-fade-up" style={{ marginBottom: 48 }}>
           <div className="text-label mb-3">Key Addresses (Unichain Sepolia)</div>
@@ -516,15 +561,36 @@ to Storacha/IPFS    -->  EvidenceAttached   -->  evidence vs         -->  on Fil
   );
 }
 
-function ContractCard({ name, role, description, chain, address, accent }: {
+// One accent (teal) for every contract — DESIGN.md: no rainbow color-coding.
+// Each contract is distinguished by a unique icon + its mono filename/role, not by hue.
+const CONTRACT_ICONS: Record<string, ReactNode> = {
+  // hook — afterSwap fee routing / the core hook
+  hook: <><path d="M18 6V13a4 4 0 0 1-8 0V8a2.5 2.5 0 0 0-5 0v6" /><path d="M3 16l2 2 2-2" /></>,
+  // gate — escrow / balance scales
+  gate: <><path d="M12 4v16" /><path d="M6 8h12" /><path d="M6 8l-3 6h6z" /><path d="M18 8l-3 6h6z" /><path d="M8 20h8" /></>,
+  // reactor — cross-chain relay arrows
+  reactor: <><path d="M17 2l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></>,
+  // oracle — broadcast / event source
+  oracle: <><circle cx="12" cy="12" r="2" /><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14" /></>,
+  // router — swap arrows
+  router: <><path d="M7 4v13" /><path d="M4 14l3 3 3-3" /><path d="M17 20V7" /><path d="M20 10l-3-3-3 3" /></>,
+};
+
+function ContractCard({ name, role, description, chain, address, icon }: {
   name: string; role: string; description: string; chain: string; address: string;
-  accent: 'cyan' | 'violet' | 'emerald' | 'amber';
+  icon: keyof typeof CONTRACT_ICONS;
 }) {
-  const accentColors = { cyan: 'var(--accent)', violet: '#7c3aed', emerald: 'var(--success)', amber: '#d97706' };
   return (
-    <div className="card p-5" style={{ borderLeft: `2px solid ${accentColors[accent]}` }}>
+    <div className="card p-5 card-accent">
       <div className="flex items-center justify-between mb-2">
-        <span className="font-data" style={{ fontSize: 13, color: accentColors[accent] }}>{name}</span>
+        <span className="flex items-center gap-2" style={{ minWidth: 0 }}>
+          <span style={{ color: 'var(--accent-light)', display: 'inline-flex', flexShrink: 0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              {CONTRACT_ICONS[icon]}
+            </svg>
+          </span>
+          <span className="font-data" style={{ fontSize: 13, color: 'var(--accent-light)' }}>{name}</span>
+        </span>
         <span className="badge badge-neutral" style={{ fontSize: 10, padding: "2px 8px" }}>{chain}</span>
       </div>
       <div className="text-label mb-2">{role}</div>

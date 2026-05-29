@@ -106,7 +106,7 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
                   width: 14,
                   height: 14,
                   border: "2px solid rgba(255,255,255,0.2)",
-                  borderTopColor: backend === "filecoin" ? "#3b82f6" : "var(--accent)",
+                  borderTopColor: "var(--accent)",
                   borderRadius: "50%",
                   animation: "spin 0.8s linear infinite",
                   display: "inline-block",
@@ -138,7 +138,7 @@ export function EvidenceUpload({ onUpload, disabled }: EvidenceUploadProps) {
             href={uploadedUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#3b82f6", textDecoration: "none" }}
+            style={{ color: "var(--accent)", textDecoration: "none" }}
           >
             {uploadedCid}
           </a>

@@ -284,7 +284,7 @@ export default function CreateProjectPage() {
           {isSuccess && (
             <div className="status-success">
               Step 1 complete.{" "}
-              <a href={`https://sepolia.uniscan.xyz/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
+              <a href={`https://sepolia.uniscan.xyz/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
@@ -316,7 +316,7 @@ export default function CreateProjectPage() {
             {isInitSuccess && (
               <div className="status-success">
                 Pool initialized.{" "}
-                <a href={`https://sepolia.uniscan.xyz/tx/${initTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
+                <a href={`https://sepolia.uniscan.xyz/tx/${initTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>
                   View transaction
                 </a>
               </div>

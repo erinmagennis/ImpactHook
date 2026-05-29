@@ -1,51 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { BrandMark, ImageSlot, CircleCutout } from "../components/Brand";
+import { ImageSlot, CircleCutout } from "../components/Brand";
 import HeroFlow from "../components/HeroFlow";
 import FundingFlow from "../components/FundingFlow";
 import Committee from "../components/Committee";
-
-function LandingNav() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <nav
-      className="landing-nav"
-      style={{
-        background: scrolled ? "rgba(10,10,10,0.92)" : "transparent",
-        backdropFilter: scrolled ? "blur(16px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: "1px solid var(--border-subtle)",
-      }}
-    >
-      <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
-        <Link href="/" className="nav-logo" style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
-          <BrandMark size={26} />
-          <span><span style={{ color: "var(--accent)" }}>Impact</span>Hook</span>
-        </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <a href="#how-it-works" className="landing-nav-link">How It Works</a>
-          <a href="#funding-models" className="landing-nav-link">Funding</a>
-          <a href="#principles" className="landing-nav-link">Principles</a>
-          <Link href="/impact" className="landing-nav-link">Impact</Link>
-          <Link href="/technical" className="landing-nav-link">Technical</Link>
-          <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" className="landing-nav-link">GitHub</a>
-          <Link href="/dashboard" className="btn-primary" style={{ padding: "8px 20px", fontSize: 14 }}>
-            Launch App
-          </Link>
-        </div>
-      </div>
-    </nav>
-  );
-}
+import { Navigation } from "../components/Navigation";
 
 function BrowserFrame({ children }: { children: React.ReactNode }) {
   return (
@@ -90,7 +50,7 @@ function Icon({ name, size = 22 }: { name: string; size?: number }) {
 export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh" }}>
-      <LandingNav />
+      <Navigation />
 
       {/* ── HERO (scroll-driven funding → outcome flow) ── */}
       <HeroFlow />
@@ -157,21 +117,27 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid-2" style={{ gap: 24 }}>
-            <div className="card" style={{ padding: 32 }}>
+            <div className="card" style={{ padding: 32, display: "flex", flexDirection: "column" }}>
               <span className="badge badge-accent" style={{ marginBottom: 16, display: "inline-flex" }}>For funders</span>
               <h3 className="heading-md" style={{ fontSize: 20, marginBottom: 10 }}>See exactly where your money goes</h3>
-              <p className="text-small" style={{ lineHeight: 1.6, margin: 0 }}>
+              <p className="text-small" style={{ lineHeight: 1.6, margin: "0 0 20px" }}>
                 Funds release only against verified milestones, so they reach the organizations
                 actually delivering, and you watch your impact accrue in real time.
               </p>
+              <Link href="/portfolio" className="btn-ghost" style={{ marginTop: "auto", alignSelf: "flex-start" }}>
+                See your impact →
+              </Link>
             </div>
-            <div className="card" style={{ padding: 32 }}>
+            <div className="card" style={{ padding: 32, display: "flex", flexDirection: "column" }}>
               <span className="badge badge-accent" style={{ marginBottom: 16, display: "inline-flex" }}>For organizations</span>
               <h3 className="heading-md" style={{ fontSize: 20, marginBottom: 10 }}>Spend time on the mission, not fundraising</h3>
-              <p className="text-small" style={{ lineHeight: 1.6, margin: 0 }}>
+              <p className="text-small" style={{ lineHeight: 1.6, margin: "0 0 20px" }}>
                 Funding arrives automatically as milestones are hit, so more of every dollar
                 reaches the work instead of a fundraising team.
               </p>
+              <Link href="/dashboard" className="btn-ghost" style={{ marginTop: "auto", alignSelf: "flex-start" }}>
+                Open your dashboard →
+              </Link>
             </div>
           </div>
         </div>
@@ -245,7 +211,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── VERIFICATION & ACCOUNTABILITY ── */}
-      <section className="container" style={{ paddingBottom: 96 }}>
+      <section id="verification" className="container" style={{ paddingBottom: 96, scrollMarginTop: 80 }}>
         <div style={{ marginBottom: 40, maxWidth: 660 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <span className="font-data" style={{ fontSize: 14, color: "var(--accent)" }}>03</span>
@@ -309,7 +275,7 @@ export default function LandingPage() {
               </p>
               <div className="grid-2" style={{ gap: 24 }}>
                 {[
-                  { value: "5", label: "Funding Channels" },
+                  { value: "4", label: "Funding Models" },
                   { value: "5", label: "Verification Paths" },
                   { value: "100%", label: "Onchain Evidence" },
                   { value: "24/7", label: "Real-Time Data" },
@@ -557,6 +523,38 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── PARTNER WITH US ── */}
+      <section id="partner" className="container" style={{ paddingBottom: 96, scrollMarginTop: 80 }}>
+        <div style={{ marginBottom: 40, maxWidth: 640 }}>
+          <div className="text-superhead" style={{ marginBottom: 16 }}>Partner with us</div>
+          <h2 className="heading-lg" style={{ marginBottom: 12 }}>Bring serious capital to accountable impact</h2>
+          <p className="text-body">
+            Whether you fund through milestone-gated escrow or provide liquidity whose yield
+            flows to impact, the same onchain guarantee holds: money only moves against proof.
+          </p>
+        </div>
+        <div className="grid-2" style={{ gap: 24 }}>
+          <Link href="/partners" className="card principle-card" style={{ padding: 32, textDecoration: "none", display: "block" }}>
+            <span className="badge badge-accent" style={{ marginBottom: 16, display: "inline-flex" }}>Institutions &amp; funders</span>
+            <h3 className="heading-md" style={{ fontSize: 20, marginBottom: 10 }}>Milestone-gated escrow for grants</h3>
+            <p className="text-small" style={{ lineHeight: 1.6, margin: "0 0 16px" }}>
+              Run a funding pool to your own standard. Capital releases only as verified milestones
+              are hit, with audit-grade onchain reporting your team can read directly.
+            </p>
+            <span className="btn-ghost" style={{ padding: 0 }}>Learn more →</span>
+          </Link>
+          <Link href="/partners" className="card principle-card" style={{ padding: 32, textDecoration: "none", display: "block" }}>
+            <span className="badge badge-accent" style={{ marginBottom: 16, display: "inline-flex" }}>Liquidity providers</span>
+            <h3 className="heading-md" style={{ fontSize: 20, marginBottom: 10 }}>Provide liquidity, fund through yield</h3>
+            <p className="text-small" style={{ lineHeight: 1.6, margin: "0 0 16px" }}>
+              Add liquidity to an impact pool and the hook skims a configurable share of LP fees to
+              the project. You keep earning while a slice of the yield funds verified impact.
+            </p>
+            <span className="btn-ghost" style={{ padding: 0 }}>Learn more →</span>
+          </Link>
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section className="section-accent" style={{ padding: "80px 0" }}>
         <div className="container" style={{ textAlign: "center" }}>
@@ -565,7 +563,7 @@ export default function LandingPage() {
             Register a project, fund one, or see how verification works.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-            <Link href="/dashboard" style={{ padding: "14px 32px", fontSize: 16, fontWeight: 600, background: "#ffffff", color: "#0b5f57", borderRadius: "var(--radius-btn)", textDecoration: "none" }}>
+            <Link href="/portfolio" style={{ padding: "14px 32px", fontSize: 16, fontWeight: 600, background: "#ffffff", color: "#0b5f57", borderRadius: "var(--radius-btn)", textDecoration: "none" }}>
               Launch App
             </Link>
             <a href="https://github.com/erinmagennis/ImpactHook" target="_blank" rel="noopener noreferrer" style={{ padding: "14px 32px", fontSize: 16, fontWeight: 600, background: "transparent", color: "#ffffff", border: "1px solid rgba(255,255,255,0.55)", borderRadius: "var(--radius-btn)", textDecoration: "none" }}>

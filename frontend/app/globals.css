@@ -272,8 +272,9 @@ body {
   border-left: 2px solid var(--success);
 }
 
+/* Retired: violet is off-palette. Kept as a teal alias so any stray usage stays on-system. */
 .card-accent-violet {
-  border-left: 2px solid #7c3aed;
+  border-left: 2px solid var(--accent);
 }
 
 /* ========================================
@@ -437,10 +438,11 @@ body {
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
+/* Retired: violet is off-palette. Teal alias so any stray usage stays on-system. */
 .badge-violet {
-  background: rgba(124, 58, 237, 0.08);
-  color: #a78bfa;
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: var(--accent-bg);
+  color: var(--accent-light);
+  border: 1px solid var(--accent-border);
 }
 
 .badge-warning {
@@ -637,31 +639,15 @@ textarea::placeholder {
   cursor: default;
 }
 
-.btn-action-violet {
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  background: rgba(124, 58, 237, 0.06);
-  color: #7c3aed;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: opacity 0.15s;
-}
-
-.btn-action-violet:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
+/* Retired: violet + orange are off-palette. Teal aliases so secondary verification
+   paths share the single accent; they're distinguished by icon + mono label, not hue. */
+.btn-action-violet,
 .btn-action-orange {
   padding: 8px 16px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(249, 115, 22, 0.2);
-  background: rgba(249, 115, 22, 0.06);
-  color: #f97316;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -670,6 +656,7 @@ textarea::placeholder {
   transition: opacity 0.15s;
 }
 
+.btn-action-violet:disabled,
 .btn-action-orange:disabled {
   opacity: 0.4;
   cursor: default;
@@ -701,16 +688,16 @@ textarea::placeholder {
 }
 
 .evidence-toggle-active {
-  background: rgba(59, 130, 246, 0.12);
-  color: #3b82f6;
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
 .evidence-upload-btn {
   padding: 8px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  background: rgba(59, 130, 246, 0.06);
-  color: #3b82f6;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -734,8 +721,8 @@ textarea::placeholder {
   margin-top: 8px;
   padding: 6px 12px;
   border-radius: var(--radius-sm);
-  background: rgba(59, 130, 246, 0.04);
-  border: 1px solid rgba(59, 130, 246, 0.08);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
   font-size: 12px;
   color: var(--text-dim);
   word-break: break-all;

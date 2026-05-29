@@ -17,7 +17,7 @@ function MilestoneProof({ name, status, proof, date, feeBps }: {
 }) {
   const colors = {
     verified: { bg: 'rgba(13, 148, 136, 0.06)', border: 'rgba(13, 148, 136, 0.15)', text: 'var(--accent)' },
-    pending: { bg: 'rgba(124, 58, 237, 0.06)', border: 'rgba(124, 58, 237, 0.15)', text: '#7c3aed' },
+    pending: { bg: 'rgba(13, 148, 136, 0.06)', border: 'rgba(13, 148, 136, 0.15)', text: 'var(--accent)' },
     locked: { bg: 'var(--bg-elevated)', border: 'var(--border-subtle)', text: 'var(--text-dim)' },
   };
   const c = colors[status];
@@ -132,7 +132,7 @@ export default function ImpactPage() {
 
         {/* For Projects */}
         <div className="animate-fade-up" style={{ marginBottom: 48 }}>
-          <div className="text-superhead" style={{ color: '#7c3aed' }}>For Projects</div>
+          <div className="text-superhead" style={{ color: 'var(--accent)' }}>For Projects</div>
           <h2 className="heading-md mt-3 mb-3">Prove your progress, get funded</h2>
           <p className="text-body mb-8" style={{ maxWidth: 640 }}>
             If you&apos;re building something that matters, ImpactHook gives you a new way to get funded.
@@ -182,7 +182,7 @@ export default function ImpactPage() {
                 { num: "2", title: "LP Fee Skim", desc: "A percentage of LP earnings goes to the project via afterAddLiquidity. Swap pricing stays identical to regular pools. LPs opt in. Key to router-competitive impact funding.", accent: true },
                 { num: "3", title: "Native v4 Donate Skim", desc: "When someone tips LPs via PoolManager.donate(), a share is routed to the project via the afterDonate hook.", accent: false },
                 { num: "4", title: "Direct Donations", desc: "Anyone can donate ERC20 or native ETH directly. Same milestone-gated withdrawal rules apply.", accent: false },
-                { num: "5", title: "Institutional Escrow", desc: "Alkahest integration (Zellic-audited) gates grant release on the same milestone state. All five channels share one source of truth.", accent: false, color: "#7c3aed" },
+                { num: "5", title: "Institutional Escrow", desc: "Alkahest integration (Zellic-audited) gates grant release on the same milestone state. All five channels share one source of truth.", accent: false, color: "var(--accent)" },
               ].map((ch) => (
                 <div key={ch.num} className="card p-5" style={ch.accent ? { borderLeft: '3px solid var(--accent)' } : {}}>
                   <div className="flex items-center gap-3 mb-2">
@@ -206,7 +206,7 @@ export default function ImpactPage() {
 
         {/* Agent verification */}
         <div className="animate-fade-up" style={{ marginBottom: 48 }}>
-          <div className="text-superhead" style={{ color: '#3b82f6' }}>Autonomous Accountability</div>
+          <div className="text-superhead" style={{ color: 'var(--accent)' }}>Autonomous Accountability</div>
           <h2 className="heading-md mt-3 mb-3">AI agent verifies milestones</h2>
           <p className="text-body mb-8" style={{ maxWidth: 640 }}>
             Milestone verification is the bottleneck in impact funding. An autonomous AI agent
@@ -221,13 +221,13 @@ export default function ImpactPage() {
               { title: "Verifies", desc: "If confident, submits the verification onchain. The report is stored permanently on Filecoin. Anyone can audit why the agent approved or rejected." },
             ].map((item) => (
               <div key={item.title} className="card p-5">
-                <div className="font-data mb-2" style={{ fontSize: 14, color: '#3b82f6' }}>{item.title}</div>
+                <div className="font-data mb-2" style={{ fontSize: 14, color: 'var(--accent)' }}>{item.title}</div>
                 <p className="text-caption" style={{ lineHeight: 1.6 }}>{item.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="card p-4 mt-4" style={{ borderLeft: '2px solid #3b82f6' }}>
+          <div className="card p-4 mt-4" style={{ borderLeft: '2px solid var(--accent)' }}>
             <p className="text-caption" style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
               When the agent verifies a milestone, Alkahest escrow funds release automatically.
               Evidence upload, AI analysis, onchain verification, escrow release. The complete

@@ -58,10 +58,14 @@ Functional only — never ambient/looping. The vocabulary: in-view fade/`.reveal
 - Pair every number with its human result (proof + the child), and surface proof artifacts (tx, attestation, block) with pride (`ProofRow`), charity:water-GPS style.
 
 ## Navigation / IA
-- **Landing nav** = the landing only (on-page anchors + Launch App + GitHub). One door into the app.
-- **App nav** (`Navigation.tsx`) = tools as direct links (Swap/Dashboard/Donate + role tools) **+ a persistent "Learn ▾" dropdown** for content pages (Impact, Agent, Pantheon, Technical). Never mix tools and learn pages in the flat row. Role selector = Trader/Project/Sponsor.
-- Homepage links *out* to deep pages from their matching section ("See how the committee works →", "See the full architecture →", "Read the accountability story →").
-- TODO (cascade): give the learn pages a lighter nav (vs the dApp role nav) so they read as learn, not tools.
+- **No role selector.** The product has two sides — people who *fund* impact and people who *deliver* it — expressed as **persistent dropdown tabs**, never a "pick who you are" gate. Model lives in `components/navConfig.ts` (`FUNDER`, `ORGANIZATION`, `LEARN`); rendered by the shared `components/NavDropdown.tsx` primitive. Clicking a tab label goes to that side's Overview; the caret opens its tool menu.
+  - **Funder ▾** (→ `/portfolio` overview): Swap, Donate, Provide liquidity.
+  - **Organization ▾** (→ `/dashboard` overview): Register project, Milestones, Withdraw.
+  - **Learn ▾** (label is exactly "Learn", no overview): Impact · Technical · Pantheon Committees · Agent · GitHub. Same dropdown on landing and app.
+- **Homes.** `/portfolio` is the **Funder home** (your impact + Swap/Donate quick actions + LP/partner cards). `/dashboard` is the **Organization home** (auto-lists projects where your wallet is recipient/verifier, with health + Milestones/Withdraw actions, and an "Inspect any pool" disclosure for power users). Generic Launch App → `/portfolio`.
+- **Landing nav** = on-page anchors (How it works · Funding · Verification · Partner) + the shared **Learn ▾** dropdown + a context button (**Launch App**; the app nav shows **Connect Wallet** instead). The two navs share the `NavDropdown` primitive + config, not the whole bar.
+- **Partner with us** (`/partners`, plus the landing `#partner` section) is the institutional + LP front door; CTA is a mailto.
+- Homepage links *out* to deep pages from their matching section ("See how the committee works →", "See the full architecture →", "Read the accountability story →"). Audience CTAs route: For funders → `/portfolio`, For organizations → `/dashboard`.
 
 ## Visual do / don't
 - DO: one teal accent · mono for data only · big whitespace + strict hierarchy · diagrams/screenshots/accordions over repeated card grids · proof shown with pride · dignified real photos · the logo motif woven in.

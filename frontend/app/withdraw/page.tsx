@@ -202,7 +202,7 @@ export default function WithdrawPage() {
           {isSuccess && (
             <div className="status-success">
               Fees withdrawn!{" "}
-              <a href={`https://sepolia.uniscan.xyz/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
+              <a href={`https://sepolia.uniscan.xyz/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
@@ -213,7 +213,7 @@ export default function WithdrawPage() {
         {!hasPoolKey && (
           <div className="animate-fade-up delay-200" style={{ marginTop: 24, position: "relative" }}>
             <div className="card" style={{ padding: 32, position: "relative" }}>
-              <span className="badge badge-violet" style={{ position: "absolute", top: 16, right: 16, fontSize: 11, padding: "2px 10px" }}>
+              <span className="badge badge-neutral" style={{ position: "absolute", top: 16, right: 16, fontSize: 11, padding: "2px 10px" }}>
                 Preview
               </span>
               <div className="text-label" style={{ marginBottom: 12 }}>

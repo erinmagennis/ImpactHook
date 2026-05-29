@@ -81,7 +81,7 @@ export function AgentReportViewer({ reportCid }: { reportCid: string }) {
           href={`https://ipfs.io/ipfs/${reportCid}`}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: "#3b82f6", textDecoration: "none" }}
+          style={{ color: "var(--accent)", textDecoration: "none" }}
         >
           View raw report
         </a>
@@ -197,7 +197,7 @@ export function AgentReportViewer({ reportCid }: { reportCid: string }) {
               href={`https://ipfs.io/ipfs/${reportCid}`}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontSize: 11, color: "#3b82f6", textDecoration: "none" }}
+              style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none" }}
             >
               Full report (IPFS)
             </a>
@@ -222,9 +222,9 @@ export function AgentVerifierBadge({ verifier }: { verifier: string }) {
         fontSize: 11,
         fontWeight: 600,
         letterSpacing: "0.06em",
-        background: "rgba(59,130,246,0.06)",
-        border: "1px solid rgba(59,130,246,0.12)",
-        color: "#3b82f6",
+        background: "rgba(13, 148, 136, 0.06)",
+        border: "1px solid rgba(13, 148, 136, 0.12)",
+        color: "var(--accent)",
       }}
     >
       <svg width="10" height="10" viewBox="0 0 16 16" fill="none">

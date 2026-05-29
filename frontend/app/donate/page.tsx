@@ -344,7 +344,7 @@ export default function DonatePage() {
           {isApproving && approveTxHash && (
             <div className="status-pending">
               Approval pending...{" "}
-              <a href={`https://sepolia.uniscan.xyz/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
+              <a href={`https://sepolia.uniscan.xyz/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
@@ -359,7 +359,7 @@ export default function DonatePage() {
           {isDonating && donateTxHash && (
             <div className="status-pending">
               Donation pending...{" "}
-              <a href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
+              <a href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
@@ -368,7 +368,7 @@ export default function DonatePage() {
           {donateSuccess && (
             <div className="status-success">
               Donation successful!{" "}
-              <a href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#7c3aed", textDecoration: "underline" }}>
+              <a href={`https://sepolia.uniscan.xyz/tx/${donateTxHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>
                 View transaction
               </a>
             </div>
@@ -385,7 +385,7 @@ export default function DonatePage() {
         {!poolIdInput && (
           <div className="animate-fade-up delay-200" style={{ marginTop: 24, position: "relative" }}>
             <div className="card" style={{ padding: 32, position: "relative" }}>
-              <span className="badge badge-violet" style={{ position: "absolute", top: 16, right: 16, fontSize: 11, padding: "2px 10px" }}>
+              <span className="badge badge-neutral" style={{ position: "absolute", top: 16, right: 16, fontSize: 11, padding: "2px 10px" }}>
                 Preview
               </span>
               <div className="text-label" style={{ marginBottom: 12 }}>

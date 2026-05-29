@@ -3,240 +3,82 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import { unichainSepolia } from "../lib/chains";
+import { BrandMark } from "./Brand";
+import { NavDropdown } from "./NavDropdown";
+import { ABOUT, FUNDER, ORGANIZATION, LEARN } from "./navConfig";
 
-type Role = "none" | "trader" | "project" | "sponsor" | "learn";
-
-const roleConfig: Record<
-  Role,
-  { label: string; description: string; nav: { href: string; label: string }[] }
-> = {
-  none: {
-    label: "I'm a...",
-    description: "",
-    nav: [
-      { href: "/swap", label: "Swap" },
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/donate", label: "Donate" },
-    ],
-  },
-  trader: {
-    label: "Trader",
-    description: "Swap tokens, fund impact automatically",
-    nav: [
-      { href: "/swap", label: "Swap" },
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/donate", label: "Donate" },
-    ],
-  },
-  project: {
-    label: "Project Owner",
-    description: "Register, verify milestones, withdraw funds",
-    nav: [
-      { href: "/create", label: "Create" },
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/milestones", label: "Milestones" },
-      { href: "/withdraw", label: "Withdraw" },
-    ],
-  },
-  sponsor: {
-    label: "LP / Sponsor",
-    description: "Provide liquidity, fund impact through yield",
-    nav: [
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/swap", label: "Swap" },
-      { href: "/donate", label: "Donate" },
-    ],
-  },
-  learn: {
-    label: "Learn More",
-    description: "How ImpactHook works",
-    nav: [
-      { href: "/impact", label: "Impact" },
-      { href: "/agent", label: "Agent" },
-      { href: "/pantheon", label: "Pantheon" },
-      { href: "/technical", label: "Technical" },
-    ],
-  },
-};
-
-const roleOrder: Role[] = ["trader", "project", "sponsor"];
-
-// Persistent "Learn" group — content/marketing pages, always available, never mixed with tools.
-const LEARN_LINKS = [
-  { href: "/impact", label: "Impact" },
-  { href: "/agent", label: "Agent" },
-  { href: "/pantheon", label: "Pantheon" },
-  { href: "/technical", label: "Technical" },
-];
-
-const roleColors: Record<Role, string> = {
-  none: "var(--text-dim)",
-  trader: "#0d9488",
-  project: "#059669",
-  sponsor: "#7c3aed",
-  learn: "#d97706",
-};
-
+// One nav bar, every page. The tabs (About / Funder / Organization / Learn) never move; only the
+// right-side button swaps (Launch App on the landing, Connect Wallet in the app). On the landing
+// the bar is transparent over the hero and blurs on scroll; elsewhere it's the standard sticky bar.
 export function Navigation() {
   const pathname = usePathname();
-  const [role, setRole] = useState<Role>("none");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [learnOpen, setLearnOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const learnRef = useRef<HTMLDivElement>(null);
+  const isLanding = pathname === "/";
   const { isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   const isWrongChain = isConnected && chainId !== unichainSepolia.id;
 
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const saved = localStorage.getItem("impacthook-role") as Role | null;
-    if (saved && roleConfig[saved]) setRole(saved);
-  }, []);
+    if (!isLanding) return;
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isLanding]);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-      if (learnRef.current && !learnRef.current.contains(e.target as Node)) {
-        setLearnOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const selectRole = (r: Role) => {
-    setRole(r);
-    localStorage.setItem("impacthook-role", r);
-    setDropdownOpen(false);
-  };
-
-  const currentRole = roleConfig[role];
-  const color = roleColors[role];
+  const variant = isLanding ? "landing" : "app";
 
   return (
     <>
-      <nav className="nav-bar">
-        <div className="nav-inner">
-          <div className="nav-left">
-            <Link href="/" className="nav-logo">
-              <span style={{ color: "var(--accent)" }}>Impact</span>Hook
-            </Link>
+      <nav
+        className={isLanding ? "landing-nav" : "nav-bar"}
+        style={
+          isLanding
+            ? {
+                background: scrolled ? "rgba(10,10,10,0.92)" : "transparent",
+                backdropFilter: scrolled ? "blur(16px)" : "none",
+                WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
+                borderBottom: "1px solid var(--border-subtle)",
+              }
+            : undefined
+        }
+      >
+        <div
+          className={isLanding ? "container" : "nav-inner"}
+          style={isLanding ? { display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 } : undefined}
+        >
+          <Link href="/" className="nav-logo" style={{ display: "inline-flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+            <BrandMark size={24} />
+            <span><span style={{ color: "var(--accent)" }}>Impact</span>Hook</span>
+          </Link>
 
-            {/* Role selector */}
-            <div ref={dropdownRef} style={{ position: "relative", flexShrink: 0 }}>
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="nav-role-trigger"
-                style={{
-                  borderColor: role === "none" ? "var(--border-subtle)" : `${color}33`,
-                  background: role === "none" ? "var(--bg-elevated)" : `${color}0d`,
-                  color: role === "none" ? "var(--text-secondary)" : color,
-                }}
-              >
-                {currentRole.label}
-                <span style={{ fontSize: 9, opacity: 0.6 }}>
-                  {dropdownOpen ? "\u25B2" : "\u25BC"}
-                </span>
-              </button>
-
-              {dropdownOpen && (
-                <div className="nav-role-dropdown">
-                  {roleOrder.map((r) => {
-                    const rc = roleConfig[r];
-                    const isSelected = r === role;
-                    const rColor = roleColors[r];
-                    return (
-                      <button
-                        key={r}
-                        onClick={() => selectRole(r)}
-                        className="nav-role-option"
-                        style={{
-                          borderLeft: isSelected
-                            ? `2px solid ${rColor}`
-                            : "2px solid transparent",
-                          background: isSelected ? `${rColor}08` : "transparent",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: isSelected ? rColor : "var(--text-primary)",
-                            marginBottom: 2,
-                          }}
-                        >
-                          {rc.label}
-                        </div>
-                        <div className="text-caption" style={{ color: "var(--text-secondary)" }}>
-                          {rc.description}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+          {/* Tabs + action grouped on the right. NOTE: do not use .nav-links here — its
+              overflow-x:auto clips the absolutely-positioned dropdown menus. Keep overflow visible. */}
+          <div style={{ display: "flex", alignItems: "center", gap: 24, marginLeft: "auto" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <NavDropdown menu={ABOUT} variant={variant} />
+              <NavDropdown menu={FUNDER} variant={variant} />
+              <NavDropdown menu={ORGANIZATION} variant={variant} />
+              <NavDropdown menu={LEARN} variant={variant} />
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              {isLanding ? (
+                <Link href="/portfolio" className="btn-primary" style={{ padding: "8px 20px", fontSize: 14 }}>
+                  Launch App
+                </Link>
+              ) : (
+                <ConnectButton chainStatus="icon" accountStatus="address" showBalance={false} />
               )}
             </div>
-
-            {/* Nav links */}
-            <div className="nav-links">
-              {currentRole.nav.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`nav-link ${isActive ? "nav-link-active" : ""}`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Persistent Learn dropdown — content pages, never mixed with tools */}
-            <div ref={learnRef} style={{ position: "relative", flexShrink: 0 }}>
-              <button
-                onClick={() => setLearnOpen(!learnOpen)}
-                className={`nav-link ${LEARN_LINKS.some((l) => l.href === pathname) ? "nav-link-active" : ""}`}
-                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 5 }}
-              >
-                Learn <span style={{ fontSize: 9, opacity: 0.6 }}>{learnOpen ? "▲" : "▼"}</span>
-              </button>
-              {learnOpen && (
-                <div className="nav-role-dropdown" style={{ minWidth: 180 }}>
-                  {LEARN_LINKS.map((l) => (
-                    <Link
-                      key={l.href}
-                      href={l.href}
-                      onClick={() => setLearnOpen(false)}
-                      className="nav-role-option"
-                      style={{ fontSize: 13, fontWeight: 600, color: pathname === l.href ? "var(--accent)" : "var(--text-primary)" }}
-                    >
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div style={{ flexShrink: 0 }}>
-            <ConnectButton
-              chainStatus="icon"
-              accountStatus="address"
-              showBalance={false}
-            />
           </div>
         </div>
       </nav>
 
-      {isWrongChain && (
+      {isWrongChain && !isLanding && (
         <div className="chain-warning">
           <span>You are connected to the wrong network.</span>
           <button
