@@ -20,9 +20,6 @@ const roleConfig: Record<
       { href: "/swap", label: "Swap" },
       { href: "/dashboard", label: "Dashboard" },
       { href: "/donate", label: "Donate" },
-      { href: "/impact", label: "Impact" },
-      { href: "/agent", label: "Agent" },
-      { href: "/technical", label: "Technical" },
     ],
   },
   trader: {
@@ -59,12 +56,21 @@ const roleConfig: Record<
     nav: [
       { href: "/impact", label: "Impact" },
       { href: "/agent", label: "Agent" },
+      { href: "/pantheon", label: "Pantheon" },
       { href: "/technical", label: "Technical" },
     ],
   },
 };
 
-const roleOrder: Role[] = ["trader", "project", "sponsor", "learn"];
+const roleOrder: Role[] = ["trader", "project", "sponsor"];
+
+// Persistent "Learn" group — content/marketing pages, always available, never mixed with tools.
+const LEARN_LINKS = [
+  { href: "/impact", label: "Impact" },
+  { href: "/agent", label: "Agent" },
+  { href: "/pantheon", label: "Pantheon" },
+  { href: "/technical", label: "Technical" },
+];
 
 const roleColors: Record<Role, string> = {
   none: "var(--text-dim)",
@@ -78,7 +84,9 @@ export function Navigation() {
   const pathname = usePathname();
   const [role, setRole] = useState<Role>("none");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [learnOpen, setLearnOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const learnRef = useRef<HTMLDivElement>(null);
   const { isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
@@ -93,6 +101,9 @@ export function Navigation() {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
+      }
+      if (learnRef.current && !learnRef.current.contains(e.target as Node)) {
+        setLearnOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -186,6 +197,32 @@ export function Navigation() {
                   </Link>
                 );
               })}
+            </div>
+
+            {/* Persistent Learn dropdown — content pages, never mixed with tools */}
+            <div ref={learnRef} style={{ position: "relative", flexShrink: 0 }}>
+              <button
+                onClick={() => setLearnOpen(!learnOpen)}
+                className={`nav-link ${LEARN_LINKS.some((l) => l.href === pathname) ? "nav-link-active" : ""}`}
+                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 5 }}
+              >
+                Learn <span style={{ fontSize: 9, opacity: 0.6 }}>{learnOpen ? "▲" : "▼"}</span>
+              </button>
+              {learnOpen && (
+                <div className="nav-role-dropdown" style={{ minWidth: 180 }}>
+                  {LEARN_LINKS.map((l) => (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      onClick={() => setLearnOpen(false)}
+                      className="nav-role-option"
+                      style={{ fontSize: 13, fontWeight: 600, color: pathname === l.href ? "var(--accent)" : "var(--text-primary)" }}
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

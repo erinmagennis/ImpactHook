@@ -17,28 +17,34 @@
    ======================================== */
 
 :root {
-  /* Backgrounds: true black, neutral grays */
-  --bg-primary: #0a0a0a;
-  --bg-card: #151515;
-  --bg-elevated: #1c1c1c;
-  --bg-surface: #252525;
+  /* Backgrounds: warm near-black (a hair of navy so it reads "foundation",
+     not "crypto void"), with a clean 2-step elevation ladder */
+  --bg-primary: #0a0b0d;
+  --bg-card: #131519;
+  --bg-elevated: #1a1d23;
+  --bg-surface: #23262d;
 
-  /* Accent: teal — the "impact" color */
+  /* Accent: teal — the action + "verified" color (single accent, used sparingly) */
   --accent: #0d9488;
   --accent-light: #2dd4bf;
   --accent-bg: rgba(13, 148, 136, 0.06);
   --accent-border: rgba(13, 148, 136, 0.15);
 
+  /* Slate: quiet neutral for informational emphasis + links (never competes with teal) */
+  --slate: #64748b;
+  --slate-light: #94a3b8;
+
   /* Text */
   --text-primary: #f5f5f5;
-  --text-secondary: #999999;
-  --text-dim: #666666;
+  --text-secondary: #9aa0a6;
+  --text-dim: #6b7177;
 
-  /* Borders */
-  --border-subtle: #252525;
+  /* Borders — hairlines, softened (Linear 2025 lesson) */
+  --border-subtle: #23262d;
+  --border-hairline: rgba(255, 255, 255, 0.07);
   --border-active: #0d9488;
 
-  /* Semantic */
+  /* Semantic — locked: emerald/teal = verified·released, amber = pending, red = failure only */
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
@@ -78,7 +84,7 @@ body {
   font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
   line-height: 1.6;
 }
 
@@ -167,10 +173,11 @@ body {
 }
 
 .text-superhead {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--accent);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .text-mono {
@@ -244,17 +251,17 @@ body {
    ======================================== */
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: #181b21;
+  border: 1px solid #2e333c;
   border-radius: var(--radius-card);
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .card:hover {
-  border-color: #333;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-color: #3d434e;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
 }
 
 .card-accent {
@@ -268,6 +275,42 @@ body {
 .card-accent-violet {
   border-left: 2px solid #7c3aed;
 }
+
+/* ========================================
+   Light section — contrast break against the dark theme
+   ======================================== */
+
+.section-light {
+  background: #f4f1ea;
+  color: #1f1d1a;
+}
+.section-light .text-superhead { color: #0d9488; }
+.section-light .heading-xl,
+.section-light .heading-lg,
+.section-light .heading-md,
+.section-light .heading-sm { color: #1a1815; }
+.section-light .text-body { color: #44403a; }
+.section-light .text-small { color: #55504a; }
+.section-light .text-caption { color: #78736b; }
+.section-light .card {
+  background: #ffffff;
+  border-color: #e5ded2;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.section-light .card:hover { border-color: #d4ccba; }
+
+/* ========================================
+   Accent section — bold teal band
+   ======================================== */
+
+.section-accent {
+  background: linear-gradient(135deg, #0d9488 0%, #0b5f57 100%);
+  color: #ffffff;
+}
+.section-accent .heading-lg,
+.section-accent .heading-md,
+.section-accent .heading-sm { color: #ffffff; }
+.section-accent .text-superhead { color: rgba(255,255,255,0.8); }
 
 /* ========================================
    Buttons
@@ -1173,4 +1216,357 @@ textarea::placeholder {
   background: rgba(5,150,105,0.06) !important;
   border-color: rgba(5,150,105,0.18) !important;
   border-left: 3px solid var(--success) !important;
+}
+
+/* ========================================
+   Brand motif — bracket + checkmark logo
+   The checkmark is the "verified" state; brackets = open-source / onchain.
+   ======================================== */
+
+/* Heavier display sizes for hero / section openers */
+.heading-display {
+  font-size: clamp(40px, 6vw, 60px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  color: var(--text-primary);
+}
+
+/* Two-tone headline accent word (echoes UNICEF deck's bold + accent word) */
+.accent-word { color: var(--accent-light); }
+.section-light .accent-word { color: var(--accent); }
+
+/* Animated checkmark draw — used on verification moments */
+.brand-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.brand-check .bracket {
+  stroke: var(--text-dim);
+}
+.brand-check .check {
+  stroke: var(--accent-light);
+}
+.brand-check-animate .check {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: check-draw 0.7s cubic-bezier(0.32, 0.72, 0, 1) 0.25s forwards;
+}
+.brand-check-animate .bracket {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: check-draw 0.6s ease-out forwards;
+}
+
+@keyframes check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Faint watermark of the motif behind hero / section panels */
+.motif-field {
+  position: relative;
+  overflow: hidden;
+}
+.motif-field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 50% 50%, rgba(13,148,136,0.10), transparent 60%);
+  pointer-events: none;
+}
+
+/* ========================================
+   Circle cutout — UNICEF Office of Innovation photo motif
+   A large circle framing a real, dignified photo against the dark field.
+   ======================================== */
+
+.circle-cutout {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--border-hairline);
+}
+.circle-cutout img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.circle-cutout-ring {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px dashed var(--accent-border);
+  pointer-events: none;
+}
+
+/* ========================================
+   Image slot — placeholder + sourcing hint until real photo is dropped in
+   ======================================== */
+
+.image-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 24px;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0 10px, transparent 10px 20px),
+    var(--bg-elevated);
+  border: 1px dashed var(--border-subtle);
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.image-slot .image-slot-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.section-light .image-slot {
+  background:
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0 10px, transparent 10px 20px),
+    #efeae0;
+  border-color: #ddd5c6;
+  color: #8a8478;
+}
+
+/* ========================================
+   ProofRow — a verified onchain artifact, shown with pride
+   (human statement on top, quiet mono hash + explorer link beneath)
+   ======================================== */
+
+.proof-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(16,185,129,0.05);
+  border: 1px solid rgba(16,185,129,0.16);
+}
+.proof-row .proof-hash {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  word-break: break-all;
+}
+
+/* StatusPill — quiet, semantic */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-pill-verified { background: rgba(16,185,129,0.10); color: var(--success); }
+.status-pill-pending  { background: rgba(245,158,11,0.10); color: var(--warning); }
+.status-pill-idle     { background: var(--bg-elevated); color: var(--text-dim); }
+
+/* Data freshness indicator (trust signal) */
+.data-freshness {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ========================================
+   Scroll-driven hero flow (funding -> verified -> outcome)
+   ======================================== */
+
+.flow-node {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  opacity: 0.4;
+  transform: translateY(6px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.32,0.72,0,1),
+    border-color 0.5s ease, background 0.5s ease, box-shadow 0.5s ease;
+}
+.flow-node.is-done { opacity: 1; transform: translateY(0); border-color: var(--accent-border); }
+.flow-node.is-active {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: var(--accent);
+  background: #14201e;
+  box-shadow: 0 0 0 1px var(--accent-border), 0 10px 28px rgba(0,0,0,0.35);
+}
+
+.flow-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  border: 1px solid transparent;
+  transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+.flow-node.is-active .flow-icon,
+.flow-node.is-done .flow-icon {
+  background: var(--accent-bg);
+  color: var(--accent-light);
+  border-color: var(--accent-border);
+}
+.flow-node-title { font-size: 15px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+.flow-node-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-top: 3px; }
+
+.flow-connector {
+  width: 2px;
+  height: 20px;
+  margin-left: 37px;
+  background: var(--border-subtle);
+  position: relative;
+  overflow: hidden;
+}
+.flow-connector .flow-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.5s ease;
+}
+.flow-connector.is-filled .flow-fill { transform: scaleY(1); }
+
+.flow-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.flow-source-chip.is-on {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: var(--accent-border);
+  color: var(--accent-light);
+  background: var(--accent-bg);
+}
+
+/* ========================================
+   In-view reveal + line-draw (for diagrams)
+   ======================================== */
+
+.reveal { opacity: 0; transform: translateY(10px); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.32,0.72,0,1); }
+.in-view .reveal { opacity: 1; transform: none; }
+.in-view .reveal.d1 { transition-delay: 0.06s; }
+.in-view .reveal.d2 { transition-delay: 0.14s; }
+.in-view .reveal.d3 { transition-delay: 0.22s; }
+.in-view .reveal.d4 { transition-delay: 0.30s; }
+.in-view .reveal.d5 { transition-delay: 0.40s; }
+
+.draw-path { stroke-dasharray: 240; stroke-dashoffset: 240; }
+.in-view .draw-path { animation: draw-line 1.1s ease forwards 0.2s; }
+@keyframes draw-line { to { stroke-dashoffset: 0; } }
+
+/* ========================================
+   Convergence diagram (funding -> one gate -> project)
+   ======================================== */
+
+.converge {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(80px, 0.7fr) minmax(200px, 1.1fr);
+  align-items: stretch;
+  gap: 0;
+}
+.converge-gate { align-self: center; }
+.converge-connector { align-self: stretch; }
+.converge-sources { display: flex; flex-direction: column; gap: 14px; }
+.converge-source {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius-card);
+  border: 1px solid var(--border-subtle); background: var(--bg-card);
+}
+.converge-source .flow-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-bg); color: var(--accent-light); border: 1px solid var(--accent-border); }
+.converge-gate {
+  padding: 22px; border-radius: var(--radius-card);
+  border: 1px solid var(--accent); background: #14201e;
+  box-shadow: 0 0 0 1px var(--accent-border), 0 10px 30px rgba(0,0,0,0.4);
+  text-align: center;
+}
+@media (max-width: 760px) {
+  .converge { grid-template-columns: 1fr; gap: 12px; }
+  .converge-connector { display: none; }
+}
+
+/* Committee layout — seats stacked, one connector line per seat -> verdict */
+.committee-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.3fr) minmax(60px, 0.5fr) minmax(220px, 1fr);
+  align-items: stretch;
+}
+@media (max-width: 760px) {
+  .committee-grid { grid-template-columns: 1fr; gap: 14px; }
+  .committee-connector { display: none; }
+}
+
+/* ========================================
+   Accordion (verification paths, etc.)
+   ======================================== */
+
+.accordion { border: 1px solid var(--border-subtle); border-radius: var(--radius-card); overflow: hidden; background: var(--bg-card); }
+.accordion details { border-bottom: 1px solid var(--border-subtle); }
+.accordion details:last-child { border-bottom: none; }
+.accordion summary {
+  list-style: none; cursor: pointer; padding: 18px 20px;
+  display: flex; align-items: center; gap: 14px;
+  font-size: 15px; font-weight: 600; color: var(--text-primary);
+  transition: background 0.15s;
+}
+.accordion summary::-webkit-details-marker { display: none; }
+.accordion summary:hover { background: var(--bg-elevated); }
+.accordion summary .acc-icon { color: var(--accent-light); flex-shrink: 0; display: inline-flex; }
+.accordion summary .acc-chev { margin-left: auto; color: var(--text-dim); transition: transform 0.25s ease; flex-shrink: 0; }
+.accordion details[open] summary .acc-chev { transform: rotate(90deg); }
+.accordion .acc-body { padding: 0 20px 18px 54px; color: var(--text-secondary); font-size: 14px; line-height: 1.65; }
+.accordion details[open] summary { background: var(--bg-elevated); }
+
+/* Principle card — icon + hover bounce/highlight */
+.principle-card { transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.32,0.72,0,1); }
+.principle-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-border), 0 12px 28px rgba(0,0,0,0.4); }
+.principle-icon { color: var(--accent-light); display: inline-flex; transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); }
+.principle-card:hover .principle-icon { transform: translateY(-3px) scale(1.08); }
+
+/* Tech tag — small mono pill naming the stack used at a step */
+.tech-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  background: var(--accent-bg);
+  white-space: nowrap;
+}
+
+/* Feature row (text + screenshot, alternating) */
+.feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.feature-row.reverse > .feature-visual { order: -1; }
+@media (max-width: 860px) {
+  .feature-row { grid-template-columns: 1fr; gap: 24px; }
+  .feature-row.reverse > .feature-visual { order: 0; }
 }
